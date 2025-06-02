@@ -1,0 +1,349 @@
+// في بداية الملف، أضف أنواعًا عامة لاستجابات API
+export interface SuccessResponse<T = any> {
+  success: true
+  data: T
+  message?: string
+  timestamp: string
+}
+
+export interface ErrorResponse {
+  success: false
+  error: string
+  details?: any
+  timestamp: string
+}
+
+export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse
+
+export interface Device {
+  id: number
+  name: string
+  phone_number?: string
+  status: "disconnected" | "connecting" | "qr_ready" | "connected" | "error" | "auth_failed"
+  qr_code?: string
+  last_seen?: string
+  created_at: string
+  updated_at: string
+  error_message?: string
+  connection_attempts: number
+}
+
+export type DeviceStatus = "disconnected" | "connecting" | "qr_ready" | "connected" | "error" | "auth_failed"
+
+export interface Message {
+  id: number
+  device_id: number
+  recipient: string
+  message: string
+  status: "pending" | "sent" | "failed"
+  sent_at: string
+  error_message?: string
+  message_type: MessageType
+  media_url?: string
+  delivered_at?: string
+}
+
+export type MessageStatus = "pending" | "sent" | "delivered" | "failed"
+export type MessageType = "text" | "image" | "video" | "audio" | "document"
+
+export interface IncomingMessage {
+  id: number
+  device_id: number
+  sender: string
+  message: string
+  message_id: string
+  message_type: MessageType
+  media_url?: string
+  received_at: string
+}
+
+export interface Admin {
+  id: number
+  username: string
+  password_hash: string
+  last_login?: string
+  login_attempts: number
+  locked_until?: string
+  created_at: string
+  is_active: boolean
+}
+
+// ===== أنواع API =====
+// export interface ApiResponse<T = any> {
+//   success: boolean
+//   data?: T
+//   error?: string
+//   message?: string
+//   timestamp: string
+// }
+
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
+// ===== أنواع WhatsApp =====
+export interface QRCodeData {
+  deviceId: number
+  qrCode: string
+  timestamp: string
+  expiresAt: string
+}
+
+export interface DeviceConnection {
+  deviceId: number
+  phoneNumber: string
+  deviceInfo: WhatsAppDeviceInfo
+  connectedAt: string
+}
+
+export interface WhatsAppDeviceInfo {
+  platform: string
+  pushname: string
+  wid: string
+}
+
+export interface BulkMessageRequest {
+  deviceId: number
+  recipients: string[]
+  message: string
+  delay?: number
+}
+
+export interface BulkMessageResult {
+  recipient: string
+  success: boolean
+  messageId?: number
+  error?: string
+}
+
+// ===== أنواع النظام =====
+export interface SystemStats {
+  devices: {
+    total: number
+    connected: number
+    disconnected: number
+    connecting: number
+    error: number
+  }
+  messages: {
+    total: number
+    sent: number
+    pending: number
+    failed: number
+    today: number
+  }
+  system: {
+    uptime: number
+    memory: NodeJS.MemoryUsage
+    cpu: number
+    disk: {
+      used: string
+      available: string
+      percentage: string
+    }
+  }
+}
+
+export interface HealthStatus {
+  status: "healthy" | "unhealthy" | "degraded"
+  timestamp: string
+  uptime: number
+  memory: NodeJS.MemoryUsage
+  database: {
+    connected: boolean
+    responseTime?: number
+  }
+  whatsappClients: {
+    total: number
+    connected: number
+    errors: number
+  }
+  services: Record<
+    string,
+    {
+      status: "up" | "down"
+      responseTime?: number
+      lastCheck: string
+    }
+  >
+}
+
+// ===== أنواع المرشحات =====
+export interface MessageFilters {
+  deviceId?: number
+  status?: MessageStatus
+  dateFrom?: string
+  dateTo?: string
+  limit?: number
+  offset?: number
+  search?: string
+}
+
+export interface DeviceFilters {
+  status?: DeviceStatus
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+// ===== أنواع المصادقة =====
+export interface AuthUser {
+  id: number
+  username: string
+  lastLogin?: string | null
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse extends ApiResponse {
+  data?: {
+    id: number
+    username: string
+    lastLogin?: string
+  }
+  token?: string
+}
+
+// ===== أنواع العمليات =====
+export interface DatabaseOperations {
+  // عمليات الأجهزة
+  createDevice: (data: Partial<Device>) => Promise<{ data: Device | null; error: string | null }>
+  getDevice: (id: number) => Promise<{ data: Device | null; error: string | null }>
+  getDevices: (filters?: DeviceFilters) => Promise<{ data: Device[]; error: string | null }>
+  updateDevice: (id: number, data: Partial<Device>) => Promise<{ data: Device | null; error: string | null }>
+  deleteDevice: (id: number) => Promise<{ error: string | null }>
+
+  // عمليات الرسائل
+  createMessage: (data: Partial<Message>) => Promise<{ data: Message | null; error: string | null }>
+  getMessage: (id: number) => Promise<{ data: Message | null; error: string | null }>
+  getMessages: (filters?: MessageFilters) => Promise<{ data: Message[]; error: string | null }>
+  updateMessage: (id: number, data: Partial<Message>) => Promise<{ data: Message | null; error: string | null }>
+  deleteMessage: (id: number) => Promise<{ error: string | null }>
+
+  // عمليات الرسائل الواردة
+  createIncomingMessage: (
+    data: Partial<IncomingMessage>,
+  ) => Promise<{ data: IncomingMessage | null; error: string | null }>
+  getIncomingMessages: (filters?: MessageFilters) => Promise<{ data: IncomingMessage[]; error: string | null }>
+
+  // عمليات المديرين
+  getAdminByUsername: (username: string) => Promise<{ data: Admin | null; error: string | null }>
+  updateAdmin: (id: number, data: Partial<Admin>) => Promise<{ data: Admin | null; error: string | null }>
+
+  // إحصائيات النظام
+  getSystemStats: () => Promise<{ data: SystemStats | null; error: string | null }>
+}
+
+// ===== أنواع الأحداث =====
+export interface WebSocketEvent {
+  type: string
+  data: any
+  timestamp: string
+}
+
+export interface DeviceEvent extends WebSocketEvent {
+  type: "device:qr" | "device:connected" | "device:disconnected" | "device:error"
+  data: {
+    deviceId: number
+    [key: string]: any
+  }
+}
+
+export interface MessageEvent extends WebSocketEvent {
+  type: "message:incoming" | "message:sent" | "message:failed"
+  data: {
+    deviceId: number
+    messageId?: number
+    [key: string]: any
+  }
+}
+
+// ===== أنواع التكوين =====
+export interface AppConfig {
+  database: {
+    path: string
+    backupInterval: number
+  }
+  whatsapp: {
+    maxConnectionAttempts: number
+    connectionTimeout: number
+    qrTimeout: number
+    messageDelay: number
+  }
+  security: {
+    jwtExpiry: string
+    rateLimits: {
+      general: { window: number; max: number }
+      auth: { window: number; max: number }
+      messages: { window: number; max: number }
+    }
+  }
+  logging: {
+    level: "debug" | "info" | "warn" | "error"
+    maxFiles: number
+    maxSize: string
+  }
+}
+
+// ===== أنواع الأخطاء =====
+export class AppError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode = 500,
+    public details?: any,
+  ) {
+    super(message)
+    this.name = "AppError"
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string, details?: any) {
+    super(message, "VALIDATION_ERROR", 400, details)
+    this.name = "ValidationError"
+  }
+}
+
+export class AuthenticationError extends AppError {
+  constructor(message = "Authentication failed") {
+    super(message, "AUTH_ERROR", 401)
+    this.name = "AuthenticationError"
+  }
+}
+
+export class WhatsAppError extends AppError {
+  constructor(message: string, details?: any) {
+    super(message, "WHATSAPP_ERROR", 500, details)
+    this.name = "WhatsAppError"
+  }
+}
+
+// إضافة نوع لـ User في AuthContext إذا لم يكن موجودًا بشكل واضح
+export interface UserContextType {
+  id: number // أو string حسب قاعدة البيانات
+  username: string
+  // أضف أي حقول أخرى ضرورية مثل الأدوار، إلخ.
+}
+
+export interface WebSocketMessage {
+  type: string
+  data: any
+  timestamp: number
+}
+
+export interface NotificationData {
+  id: string
+  type: "success" | "error" | "warning" | "info"
+  title: string
+  message: string
+  timestamp: number
+}

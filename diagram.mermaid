@@ -1,0 +1,13 @@
+graph TD
+    A[Create Device] --> B[Disconnected]
+    B --> C[Connect Request]
+    C --> D[Connecting]
+    D --> E[QR Code Ready]
+    E --> F[Scan QR Code]
+    F --> G[Connected]
+    G --> H[Send Messages]
+    G --> I[Disconnect]
+    I --> B
+    D --> J[Error]
+    E --> J
+    J --> B

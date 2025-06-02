@@ -1,0 +1,1055 @@
+# دليل المطور الشامل - مشروع WhatsApp Manager
+
+## 📋 نظرة عامة على المشروع
+
+**WhatsApp Manager** هو نظام إدارة متكامل لـ WhatsApp مبني بـ Next.js 14، يوفر واجهة ويب حديثة لإدارة أجهزة WhatsApp متعددة وإرسال الرسائل بشكل احترافي.
+
+### 🎯 الهدف من المشروع
+
+- إدارة أجهزة WhatsApp متعددة من واجهة واحدة
+- إرسال رسائل فردية وجماعية
+- مراقبة حالة الأجهزة والرسائل في الوقت الفعلي
+- نظام أمان متقدم مع JWT
+- واجهة مستخدم حديثة ومتجاوبة
+
+
+---
+
+## 🏗️ البنية التقنية
+
+### التقنيات المستخدمة
+
+| المكون | التقنية | الإصدار
+|-----|-----|-----
+| **Frontend** | Next.js | 14.x
+| **UI Framework** | React | 18.x
+| **Styling** | Tailwind CSS | 3.x
+| **UI Components** | shadcn/ui | Latest
+| **Database** | SQLite | 3.x
+| **WhatsApp Integration** | whatsapp-web.js | Latest
+| **Authentication** | JWT | -
+| **Process Manager** | PM2 | Latest
+| **Web Automation** | Puppeteer | Latest
+| **Real-time** | WebSocket | Native
+
+
+### متطلبات النظام
+
+```shellscript
+# الحد الأدنى
+- Ubuntu 20.04+ / CentOS 8+
+- Node.js 18+
+- npm 9+
+- 4GB RAM
+- 20GB Storage
+- Chromium Browser
+
+# المُنصح به
+- Ubuntu 22.04 LTS
+- Node.js 20+
+- 8GB+ RAM
+- 50GB+ SSD
+- Domain للـ SSL
+```
+
+---
+
+## 📁 هيكل المشروع
+
+```plaintext
+whatsapp-manager/
+├── 📁 app/                          # Next.js App Router
+│   ├── 📁 api/                      # API Routes
+│   │   ├── 📁 auth/                 # Authentication endpoints
+│   │   ├── 📁 devices/              # Device management
+│   │   ├── 📁 messages/             # Message handling
+│   │   └── 📁 stats/                # Statistics
+│   ├── 📁 dashboard/                # Dashboard page
+│   ├── 📁 devices/                  # Devices management page
+│   ├── 📁 messages/                 # Messages page
+│   ├── 📁 login/                    # Login page
+│   ├── layout.tsx                   # Root layout
+│   ├── page.tsx                     # Home page
+│   └── globals.css                  # Global styles
+├── 📁 components/                   # React Components
+│   ├── 📁 ui/                       # shadcn/ui components
+│   ├── 📁 layout/                   # Layout components
+│   ├── device-card.tsx              # Device card component
+│   ├── message-dialog.tsx           # Message dialog
+│   └── notifications.tsx            # Notification system
+├── 📁 lib/                          # Utility libraries
+│   ├── auth.ts                      # Authentication logic
+│   ├── database.ts                  # Database operations
+│   ├── whatsapp-client-manager.ts   # WhatsApp client management
+│   ├── websocket.ts                 # WebSocket handling
+│   ├── types.ts                     # TypeScript types
+│   ├── validation.ts                # Input validation
+│   └── utils.ts                     # Utility functions
+├── 📁 data/                         # Data storage
+│   ├── database.sqlite              # SQLite database
+│   └── 📁 whatsapp_sessions/        # WhatsApp sessions
+├── 📁 scripts/                      # Utility scripts
+├── manager.sh                       # Main management script
+├── ecosystem.config.js              # PM2 configuration
+├── next.config.js                   # Next.js configuration
+├── package.json                     # Dependencies
+└── .env                             # Environment variables
+```
+
+---
+
+## 🔧 إعداد البيئة التطويرية
+
+### 1. استنساخ المشروع
+
+```shellscript
+git clone <repository-url>
+cd whatsapp-manager
+```
+
+### 2. تثبيت التبعيات
+
+```shellscript
+# تثبيت Node.js dependencies
+npm install
+
+# تثبيت متطلبات النظام (Ubuntu)
+sudo apt update
+sudo apt install -y chromium-browser sqlite3
+```
+
+### 3. إعداد متغيرات البيئة
+
+```shellscript
+# إنشاء ملف .env
+cp .env.example .env
+```
+
+```plaintext
+# .env
+NODE_ENV=development
+PORT=3000
+WEBSOCKET_PORT=3001
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=24h
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+
+# Database
+DATABASE_PATH=./data/whatsapp_manager.db
+
+# Puppeteer
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# WebSocket
+ENABLE_WEBSOCKET=true
+NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:3001
+
+# URLs
+FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_WHATSAPP_API_URL=http://localhost:3000/api
+```
+
+### 4. تشغيل المشروع
+
+```shellscript
+# Development mode
+npm run dev
+
+# Production build
+npm run build
+npm start
+
+# Using PM2 (Production)
+pm2 start ecosystem.config.js
+```
+
+---
+
+## 🗄️ قاعدة البيانات
+
+### Schema Overview
+
+```sql
+-- Admins table
+CREATE TABLE admins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  passwordHash TEXT NOT NULL,
+  isActive INTEGER DEFAULT 1,
+  loginAttempts INTEGER DEFAULT 0,
+  lockedUntil TEXT,
+  lastLogin TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+-- Devices table
+CREATE TABLE devices (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  status TEXT DEFAULT 'disconnected',
+  phoneNumber TEXT,
+  qrCode TEXT,
+  lastSeen TEXT,
+  errorMessage TEXT,
+  connectionAttempts INTEGER DEFAULT 0,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+-- Messages table (outgoing)
+CREATE TABLE messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  deviceId INTEGER NOT NULL,
+  recipient TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  messageId TEXT,
+  messageType TEXT DEFAULT 'text',
+  sentAt TEXT,
+  errorMessage TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (deviceId) REFERENCES devices (id)
+);
+
+-- Incoming messages table
+CREATE TABLE incoming_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  deviceId INTEGER NOT NULL,
+  sender TEXT NOT NULL,
+  message TEXT NOT NULL,
+  messageId TEXT UNIQUE NOT NULL,
+  messageType TEXT DEFAULT 'text',
+  mediaUrl TEXT,
+  receivedAt TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (deviceId) REFERENCES devices (id)
+);
+```
+
+### Database Operations
+
+```typescript
+// lib/database.ts - Main database manager
+class DatabaseManager {
+  // Device operations
+  async getAllDevices(): Promise<Device[]>
+  async createDevice(name: string): Promise<Device>
+  async updateDevice(id: number, data: Partial<Device>): Promise<void>
+  async deleteDevice(id: number): Promise<void>
+
+  // Message operations
+  async createMessage(data: MessageData): Promise<Message>
+  async getAllMessages(limit?: number, offset?: number): Promise<Message[]>
+  async getMessagesByDevice(deviceId: number, limit?: number): Promise<Message[]>
+
+  // Admin operations
+  async getAdminByUsername(username: string): Promise<Admin | undefined>
+  async updateAdmin(id: number, data: Partial<Admin>): Promise<void>
+}
+```
+
+---
+
+## 🔐 نظام المصادقة
+
+### JWT Authentication Flow
+
+```typescript
+// lib/auth.ts
+export async function authenticateUser(username: string, password: string): Promise<AuthResult> {
+  // 1. Validate credentials
+  // 2. Check account lock status
+  // 3. Verify password (bcrypt)
+  // 4. Generate JWT token
+  // 5. Update last login
+}
+
+export function verifyToken(token: string): { valid: boolean; userId?: number; username?: string }
+
+export async function getCurrentUser(request: NextRequest): Promise<User | null>
+```
+
+### Middleware Protection
+
+```typescript
+// lib/middleware.ts
+export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
+  const token = request.cookies.get("auth-token")?.value
+  if (!token) return { success: false, message: "No token provided" }
+  
+  const decoded = verifyToken(token)
+  if (!decoded.valid) return { success: false, message: "Invalid token" }
+  
+  return { success: true, user: decoded }
+}
+```
+
+### Usage in API Routes
+
+```typescript
+// app/api/devices/route.ts
+export async function GET(request: NextRequest) {
+  const authResult = await verifyAuth(request)
+  if (!authResult.success) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  
+  // Proceed with authenticated request
+}
+```
+
+---
+
+## 📱 إدارة WhatsApp
+
+### WhatsApp Client Manager
+
+```typescript
+// lib/whatsapp-client-manager.ts
+class WhatsAppClientManager extends EventEmitter {
+  private clients: Map<number, WhatsAppClient> = new Map()
+
+  // Create new WhatsApp client
+  async createClient(deviceId: number, deviceName: string): Promise<boolean>
+  
+  // Send single message
+  async sendMessage(deviceId: number, recipient: string, message: string): Promise<boolean>
+  
+  // Send bulk messages
+  async sendBulkMessages(deviceId: number, recipients: string[], message: string): Promise<BulkResult[]>
+  
+  // Disconnect device
+  async disconnectDevice(deviceId: number): Promise<boolean>
+  
+  // Get device status
+  getDeviceStatus(deviceId: number): string
+}
+```
+
+### Device Lifecycle
+
+```mermaid
+Diagram.download-icon {
+            cursor: pointer;
+            transform-origin: center;
+        }
+        .download-icon .arrow-part {
+            transition: transform 0.35s cubic-bezier(0.35, 0.2, 0.14, 0.95);
+             transform-origin: center;
+        }
+        button:has(.download-icon):hover .download-icon .arrow-part, button:has(.download-icon):focus-visible .download-icon .arrow-part {
+          transform: translateY(-1.5px);
+        }
+        #mermaid-diagram-rkv4{font-family:var(--font-geist-sans);font-size:12px;fill:#000000;}#mermaid-diagram-rkv4 .error-icon{fill:#552222;}#mermaid-diagram-rkv4 .error-text{fill:#552222;stroke:#552222;}#mermaid-diagram-rkv4 .edge-thickness-normal{stroke-width:1px;}#mermaid-diagram-rkv4 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-diagram-rkv4 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-diagram-rkv4 .edge-thickness-invisible{stroke-width:0;fill:none;}#mermaid-diagram-rkv4 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-diagram-rkv4 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-diagram-rkv4 .marker{fill:#666;stroke:#666;}#mermaid-diagram-rkv4 .marker.cross{stroke:#666;}#mermaid-diagram-rkv4 svg{font-family:var(--font-geist-sans);font-size:12px;}#mermaid-diagram-rkv4 p{margin:0;}#mermaid-diagram-rkv4 .label{font-family:var(--font-geist-sans);color:#000000;}#mermaid-diagram-rkv4 .cluster-label text{fill:#333;}#mermaid-diagram-rkv4 .cluster-label span{color:#333;}#mermaid-diagram-rkv4 .cluster-label span p{background-color:transparent;}#mermaid-diagram-rkv4 .label text,#mermaid-diagram-rkv4 span{fill:#000000;color:#000000;}#mermaid-diagram-rkv4 .node rect,#mermaid-diagram-rkv4 .node circle,#mermaid-diagram-rkv4 .node ellipse,#mermaid-diagram-rkv4 .node polygon,#mermaid-diagram-rkv4 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mermaid-diagram-rkv4 .rough-node .label text,#mermaid-diagram-rkv4 .node .label text{text-anchor:middle;}#mermaid-diagram-rkv4 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-diagram-rkv4 .node .label{text-align:center;}#mermaid-diagram-rkv4 .node.clickable{cursor:pointer;}#mermaid-diagram-rkv4 .arrowheadPath{fill:#333333;}#mermaid-diagram-rkv4 .edgePath .path{stroke:#666;stroke-width:2.0px;}#mermaid-diagram-rkv4 .flowchart-link{stroke:#666;fill:none;}#mermaid-diagram-rkv4 .edgeLabel{background-color:white;text-align:center;}#mermaid-diagram-rkv4 .edgeLabel p{background-color:white;}#mermaid-diagram-rkv4 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mermaid-diagram-rkv4 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mermaid-diagram-rkv4 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mermaid-diagram-rkv4 .cluster text{fill:#333;}#mermaid-diagram-rkv4 .cluster span{color:#333;}#mermaid-diagram-rkv4 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:var(--font-geist-sans);font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-diagram-rkv4 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mermaid-diagram-rkv4 .flowchart-link{stroke:hsl(var(--gray-400));stroke-width:1px;}#mermaid-diagram-rkv4 .marker,#mermaid-diagram-rkv4 marker,#mermaid-diagram-rkv4 marker *{fill:hsl(var(--gray-400))!important;stroke:hsl(var(--gray-400))!important;}#mermaid-diagram-rkv4 .label,#mermaid-diagram-rkv4 text,#mermaid-diagram-rkv4 text>tspan{fill:hsl(var(--black))!important;color:hsl(var(--black))!important;}#mermaid-diagram-rkv4 .background,#mermaid-diagram-rkv4 rect.relationshipLabelBox{fill:hsl(var(--white))!important;}#mermaid-diagram-rkv4 .entityBox,#mermaid-diagram-rkv4 .attributeBoxEven{fill:hsl(var(--gray-150))!important;}#mermaid-diagram-rkv4 .attributeBoxOdd{fill:hsl(var(--white))!important;}#mermaid-diagram-rkv4 .label-container,#mermaid-diagram-rkv4 rect.actor{fill:hsl(var(--white))!important;stroke:hsl(var(--gray-400))!important;}#mermaid-diagram-rkv4 line{stroke:hsl(var(--gray-400))!important;}#mermaid-diagram-rkv4 :root{--mermaid-font-family:var(--font-geist-sans);}Create DeviceDisconnectedConnect RequestConnectingQR Code ReadyScan QR CodeConnectedSend MessagesDisconnectError
+```
+
+### WhatsApp Events
+
+```typescript
+// Event handlers in WhatsAppClientManager
+client.on("qr", async (qr) => {
+  // Generate QR code for device connection
+  const qrCodeDataURL = await QRCode.toDataURL(qr)
+  await db.updateDevice(deviceId, { status: "qr_ready", qrCode: qrCodeDataURL })
+})
+
+client.on("ready", async () => {
+  // Device successfully connected
+  await db.updateDevice(deviceId, { status: "connected", phoneNumber: info.wid.user })
+})
+
+client.on("message", async (message) => {
+  // Handle incoming messages
+  if (!message.fromMe) {
+    await db.createIncomingMessage({ deviceId, sender: message.from, message: message.body })
+  }
+})
+
+client.on("disconnected", async (reason) => {
+  // Handle disconnection
+  await db.updateDevice(deviceId, { status: "disconnected", errorMessage: reason })
+})
+```
+
+---
+
+## 🌐 API Endpoints
+
+### Authentication APIs
+
+```typescript
+// POST /api/auth/login
+{
+  "username": "admin",
+  "password": "password"
+}
+// Response: { success: true, token: "jwt-token", user: {...} }
+
+// POST /api/auth/logout
+// Response: { success: true, message: "Logged out" }
+
+// GET /api/auth/me
+// Response: { success: true, user: {...} }
+```
+
+### Device Management APIs
+
+```typescript
+// GET /api/devices
+// Response: { success: true, devices: [...], count: 5 }
+
+// POST /api/devices
+{
+  "name": "Device Name"
+}
+// Response: { success: true, device: {...} }
+
+// POST /api/devices/[id]/connect
+// Response: { success: true, message: "Connection started" }
+
+// POST /api/devices/[id]/disconnect
+// Response: { success: true, message: "Device disconnected" }
+
+// DELETE /api/devices/[id]
+// Response: { success: true, message: "Device deleted" }
+```
+
+### Message APIs
+
+```typescript
+// GET /api/messages
+// Response: { success: true, data: [...], count: 10 }
+
+// POST /api/devices/[id]/send
+{
+  "recipient": "+966501234567",
+  "message": "Hello World"
+}
+// Response: { success: true, messageId: "msg_123" }
+
+// POST /api/devices/[id]/send-bulk
+{
+  "recipients": ["+966501234567", "+966507654321"],
+  "message": "Bulk message"
+}
+// Response: { success: true, results: [...] }
+```
+
+---
+
+## 🎨 Frontend Components
+
+### Main Layout Structure
+
+```typescript
+// components/layout/main-layout.tsx
+export function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
+      <Notifications />
+    </div>
+  )
+}
+```
+
+### Device Card Component
+
+```typescript
+// components/device-card.tsx
+interface DeviceCardProps {
+  device: Device
+  onConnect: (deviceId: number) => void
+  onDisconnect: (deviceId: number) => void
+  onDelete: (deviceId: number) => void
+  onSendMessage: (deviceId: number) => void
+  isLoading?: boolean
+}
+
+export function DeviceCard({ device, onConnect, onDisconnect, ... }: DeviceCardProps) {
+  const statusConfig = getStatusConfig(device.status)
+  
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>{device.name}</CardTitle>
+          <StatusIndicator status={device.status} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {device.status === "qr_ready" && device.qrCode && (
+          <QRCodeDisplay qrCode={device.qrCode} />
+        )}
+        <DeviceActions 
+          device={device}
+          onConnect={onConnect}
+          onDisconnect={onDisconnect}
+          onDelete={onDelete}
+          onSendMessage={onSendMessage}
+        />
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+### Message Dialog Component
+
+```typescript
+// components/message-dialog.tsx
+export function MessageDialog({ 
+  open, 
+  onOpenChange, 
+  deviceId, 
+  deviceName, 
+  onSendMessage 
+}: MessageDialogProps) {
+  const [isBulk, setIsBulk] = useState(false)
+  const [recipient, setRecipient] = useState("")
+  const [recipients, setRecipients] = useState<string[]>([])
+  const [message, setMessage] = useState("")
+
+  const handleSubmit = () => {
+    onSendMessage({
+      deviceId,
+      recipient: isBulk ? undefined : recipient,
+      recipients: isBulk ? recipients : undefined,
+      message,
+      isBulk
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>إرسال رسالة - {deviceName}</DialogTitle>
+        </DialogHeader>
+        
+        <Tabs value={isBulk ? "bulk" : "single"} onValueChange={(v) => setIsBulk(v === "bulk")}>
+          <TabsList>
+            <TabsTrigger value="single">رسالة فردية</TabsTrigger>
+            <TabsTrigger value="bulk">رسالة جماعية</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="single">
+            <SingleMessageForm 
+              recipient={recipient}
+              setRecipient={setRecipient}
+              message={message}
+              setMessage={setMessage}
+            />
+          </TabsContent>
+          
+          <TabsContent value="bulk">
+            <BulkMessageForm 
+              recipients={recipients}
+              setRecipients={setRecipients}
+              message={message}
+              setMessage={setMessage}
+            />
+          </TabsContent>
+        </Tabs>
+        
+        <DialogFooter>
+          <Button onClick={handleSubmit}>إرسال</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+```
+
+---
+
+## 🔄 WebSocket Integration
+
+### WebSocket Server
+
+```typescript
+// lib/websocket.ts
+export class WebSocketManager {
+  private wss: WebSocketServer | null = null
+  private clients: Set<WebSocket> = new Set()
+
+  initialize(port: number) {
+    this.wss = new WebSocketServer({ port })
+    
+    this.wss.on('connection', (ws) => {
+      this.clients.add(ws)
+      
+      ws.on('close', () => {
+        this.clients.delete(ws)
+      })
+    })
+  }
+
+  broadcast(data: any) {
+    const message = JSON.stringify(data)
+    this.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message)
+      }
+    })
+  }
+}
+```
+
+### Client-side WebSocket
+
+```typescript
+// lib/use-websocket.ts
+export function useWebSocket(url: string) {
+  const [socket, setSocket] = useState<WebSocket | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
+
+  useEffect(() => {
+    const ws = new WebSocket(url)
+    
+    ws.onopen = () => {
+      setIsConnected(true)
+      setSocket(ws)
+    }
+    
+    ws.onclose = () => {
+      setIsConnected(false)
+      setSocket(null)
+    }
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      // Handle incoming messages
+    }
+
+    return () => ws.close()
+  }, [url])
+
+  return { socket, isConnected }
+}
+```
+
+---
+
+## 🛠️ إدارة النظام
+
+### Manager Script
+
+```shellscript
+# manager.sh - Main system management script
+
+# Installation
+sudo ./manager.sh install          # Full system setup
+sudo ./manager.sh update-app       # Update from Git
+sudo ./manager.sh update-sys       # Update system packages
+
+# Application Management
+sudo ./manager.sh start            # Start application
+sudo ./manager.sh stop             # Stop application
+sudo ./manager.sh restart          # Restart application
+sudo ./manager.sh status           # Show status
+
+# Maintenance
+sudo ./manager.sh diagnose         # System diagnostics
+sudo ./manager.sh cleanup          # Clean temporary files
+sudo ./manager.sh backup           # Create backup
+sudo ./manager.sh restore          # Restore backup
+
+# Logs
+sudo ./manager.sh logs app         # Application logs
+sudo ./manager.sh logs pm2         # PM2 logs
+sudo ./manager.sh logs nginx       # Nginx logs
+```
+
+### PM2 Configuration
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'whatsapp-manager',
+    script: 'npm',
+    args: 'start',
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    instances: 1,
+    exec_mode: 'fork',
+    watch: false,
+    max_memory_restart: '1G',
+    error_file: './logs/pm2-error.log',
+    out_file: './logs/pm2-out.log',
+    log_file: './logs/pm2-combined.log'
+  }]
+}
+```
+
+---
+
+## 🧪 Testing
+
+### Test Structure
+
+```shellscript
+tests/
+├── unit/
+│   ├── auth.test.ts
+│   ├── database.test.ts
+│   └── validation.test.ts
+├── integration/
+│   ├── api.test.ts
+│   └── whatsapp.test.ts
+└── e2e/
+    ├── login.test.ts
+    └── device-management.test.ts
+```
+
+### Example Test
+
+```typescript
+// tests/unit/auth.test.ts
+import { authenticateUser, verifyToken } from '@/lib/auth'
+
+describe('Authentication', () => {
+  test('should authenticate valid user', async () => {
+    const result = await authenticateUser('admin', 'admin123')
+    expect(result.success).toBe(true)
+    expect(result.token).toBeDefined()
+  })
+
+  test('should reject invalid credentials', async () => {
+    const result = await authenticateUser('admin', 'wrong-password')
+    expect(result.success).toBe(false)
+  })
+
+  test('should verify valid token', () => {
+    const token = 'valid-jwt-token'
+    const result = verifyToken(token)
+    expect(result.valid).toBe(true)
+  })
+})
+```
+
+---
+
+## 🚀 النشر
+
+### Development Deployment
+
+```shellscript
+# Clone and setup
+git clone <repo-url>
+cd whatsapp-manager
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Run development server
+npm run dev
+```
+
+### Production Deployment
+
+```shellscript
+# Using manager script (Recommended)
+sudo ./manager.sh install
+
+# Manual deployment
+npm install --production
+npm run build
+pm2 start ecosystem.config.js --env production
+
+# Setup Nginx (optional)
+sudo ./manager.sh setup-nginx
+
+# Setup SSL (optional)
+sudo certbot --nginx -d your-domain.com
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  whatsapp-manager:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/database.sqlite
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+```
+
+---
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### 1. WhatsApp Connection Issues
+
+```shellscript
+# Check Puppeteer installation
+which chromium-browser
+echo $PUPPETEER_EXECUTABLE_PATH
+
+# Clear WhatsApp sessions
+rm -rf data/whatsapp_sessions/*
+
+# Check logs
+sudo ./manager.sh logs app
+```
+
+#### 2. Database Issues
+
+```shellscript
+# Check database file
+ls -la data/database.sqlite
+
+# Test database connection
+sqlite3 data/database.sqlite ".tables"
+
+# Fix permissions
+sudo chown -R $USER:$USER data/
+```
+
+#### 3. Port Conflicts
+
+```shellscript
+# Check port usage
+sudo netstat -tulpn | grep :3000
+sudo netstat -tulpn | grep :3001
+
+# Kill conflicting processes
+sudo fuser -k 3000/tcp
+sudo fuser -k 3001/tcp
+```
+
+#### 4. PM2 Issues
+
+```shellscript
+# Check PM2 status
+pm2 list
+pm2 describe whatsapp-manager
+
+# Restart PM2
+pm2 restart whatsapp-manager
+
+# Reset PM2
+pm2 delete all
+pm2 start ecosystem.config.js
+```
+
+### Debug Mode
+
+```shellscript
+# Enable debug logging
+export DEBUG=whatsapp-manager:*
+npm run dev
+
+# Check application logs
+tail -f logs/app.log
+
+# Monitor system resources
+htop
+iotop
+```
+
+---
+
+## 📚 Best Practices
+
+### Code Organization
+
+1. **Separation of Concerns**: Keep business logic separate from UI components
+2. **Type Safety**: Use TypeScript interfaces for all data structures
+3. **Error Handling**: Implement comprehensive error handling with try-catch blocks
+4. **Logging**: Use structured logging with appropriate log levels
+5. **Validation**: Validate all inputs on both client and server side
+
+
+### Security
+
+1. **Authentication**: Always verify JWT tokens in API routes
+2. **Input Sanitization**: Sanitize all user inputs
+3. **Rate Limiting**: Implement rate limiting for API endpoints
+4. **HTTPS**: Use HTTPS in production
+5. **Environment Variables**: Never commit sensitive data to version control
+
+
+### Performance
+
+1. **Database Indexing**: Create appropriate database indexes
+2. **Caching**: Implement caching for frequently accessed data
+3. **Lazy Loading**: Use lazy loading for components and data
+4. **Optimization**: Optimize images and assets
+5. **Monitoring**: Monitor application performance and errors
+
+
+### WhatsApp Integration
+
+1. **Session Management**: Properly manage WhatsApp sessions
+2. **Rate Limiting**: Respect WhatsApp's rate limits
+3. **Error Recovery**: Implement automatic reconnection logic
+4. **QR Code Handling**: Handle QR code expiration gracefully
+5. **Message Queuing**: Queue messages during disconnection
+
+
+---
+
+## 🔄 Development Workflow
+
+### Git Workflow
+
+```shellscript
+# Feature development
+git checkout -b feature/new-feature
+git add .
+git commit -m "feat: add new feature"
+git push origin feature/new-feature
+
+# Create pull request
+# After review and approval, merge to main
+```
+
+### Testing Workflow
+
+```shellscript
+# Run tests before committing
+npm test
+npm run test:coverage
+
+# Run linting
+npm run lint
+npm run lint:fix
+
+# Type checking
+npm run type-check
+```
+
+### Deployment Workflow
+
+```shellscript
+# Development
+npm run dev
+
+# Staging
+npm run build
+npm run start
+
+# Production
+sudo ./manager.sh deploy
+```
+
+---
+
+## 📖 Additional Resources
+
+### Documentation Links
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [WhatsApp Web.js Guide](https://wwebjs.dev/)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [shadcn/ui Components](https://ui.shadcn.com/)
+- [PM2 Documentation](https://pm2.keymetrics.io/docs/)
+
+
+### Useful Commands
+
+```shellscript
+# Package management
+npm install <package>
+npm uninstall <package>
+npm update
+
+# Development tools
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript type checking
+
+# System management
+sudo ./manager.sh status     # Check system status
+sudo ./manager.sh diagnose   # Run diagnostics
+sudo ./manager.sh backup     # Create backup
+sudo ./manager.sh logs app   # View logs
+```
+
+---
+
+## 🎯 Next Steps للمطور الجديد
+
+### Week 1: Setup & Familiarization
+
+1. ✅ Setup development environment
+2. ✅ Run the application locally
+3. ✅ Explore the codebase structure
+4. ✅ Understand the database schema
+5. ✅ Test basic functionality
+
+
+### Week 2: Deep Dive
+
+1. ✅ Study WhatsApp integration
+2. ✅ Understand authentication flow
+3. ✅ Explore API endpoints
+4. ✅ Review frontend components
+5. ✅ Test deployment process
+
+
+### Week 3: Contribution
+
+1. ✅ Fix minor bugs
+2. ✅ Add small features
+3. ✅ Write tests
+4. ✅ Improve documentation
+5. ✅ Optimize performance
+
+
+### Week 4: Advanced Features
+
+1. ✅ Implement new features
+2. ✅ Enhance security
+3. ✅ Add monitoring
+4. ✅ Improve error handling
+5. ✅ Scale the application
+
+
+---
+
+هذا الدليل يوفر فهماً شاملاً للمشروع ويمكن للمطور الجديد الرجوع إليه في أي وقت. المشروع مصمم ليكون قابلاً للصيانة والتطوير بسهولة، مع اتباع أفضل الممارسات في التطوير.
