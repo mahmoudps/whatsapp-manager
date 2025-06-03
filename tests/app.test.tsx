@@ -15,7 +15,7 @@ describe('Home Page', () => {
 
   it('displays welcome message', () => {
     render(<Home />);
-    expect(screen.getByText(/مرحباً بك في نظام إدارة WhatsApp/i)).toBeInTheDocument();
+    expect(screen.getByText(/نظام إدارة شامل لرسائل واتساب/i)).toBeInTheDocument();
   });
 });
 
