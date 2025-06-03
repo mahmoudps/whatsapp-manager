@@ -5,6 +5,7 @@ const next = require("next")
 const helmet = require("helmet")
 const compression = require("compression")
 const rateLimit = require("express-rate-limit")
+const { initializeDatabase } = require("./lib/database")
 
 const dev = process.env.NODE_ENV !== "production"
 const hostname = process.env.HOST || "127.0.0.1"
@@ -29,6 +30,9 @@ const handle = app.getRequestHandler()
 // دالة لبدء الخادم
 async function startServer() {
   try {
+    console.log("🔄 Initializing database...")
+    await initializeDatabase()
+    console.log("✅ Database initialized")
     console.log("🔄 Preparing Next.js application...")
     await app.prepare()
     console.log("✅ Next.js application prepared successfully")
