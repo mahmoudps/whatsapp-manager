@@ -25,11 +25,13 @@ const createTables = () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
-        last_login DATETIME,
+        role TEXT DEFAULT 'admin',
+        is_active INTEGER DEFAULT 1,
         login_attempts INTEGER DEFAULT 0,
-        locked_until DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        is_active BOOLEAN DEFAULT 1
+        locked_until TEXT,
+        last_login TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `)
     console.log("✅ Admins table created/verified")
@@ -39,14 +41,14 @@ const createTables = () => {
       CREATE TABLE IF NOT EXISTS devices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        phone_number TEXT,
         status TEXT DEFAULT 'disconnected',
+        phone_number TEXT,
         qr_code TEXT,
-        last_seen DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_seen TEXT,
         error_message TEXT,
-        connection_attempts INTEGER DEFAULT 0
+        connection_attempts INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `)
     console.log("✅ Devices table created/verified")
@@ -59,12 +61,12 @@ const createTables = () => {
         recipient TEXT NOT NULL,
         message TEXT NOT NULL,
         status TEXT DEFAULT 'pending',
-        sent_at DATETIME,
-        error_message TEXT,
+        message_id TEXT,
         message_type TEXT DEFAULT 'text',
-        media_url TEXT,
-        delivered_at DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        sent_at TEXT,
+        error_message TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
       )
     `)
@@ -80,7 +82,9 @@ const createTables = () => {
         message_id TEXT UNIQUE NOT NULL,
         message_type TEXT DEFAULT 'text',
         media_url TEXT,
-        received_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        media_type TEXT,
+        received_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
       )
     `)

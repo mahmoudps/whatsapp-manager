@@ -38,6 +38,9 @@
    ```bash
    npm run setup
    ```
+   هذا الأمر يشغل سكربت `scripts/init-database.js` الذي ينشئ الجداول
+   وفق المخطط الموجود في `lib/database.ts` بما في ذلك الحقول الجديدة
+   مثل `updated_at` و`role` و`message_id`.
 
 ## الأوامر الأساسية
 
