@@ -11,6 +11,8 @@ npm install --legacy-peer-deps
 npm run setup
 npm run dev
 ```
+سيقوم الأمر `npm run setup` بإنشاء قاعدة البيانات بالجداول الصحيحة
+وفق المخطط الموجود في `lib/database.ts`.
 
 ## بيانات الدخول:
 - اسم المستخدم: admin
@@ -34,6 +36,8 @@ npm install --legacy-peer-deps
 npm run setup
 npm run dev
 ```
+Running `npm run setup` will create the database schema as defined in
+`lib/database.ts`.
 
 ## Login credentials:
 - Username: admin
