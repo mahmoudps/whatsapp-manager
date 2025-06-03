@@ -39,13 +39,14 @@ const createTables = () => {
       CREATE TABLE IF NOT EXISTS admins (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        passwordHash TEXT NOT NULL,
-        isActive INTEGER DEFAULT 1,
-        loginAttempts INTEGER DEFAULT 0,
-        lockedUntil TEXT,
-        lastLogin TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
+        password_hash TEXT NOT NULL,
+        role TEXT DEFAULT 'admin',
+        is_active INTEGER DEFAULT 1,
+        login_attempts INTEGER DEFAULT 0,
+        locked_until TEXT,
+        last_login TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `)
     console.log("✅ Admins table created")
@@ -56,13 +57,13 @@ const createTables = () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         status TEXT DEFAULT 'disconnected',
-        phoneNumber TEXT,
-        qrCode TEXT,
-        lastSeen TEXT,
-        errorMessage TEXT,
-        connectionAttempts INTEGER DEFAULT 0,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
+        phone_number TEXT,
+        qr_code TEXT,
+        last_seen TEXT,
+        error_message TEXT,
+        connection_attempts INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `)
     console.log("✅ Devices table created")
@@ -71,17 +72,17 @@ const createTables = () => {
     db.exec(`
       CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        deviceId INTEGER NOT NULL,
+        device_id INTEGER NOT NULL,
         recipient TEXT NOT NULL,
         message TEXT NOT NULL,
         status TEXT DEFAULT 'pending',
-        messageId TEXT,
-        messageType TEXT DEFAULT 'text',
-        sentAt TEXT,
-        errorMessage TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES devices (id) ON DELETE CASCADE
+        message_id TEXT,
+        message_type TEXT DEFAULT 'text',
+        sent_at TEXT,
+        error_message TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
       )
     `)
     console.log("✅ Messages table created")
@@ -90,25 +91,25 @@ const createTables = () => {
     db.exec(`
       CREATE TABLE IF NOT EXISTS incoming_messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        deviceId INTEGER NOT NULL,
+        device_id INTEGER NOT NULL,
         sender TEXT NOT NULL,
         message TEXT NOT NULL,
-        messageId TEXT UNIQUE NOT NULL,
-        messageType TEXT DEFAULT 'text',
-        mediaUrl TEXT,
-        mediaType TEXT,
-        receivedAt TEXT NOT NULL,
-        createdAt TEXT NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES devices (id) ON DELETE CASCADE
+        message_id TEXT UNIQUE NOT NULL,
+        message_type TEXT DEFAULT 'text',
+        media_url TEXT,
+        media_type TEXT,
+        received_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
       )
     `)
     console.log("✅ Incoming messages table created")
 
     // إنشاء الفهارس للأداء
     db.exec("CREATE INDEX IF NOT EXISTS idx_devices_status ON devices(status)")
-    db.exec("CREATE INDEX IF NOT EXISTS idx_messages_device_status ON messages(deviceId, status)")
-    db.exec("CREATE INDEX IF NOT EXISTS idx_incoming_device_received ON incoming_messages(deviceId, receivedAt)")
-    db.exec("CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(createdAt)")
+    db.exec("CREATE INDEX IF NOT EXISTS idx_messages_device_id ON messages(device_id)")
+    db.exec("CREATE INDEX IF NOT EXISTS idx_messages_status ON messages(status)")
+    db.exec("CREATE INDEX IF NOT EXISTS idx_incoming_messages_device_id ON incoming_messages(device_id)")
     console.log("✅ Database indexes created")
   } catch (error) {
     console.error("❌ Error creating tables:", error)
@@ -123,12 +124,11 @@ const createDefaultAdmin = async () => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 12)
-    const now = new Date().toISOString()
 
     const stmt = db.prepare(
-      `INSERT OR IGNORE INTO admins (username, passwordHash, isActive, createdAt, updatedAt) VALUES (?, ?, 1, ?, ?)`,
+      `INSERT OR IGNORE INTO admins (username, password_hash) VALUES (?, ?)`,
     )
-    const result = stmt.run(username, hashedPassword, now, now)
+    const result = stmt.run(username, hashedPassword)
 
     if (result.changes > 0) {
       console.log(`✅ Default admin user created: ${username}`)
