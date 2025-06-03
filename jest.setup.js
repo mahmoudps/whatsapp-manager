@@ -3,6 +3,13 @@ import '@testing-library/jest-dom';
 // Mock fetch globally
 global.fetch = jest.fn();
 
+if (typeof global.Request === 'undefined') {
+  global.Request = function () {};
+}
+if (typeof global.Response === 'undefined') {
+  global.Response = function () {};
+}
+
 // Mock WebSocket
 global.WebSocket = class WebSocket {
   static OPEN = 1;
