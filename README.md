@@ -34,20 +34,20 @@
 
 ### 1. التشغيل المحلي
 ```bash
-cd /home/ubuntu/whatsapp-manager-fixed
+cd /home/ubuntu/whatsapp-manager
 npm install
 npm run dev
 ```
 
 ### 2. التشغيل في الإنتاج
 ```bash
-cd /home/ubuntu/whatsapp-manager-fixed
+cd /home/ubuntu/whatsapp-manager
 ./deploy.sh
 ```
 
 ### 3. باستخدام Docker
 ```bash
-cd /home/ubuntu/whatsapp-manager-fixed
+cd /home/ubuntu/whatsapp-manager
 docker-compose up -d
 ```
 
@@ -95,7 +95,7 @@ docker-compose up -d
 ## 📁 هيكل المشروع
 
 ```
-whatsapp-manager-fixed/
+whatsapp-manager/
 ├── app/                    # صفحات Next.js
 ├── components/             # مكونات React
 ├── lib/                   # مكتبات ووظائف مساعدة
