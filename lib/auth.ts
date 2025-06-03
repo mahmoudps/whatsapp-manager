@@ -3,9 +3,7 @@ import jwt from "jsonwebtoken"
 import type { NextRequest } from "next/server"
 import { db } from "./database"
 import { logger } from "@/lib/logger"
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
+import { JWT_SECRET, JWT_EXPIRES_IN } from "@/lib/config"
 const MAX_LOGIN_ATTEMPTS = Number.parseInt(process.env.MAX_AUTH_ATTEMPTS || "5")
 const LOCK_TIME = 15 * 60 * 1000 // 15 دقيقة
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
