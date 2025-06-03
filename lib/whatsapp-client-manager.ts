@@ -1,6 +1,6 @@
 import { Client, LocalAuth } from "whatsapp-web.js"
 import QRCode from "qrcode"
-import { db } from "./database"
+import { db, initializeDatabase } from "./database"
 import { logger } from "./logger"
 import path from "path"
 import fs from "fs"
@@ -44,7 +44,11 @@ class WhatsAppClientManager extends EventEmitter {
 
   constructor() {
     super()
-    this.initializeExistingDevices()
+  }
+
+  async init(): Promise<void> {
+    await initializeDatabase()
+    await this.initializeExistingDevices()
     this.startMessageProcessor()
     this.startHealthCheck()
   }
@@ -737,6 +741,12 @@ class WhatsAppClientManager extends EventEmitter {
 
 // إنشاء مثيل واحد من المدير
 export const whatsappManager = new WhatsAppClientManager()
+// Initialize manager and database before allowing usage
+try {
+  await whatsappManager.init()
+} catch (error) {
+  logger.error("Error initializing WhatsAppClientManager:", error)
+}
 
 // تنظيف عند إغلاق التطبيق
 process.on("SIGTERM", () => whatsappManager.cleanup())
