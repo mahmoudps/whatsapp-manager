@@ -3,7 +3,7 @@
 /**
  * WebSocket Server محسن لـ WhatsApp Manager
  * يدعم Socket.IO و ws مع Ubuntu 24
- * الإصدار 5.2.0
+ * الإصدار 8.0.0
  */
 
 require("dotenv").config()
@@ -22,7 +22,7 @@ const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-console.log("🚀 Starting WhatsApp Manager WebSocket Server v5.2.0")
+console.log("🚀 Starting WhatsApp Manager WebSocket Server v8.0.0")
 console.log("🐧 Ubuntu 24.04 LTS Support: ✅")
 console.log("🌐 Environment:", NODE_ENV)
 console.log("📡 Port:", PORT)
@@ -94,7 +94,7 @@ const systemStats = {
   activeConnections: 0,
   messagesProcessed: 0,
   errors: 0,
-  version: "5.2.0",
+  version: "8.0.0",
   platform: process.platform,
   nodeVersion: process.version,
 }

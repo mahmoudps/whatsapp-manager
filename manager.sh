@@ -2,7 +2,7 @@
 
 #===============================================================================
 # WhatsApp Manager - نظام إدارة متكامل ومحسن
-# الإصدار: 7.5.0
+# الإصدار: 8.0.0
 # التوافق: Ubuntu 22.04/24.04 LTS
 # المطور: فريق WhatsApp Manager
 #===============================================================================
@@ -39,7 +39,7 @@ readonly UPDATE_ICON="🔄"
 
 # معلومات التطبيق
 readonly APP_NAME="whatsapp-manager"
-readonly APP_VERSION="7.5.0" # Updated version
+readonly APP_VERSION="8.0.0"
 readonly APP_DESCRIPTION="نظام إدارة WhatsApp المتقدم والموثوق"
 readonly REQUIRED_NODE_VERSION="18" # Node.js 18 or higher
 readonly REQUIRED_NPM_VERSION="9"   # npm 9 or higher
