@@ -7,3 +7,4 @@ logs/
 backups/
 .next/
 *.db*
+data/whatsapp_manager.db*
