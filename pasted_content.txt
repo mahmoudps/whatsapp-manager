@@ -86,7 +86,7 @@ whatsapp-manager/
 │   ├── validation.ts                # Input validation
 │   └── utils.ts                     # Utility functions
 ├── 📁 data/                         # Data storage
-│   ├── database.sqlite              # SQLite database
+│   ├── whatsapp_manager.db          # SQLite database
 │   └── 📁 whatsapp_sessions/        # WhatsApp sessions
 ├── 📁 scripts/                      # Utility scripts
 ├── manager.sh                       # Main management script
@@ -808,7 +808,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_PATH=/app/data/database.sqlite
+      - DATABASE_PATH=/app/data/whatsapp_manager.db
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -838,10 +838,10 @@ sudo ./manager.sh logs app
 
 ```shellscript
 # Check database file
-ls -la data/database.sqlite
+ls -la data/whatsapp_manager.db
 
 # Test database connection
-sqlite3 data/database.sqlite ".tables"
+sqlite3 data/whatsapp_manager.db ".tables"
 
 # Fix permissions
 sudo chown -R $USER:$USER data/
