@@ -298,7 +298,7 @@ export default function SettingsPage() {
                     <Server className="h-4 w-4 text-blue-500" />
                     <span className="font-medium">إصدار النظام</span>
                   </div>
-                  <Badge variant="outline">v5.5.0</Badge>
+                  <Badge variant="outline">v8.0.0</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
