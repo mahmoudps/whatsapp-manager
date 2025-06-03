@@ -39,7 +39,7 @@ beforeAll(async () => {
   process.env.ADMIN_USERNAME = `test_admin_${Date.now()}`;
   const dbModule = await import('../lib/database');
   db = dbModule.db;
-  await new Promise((r) => setTimeout(r, 50));
+  await dbModule.initializeDatabase();
 
   const managerModule = await import('../lib/whatsapp-client-manager');
   whatsappManagerMock = managerModule.whatsappManager;

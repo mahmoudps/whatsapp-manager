@@ -62,11 +62,7 @@ class DatabaseManager {
   private db: Database.Database | null = null
   private initialized = false
 
-  constructor() {
-    this.init().catch((err) => {
-      logger.error("Failed to initialize database:", err)
-    })
-  }
+  constructor() {}
 
   async init(): Promise<Database.Database | null> {
     try {
@@ -537,6 +533,11 @@ class DatabaseManager {
 
 // إنشاء instance واحد من DatabaseManager
 export const db = new DatabaseManager()
+
+// Explicit initialization function
+export async function initializeDatabase() {
+  return db.init()
+}
 
 // تصدير الأنواع
 export type { Admin, Device, Message, IncomingMessage }
