@@ -89,11 +89,20 @@ export async function POST(request: NextRequest) {
 
     // إنشاء الجهاز في قاعدة البيانات
     try {
-      const device = await db.createDevice({
-        name: deviceData.name,
-        status: "disconnected",
-        connectionAttempts: 0,
-      })
+      const device = await db.createDevice(deviceData.name)
+
+      // تأكد من تعيين الحالة الافتراضية وعدد المحاولات إذا لم يقم بها createDevice
+      if (
+        device.status !== "disconnected" ||
+        device.connectionAttempts !== 0
+      ) {
+        await db.updateDevice(device.id, {
+          status: "disconnected",
+          connectionAttempts: 0,
+        })
+        device.status = "disconnected"
+        device.connectionAttempts = 0
+      }
 
       if (!device) {
         console.log("❌ Failed to create device in database - device is null")
