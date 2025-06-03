@@ -18,7 +18,7 @@ interface AppState {
 }
 
 type AppAction =
-  | { type: "ADD_NOTIFICATION"; payload: Omit<Notification, "id" | "timestamp"> }
+  | { type: "ADD_NOTIFICATION"; payload: Notification }
   | { type: "REMOVE_NOTIFICATION"; payload: string }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_USER"; payload: any | null }
@@ -46,21 +46,9 @@ const initialState: AppState = {
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "ADD_NOTIFICATION":
-      const notificationId = Math.random().toString(36).substr(2, 9)
-      const newNotification = {
-        ...action.payload,
-        id: notificationId,
-        timestamp: Date.now(),
-      }
-
-      // إزالة الإشعار تلقائياً بعد 5 ثوان
-      setTimeout(() => {
-        // استخدام dispatch مباشرة هنا لن يعمل، لذا سنتعامل مع هذا في المكون
-      }, 5000)
-
       return {
         ...state,
-        notifications: [...state.notifications, newNotification],
+        notifications: [...state.notifications, action.payload],
       }
     case "REMOVE_NOTIFICATION":
       return {
@@ -97,9 +85,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const actions = {
     addNotification: (notification: Omit<Notification, "id" | "timestamp">) => {
       const notificationId = Math.random().toString(36).substr(2, 9)
+      const newNotification: Notification = {
+        ...notification,
+        id: notificationId,
+        timestamp: Date.now(),
+      }
       dispatch({
         type: "ADD_NOTIFICATION",
-        payload: notification,
+        payload: newNotification,
       })
 
       // إزالة الإشعار تلقائياً بعد 5 ثوان
