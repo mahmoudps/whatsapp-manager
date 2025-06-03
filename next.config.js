@@ -6,9 +6,10 @@ const nextConfig = {
 
   // دعم Ubuntu 24.04 LTS
   experimental: {
-    serverExternalPackages: ["whatsapp-web.js", "puppeteer", "sqlite3"],
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
+
+  serverExternalPackages: ["whatsapp-web.js", "puppeteer", "sqlite3"],
 
   // إعدادات الصور
   images: {
