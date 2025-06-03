@@ -7,7 +7,6 @@ const mockFetch = global.fetch as jest.Mock;
 beforeEach(() => {
   jest.clearAllMocks();
 });
-
 describe('Home Page', () => {
   it('renders without crashing', () => {
     render(<Home />);
@@ -16,7 +15,7 @@ describe('Home Page', () => {
 
   it('displays welcome message', () => {
     render(<Home />);
-    expect(screen.getByText(/مدير واتساب/i)).toBeInTheDocument();
+    expect(screen.getByText(/مرحباً بك في نظام إدارة WhatsApp/i)).toBeInTheDocument();
   });
 });
 
@@ -50,7 +49,6 @@ describe('Authentication', () => {
     expect(response.status).toBe(401);
   });
 });
-
 describe('Database', () => {
   it('database connection works', async () => {
     mockFetch.mockResolvedValueOnce({
