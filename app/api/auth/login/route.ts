@@ -13,7 +13,9 @@ export async function POST(request: NextRequest) {
 
     // التحقق البسيط
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "24h" })
+      const token = jwt.sign({ userId: 1, username }, JWT_SECRET, {
+        expiresIn: "24h",
+      })
 
       const response = NextResponse.json({
         success: true,
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
     try {
       token = jwt.sign(
         {
-          id: admin.id,
+          userId: admin.id,
           username: admin.username,
         },
         jwtSecret,
