@@ -24,6 +24,8 @@
 1. تحقق من سجلات النظام: `npm run logs`
 2. أعد تشغيل النظام: `npm run restart`
 3. تحقق من حالة قاعدة البيانات: `npm run db:check`
+4. تنفيذ تشخيص سريع للنظام: `npm run diagnose`
+- **Chromium/Chrome:** لاستخدام WhatsApp Web
 
 ## الإعداد
 
