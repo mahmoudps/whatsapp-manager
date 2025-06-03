@@ -60,6 +60,20 @@ log_loading() {
     echo -e "${LOADING} ${CYAN}$1${NC}"
 }
 
+# التحقق من تعيين متغير JWT_SECRET عند النشر للإنتاج
+check_jwt_secret() {
+    if [ "$DEPLOY_TYPE" = "production" ]; then
+        local jwt_value="${JWT_SECRET:-}"
+        if [ -z "$jwt_value" ] && [ -f ".env" ]; then
+            jwt_value=$(grep -E '^JWT_SECRET=' .env | cut -d '=' -f2-)
+        fi
+        if [ -z "$jwt_value" ]; then
+            log_error "JWT_SECRET غير معرف. الرجاء إضافته إلى ملف .env أو ضبطه كمتغير نظام قبل المتابعة."
+            exit 1
+        fi
+    fi
+}
+
 # فحص المتطلبات
 check_requirements() {
     log_info "فحص المتطلبات الأساسية..."
@@ -337,8 +351,9 @@ main() {
     echo -e "${BLUE}نوع الديبلوي: $DEPLOY_TYPE${NC}"
     echo -e "${BLUE}طريقة الديبلوي: $([ "$USE_DOCKER" = "true" ] && echo "Docker" || echo "PM2")${NC}"
     echo
-    
+
     check_requirements
+    check_jwt_secret
     create_backup
     install_dependencies
     build_application
