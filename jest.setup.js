@@ -5,8 +5,12 @@ global.fetch = jest.fn();
 
 // Mock WebSocket
 global.WebSocket = class WebSocket {
+  static OPEN = 1;
   constructor() {
-    setTimeout(() => this.onopen(), 0);
+    this.readyState = WebSocket.OPEN;
+    setTimeout(() => {
+      if (this.onopen) this.onopen();
+    }, 0);
   }
   send() {}
   close() {}
