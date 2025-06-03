@@ -55,7 +55,7 @@ readonly TEMP_DIR="$APP_DIR/tmp"
 
 # ملفات النظام
 readonly ENV_FILE="$APP_DIR/.env"
-readonly DB_FILE="$DATA_DIR/database.sqlite" # Standardized DB name
+readonly DB_FILE="$DATA_DIR/whatsapp_manager.db" # Consistent database name
 readonly LOCK_FILE="$APP_DIR/.manager.lock" # More specific lock file name
 readonly LOG_FILE="$LOG_DIR/manager.sh.log" # Specific log for this script
 
