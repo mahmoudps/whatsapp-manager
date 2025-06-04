@@ -53,6 +53,17 @@ async function initDatabase() {
           )
         `)
 
+        // إنشاء جدول جهات الاتصال
+        db.run(`
+          CREATE TABLE IF NOT EXISTS contacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone_number TEXT UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `)
+
         // إنشاء جدول الرسائل
         db.run(`
           CREATE TABLE IF NOT EXISTS messages (

@@ -64,6 +64,21 @@ interface AnalyticsEvent {
   deviceId?: number
   messageId?: string
   data?: string
+}
+
+interface Contact {
+  id: number
+  name: string
+  phoneNumber: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface RefreshToken {
+  id: number
+  userId: number
+  token: string
+  expiresAt: string
   createdAt: string
 }
 
@@ -144,6 +159,17 @@ class DatabaseManager {
         )
       `)
 
+      // جدول جهات الاتصال
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS contacts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          phone_number TEXT UNIQUE NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
       // جدول الرسائل المرسلة
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS messages (
@@ -189,6 +215,15 @@ class DatabaseManager {
           data TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+      // جدول رموز التحديث
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS refresh_tokens (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          token TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES admins(id) ON DELETE CASCADE
         )
       `)
 
@@ -199,6 +234,7 @@ class DatabaseManager {
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_incoming_messages_device_id ON incoming_messages (device_id)`)
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics (event_type)`)
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_device_id ON analytics (device_id)`)
+      this.db.exec(`CREATE INDEX IF NOT EXISTS idx_contacts_phone ON contacts (phone_number)`)
 
       logger.info("✅ Database tables created successfully")
     } catch (error) {
@@ -535,6 +571,9 @@ class DatabaseManager {
     messageId?: string
     details?: any
   }): Promise<AnalyticsEvent> {
+
+  // Contact operations
+  async createContact(name: string, phoneNumber: string): Promise<Contact> {
     if (!this.db) throw new Error("Database not initialized")
 
     const result = this.db
@@ -579,6 +618,91 @@ class DatabaseManager {
     ).all() as Array<{ eventType: string; count: number }>
 
     return rows
+}
+      this.db.prepare(
+            `INSERT INTO contacts (name, phone_number) VALUES (?, ?)`,
+      )
+      .run(name, phoneNumber)
+
+    const contact = this.db
+      .prepare(
+        `SELECT id, name, phone_number as phoneNumber, created_at as createdAt, updated_at as updatedAt FROM contacts WHERE id = ?`,
+      )
+      .get(result.lastInsertRowid) as Contact
+
+    return contact
+  }
+
+  async getContact(id: number): Promise<Contact | undefined> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    return this.db
+      .prepare(
+        `SELECT id, name, phone_number as phoneNumber, created_at as createdAt, updated_at as updatedAt FROM contacts WHERE id = ?`,
+      )
+      .get(id) as Contact | undefined
+  }
+
+  async listContacts(limit = 100, offset = 0): Promise<Contact[]> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    return this.db
+      .prepare(
+        `SELECT id, name, phone_number as phoneNumber, created_at as createdAt, updated_at as updatedAt FROM contacts ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      )
+      .all(limit, offset) as Contact[]
+  }
+
+  async updateContact(id: number, data: Partial<Contact>): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const fields = []
+    const values = []
+
+    if (data.name) {
+      fields.push("name = ?")
+      values.push(data.name)
+    }
+    if (data.phoneNumber) {
+      fields.push("phone_number = ?")
+      values.push(data.phoneNumber)
+    }
+
+    fields.push("updated_at = CURRENT_TIMESTAMP")
+    values.push(id)
+
+    this.db
+      .prepare(`UPDATE contacts SET ${fields.join(", ")} WHERE id = ?`)
+      .run(...values)
+  }
+
+  async deleteContact(id: number): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    this.db.prepare(`DELETE FROM contacts WHERE id = ?`).run(id)
+
+  // Refresh token operations
+  async createRefreshToken(data: { userId: number; token: string; expiresAt: string }): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    this.db.prepare(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)`,
+    ).run(data.userId, data.token, data.expiresAt)
+  }
+
+  async getRefreshToken(token: string): Promise<RefreshToken | undefined> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const row = this.db.prepare(
+      `SELECT id, user_id as userId, token, expires_at as expiresAt, created_at as createdAt FROM refresh_tokens WHERE token = ?`,
+    ).get(token) as RefreshToken | undefined
+    return row
+  }
+
+  async deleteRefreshToken(token: string): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    this.db.prepare(`DELETE FROM refresh_tokens WHERE token = ?`).run(token)
   }
 
   // Statistics
@@ -618,3 +742,6 @@ export async function initializeDatabase() {
 
 // تصدير الأنواع
 export type { Admin, Device, Message, IncomingMessage, AnalyticsEvent }
+export type { Admin, Device, Message, IncomingMessage, Contact }
+export type { Admin, Device, Message, IncomingMessage, RefreshToken }
+

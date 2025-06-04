@@ -13,6 +13,7 @@ jest.mock('@/lib/validation', () => ({
   ValidationSchemas: {
     createDevice: jest.fn().mockReturnValue({ name: 'API Device' }),
     createMessage: jest.fn().mockReturnValue({ recipient: '123456789', message: 'hi', deviceId: 1 }),
+    contact: jest.fn().mockReturnValue({ name: 'Test Contact', phoneNumber: '12345' }),
   },
 }));
 
@@ -33,6 +34,7 @@ let db: any;
 let createDevicePost: any;
 let sendMessagePost: any;
 let analyticsGet: any;
+let createContactPost: any;
 let whatsappManagerMock: any;
 
 beforeAll(async () => {
@@ -48,6 +50,7 @@ beforeAll(async () => {
   createDevicePost = (await import('../app/api/devices/route')).POST;
   sendMessagePost = (await import('../app/api/devices/[id]/send/route')).POST;
   analyticsGet = (await import('../app/api/analytics/route')).GET;
+  createContactPost = (await import('../app/api/contacts/route')).POST;
 });
 
 afterAll(() => {
@@ -92,4 +95,17 @@ test('GET /api/analytics returns summary', async () => {
   expect(res.status).toBe(200);
   expect(data.success).toBe(true);
   expect(Array.isArray(data.summary)).toBe(true);
+
+test('POST /api/contacts creates a contact', async () => {
+  const req: any = {
+    json: async () => ({ name: 'Test Contact', phoneNumber: '12345' }),
+    headers: new Headers({ 'Content-Type': 'application/json' }),
+    cookies: { get: () => undefined },
+  };
+
+  const res = await createContactPost(req);
+  const data = await res.json();
+  expect(res.status).toBe(201);
+  expect(data.success).toBe(true);
+  expect(data.contact).toBeDefined();
 });
