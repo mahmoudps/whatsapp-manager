@@ -58,6 +58,14 @@ interface IncomingMessage {
   createdAt: string
 }
 
+interface RefreshToken {
+  id: number
+  userId: number
+  token: string
+  expiresAt: string
+  createdAt: string
+}
+
 class DatabaseManager {
   private db: Database.Database | null = null
   private initialized = false
@@ -167,6 +175,18 @@ class DatabaseManager {
           received_at TEXT DEFAULT CURRENT_TIMESTAMP,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
+        )
+      `)
+
+      // جدول رموز التحديث
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS refresh_tokens (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          token TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES admins(id) ON DELETE CASCADE
         )
       `)
 
@@ -504,6 +524,30 @@ class DatabaseManager {
     return messages
   }
 
+  // Refresh token operations
+  async createRefreshToken(data: { userId: number; token: string; expiresAt: string }): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    this.db.prepare(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)`,
+    ).run(data.userId, data.token, data.expiresAt)
+  }
+
+  async getRefreshToken(token: string): Promise<RefreshToken | undefined> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const row = this.db.prepare(
+      `SELECT id, user_id as userId, token, expires_at as expiresAt, created_at as createdAt FROM refresh_tokens WHERE token = ?`,
+    ).get(token) as RefreshToken | undefined
+    return row
+  }
+
+  async deleteRefreshToken(token: string): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    this.db.prepare(`DELETE FROM refresh_tokens WHERE token = ?`).run(token)
+  }
+
   // Statistics
   async getStats(): Promise<any> {
     if (!this.db) throw new Error("Database not initialized")
@@ -540,4 +584,4 @@ export async function initializeDatabase() {
 }
 
 // تصدير الأنواع
-export type { Admin, Device, Message, IncomingMessage }
+export type { Admin, Device, Message, IncomingMessage, RefreshToken }
