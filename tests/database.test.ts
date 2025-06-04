@@ -34,3 +34,10 @@ test('createMessage inserts a new message', async () => {
   expect(message.deviceId).toBe(device.id);
   expect(message.message).toBe('Hello');
 });
+
+test('createContact inserts a new contact', async () => {
+  const contact = await db.createContact('Tester', '12345');
+  expect(contact).toBeDefined();
+  expect(contact.name).toBe('Tester');
+  expect(contact.phoneNumber).toBe('12345');
+});
