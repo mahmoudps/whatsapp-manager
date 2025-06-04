@@ -33,6 +33,7 @@ jest.mock('@/lib/whatsapp-client-manager', () => {
 let db: any;
 let createDevicePost: any;
 let sendMessagePost: any;
+let analyticsGet: any;
 let createContactPost: any;
 let whatsappManagerMock: any;
 
@@ -48,6 +49,7 @@ beforeAll(async () => {
 
   createDevicePost = (await import('../app/api/devices/route')).POST;
   sendMessagePost = (await import('../app/api/devices/[id]/send/route')).POST;
+  analyticsGet = (await import('../app/api/analytics/route')).GET;
   createContactPost = (await import('../app/api/contacts/route')).POST;
 });
 
@@ -84,6 +86,15 @@ test('POST /api/devices/[id]/send sends a message', async () => {
   expect(data.success).toBe(true);
   expect(whatsappManagerMock.sendMessage).toHaveBeenCalled();
 });
+
+test('GET /api/analytics returns summary', async () => {
+  await db.createAnalyticsEvent({ eventType: 'test_api' });
+  const req: any = { url: 'http://localhost/api/analytics', headers: new Headers(), cookies: { get: () => undefined } };
+  const res = await analyticsGet(req);
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.success).toBe(true);
+  expect(Array.isArray(data.summary)).toBe(true);
 
 test('POST /api/contacts creates a contact', async () => {
   const req: any = {

@@ -98,6 +98,19 @@ async function initDatabase() {
           )
         `)
 
+        // إنشاء جدول التحليلات
+        db.run(`
+          CREATE TABLE IF NOT EXISTS analytics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL,
+            device_id INTEGER,
+            message_id TEXT,
+            data TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+          )
+        `)
+
         console.log("✅ تم إنشاء الجداول بنجاح")
 
         // إنشاء المستخدم الافتراضي

@@ -58,6 +58,14 @@ interface IncomingMessage {
   createdAt: string
 }
 
+interface AnalyticsEvent {
+  id: number
+  eventType: string
+  deviceId?: number
+  messageId?: string
+  data?: string
+}
+
 interface Contact {
   id: number
   name: string
@@ -197,6 +205,16 @@ class DatabaseManager {
         )
       `)
 
+      // جدول تحليلات الاستخدام
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS analytics (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          event_type TEXT NOT NULL,
+          device_id INTEGER,
+          message_id TEXT,
+          data TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
       // جدول رموز التحديث
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS refresh_tokens (
@@ -214,6 +232,8 @@ class DatabaseManager {
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_device_id ON messages (device_id)`)
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_status ON messages (status)`)
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_incoming_messages_device_id ON incoming_messages (device_id)`)
+      this.db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics (event_type)`)
+      this.db.exec(`CREATE INDEX IF NOT EXISTS idx_analytics_device_id ON analytics (device_id)`)
       this.db.exec(`CREATE INDEX IF NOT EXISTS idx_contacts_phone ON contacts (phone_number)`)
 
       logger.info("✅ Database tables created successfully")
@@ -544,13 +564,63 @@ class DatabaseManager {
     return messages
   }
 
+  // Analytics operations
+  async createAnalyticsEvent(data: {
+    eventType: string
+    deviceId?: number
+    messageId?: string
+    details?: any
+  }): Promise<AnalyticsEvent> {
+
   // Contact operations
   async createContact(name: string, phoneNumber: string): Promise<Contact> {
     if (!this.db) throw new Error("Database not initialized")
 
     const result = this.db
       .prepare(
-        `INSERT INTO contacts (name, phone_number) VALUES (?, ?)`,
+        `INSERT INTO analytics (event_type, device_id, message_id, data) VALUES (?, ?, ?, ?)`,
+      )
+      .run(
+        data.eventType,
+        data.deviceId ?? null,
+        data.messageId ?? null,
+        data.details ? JSON.stringify(data.details) : null,
+      )
+
+    const event = this.db.prepare(`
+        SELECT id, event_type as eventType, device_id as deviceId, message_id as messageId,
+               data, created_at as createdAt
+        FROM analytics WHERE id = ?
+      `).get(result.lastInsertRowid) as AnalyticsEvent
+
+    return event
+  }
+
+  async getAnalyticsEvents(limit = 50, offset = 0): Promise<AnalyticsEvent[]> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const events = this.db.prepare(`
+        SELECT id, event_type as eventType, device_id as deviceId, message_id as messageId,
+               data, created_at as createdAt
+        FROM analytics
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+      `).all(limit, offset) as AnalyticsEvent[]
+
+    return events
+  }
+
+  async getAnalyticsSummary(): Promise<Array<{ eventType: string; count: number }>> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const rows = this.db.prepare(
+      `SELECT event_type as eventType, COUNT(*) as count FROM analytics GROUP BY event_type`,
+    ).all() as Array<{ eventType: string; count: number }>
+
+    return rows
+}
+      this.db.prepare(
+            `INSERT INTO contacts (name, phone_number) VALUES (?, ?)`,
       )
       .run(name, phoneNumber)
 
@@ -671,6 +741,7 @@ export async function initializeDatabase() {
 }
 
 // تصدير الأنواع
+export type { Admin, Device, Message, IncomingMessage, AnalyticsEvent }
 export type { Admin, Device, Message, IncomingMessage, Contact }
 export type { Admin, Device, Message, IncomingMessage, RefreshToken }
 

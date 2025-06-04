@@ -35,6 +35,15 @@ test('createMessage inserts a new message', async () => {
   expect(message.message).toBe('Hello');
 });
 
+test('createAnalyticsEvent stores event and summary returns counts', async () => {
+  const device = await db.createDevice('Analytics Device');
+  const event = await db.createAnalyticsEvent({ eventType: 'test_event', deviceId: device.id });
+  expect(event).toBeDefined();
+  expect(event.eventType).toBe('test_event');
+  const summary = await db.getAnalyticsSummary();
+  const row = summary.find((s: any) => s.eventType === 'test_event');
+  expect(row?.count).toBeGreaterThanOrEqual(1);
+
 test('createContact inserts a new contact', async () => {
   const contact = await db.createContact('Tester', '12345');
   expect(contact).toBeDefined();

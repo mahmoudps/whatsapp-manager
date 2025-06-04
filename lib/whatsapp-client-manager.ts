@@ -231,6 +231,11 @@ class WhatsAppClientManager extends EventEmitter {
             lastSeen: new Date().toISOString(),
           })
 
+          await db.createAnalyticsEvent({
+            eventType: "qr_ready",
+            deviceId,
+          })
+
           this.emit("qr", { deviceId, qrCode: qrCodeDataURL })
           logger.info(`QR code ready for device ${deviceId}`)
         } catch (error) {
@@ -255,6 +260,11 @@ class WhatsAppClientManager extends EventEmitter {
             qrCode: undefined,
             errorMessage: undefined,
             connectionAttempts: 0,
+          })
+
+          await db.createAnalyticsEvent({
+            eventType: "device_connected",
+            deviceId,
           })
 
           this.emit("connected", {
@@ -296,6 +306,12 @@ class WhatsAppClientManager extends EventEmitter {
 
             // حفظ في قاعدة البيانات
             await db.createIncomingMessage(incomingMessage)
+
+            await db.createAnalyticsEvent({
+              eventType: "message_received",
+              deviceId,
+              messageId: message.id.id,
+            })
 
             // إرسال عبر WebSocket
             this.emit("message", { deviceId, message: incomingMessage })
@@ -351,6 +367,11 @@ class WhatsAppClientManager extends EventEmitter {
             errorMessage: `Disconnected: ${reason}`,
           })
 
+          await db.createAnalyticsEvent({
+            eventType: "device_disconnected",
+            deviceId,
+          })
+
           this.emit("disconnected", { deviceId, reason })
 
           // تنظيف العميل من الذاكرة
@@ -376,6 +397,11 @@ class WhatsAppClientManager extends EventEmitter {
             lastSeen: new Date().toISOString(),
           })
 
+          await db.createAnalyticsEvent({
+            eventType: "auth_failure",
+            deviceId,
+          })
+
           this.emit("error", { deviceId, error: message })
           await this.cleanupSessions(deviceId)
         } catch (error) {
@@ -396,6 +422,11 @@ class WhatsAppClientManager extends EventEmitter {
             lastSeen: new Date().toISOString(),
           })
 
+          await db.createAnalyticsEvent({
+            eventType: "device_error",
+            deviceId,
+          })
+
           this.emit("error", { deviceId, error: error.message })
         } catch (err) {
           logger.error(`Error handling client error for device ${deviceId}:`, err)
@@ -414,6 +445,11 @@ class WhatsAppClientManager extends EventEmitter {
         status: "error",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         lastSeen: new Date().toISOString(),
+      })
+
+      await db.createAnalyticsEvent({
+        eventType: "client_init_error",
+        deviceId,
       })
       this.clients.delete(deviceId) // Ensure client is removed on init failure
 
@@ -457,6 +493,12 @@ class WhatsAppClientManager extends EventEmitter {
         messageId: sentMessage.id.id,
       })
 
+      await db.createAnalyticsEvent({
+        eventType: "message_sent",
+        deviceId,
+        messageId: sentMessage.id.id,
+      })
+
       logger.info(`Message sent successfully from device ${deviceId} to ${formattedNumber}`)
 
       this.emit("message_sent", {
@@ -479,6 +521,11 @@ class WhatsAppClientManager extends EventEmitter {
         status: "failed",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         messageType: "text",
+      })
+
+      await db.createAnalyticsEvent({
+        eventType: "message_failed",
+        deviceId,
       })
 
       this.emit("message_failed", {
@@ -602,6 +649,11 @@ class WhatsAppClientManager extends EventEmitter {
         status,
         lastSeen: new Date().toISOString(),
       })
+      await db.createAnalyticsEvent({
+        eventType: "status_changed",
+        deviceId,
+        details: { status },
+      })
       this.emit("status_changed", { deviceId, status })
     }
   }
@@ -621,6 +673,11 @@ class WhatsAppClientManager extends EventEmitter {
       await db.updateDevice(deviceId, {
         status: "disconnected",
         lastSeen: new Date().toISOString(),
+      })
+
+      await db.createAnalyticsEvent({
+        eventType: "device_manual_disconnect",
+        deviceId,
       })
 
       await this.cleanupSessions(deviceId)
