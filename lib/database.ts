@@ -215,6 +215,9 @@ class DatabaseManager {
           data TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+        )
+      `)
+
       // جدول رموز التحديث
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS refresh_tokens (
@@ -571,9 +574,6 @@ class DatabaseManager {
     messageId?: string
     details?: any
   }): Promise<AnalyticsEvent> {
-
-  // Contact operations
-  async createContact(name: string, phoneNumber: string): Promise<Contact> {
     if (!this.db) throw new Error("Database not initialized")
 
     const result = this.db
@@ -618,10 +618,14 @@ class DatabaseManager {
     ).all() as Array<{ eventType: string; count: number }>
 
     return rows
-}
-      this.db.prepare(
-            `INSERT INTO contacts (name, phone_number) VALUES (?, ?)`,
-      )
+  }
+
+  // Contact operations
+  async createContact(name: string, phoneNumber: string): Promise<Contact> {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const result = this.db
+      .prepare(`INSERT INTO contacts (name, phone_number) VALUES (?, ?)`)
       .run(name, phoneNumber)
 
     const contact = this.db
@@ -680,6 +684,7 @@ class DatabaseManager {
     if (!this.db) throw new Error("Database not initialized")
 
     this.db.prepare(`DELETE FROM contacts WHERE id = ?`).run(id)
+  }
 
   // Refresh token operations
   async createRefreshToken(data: { userId: number; token: string; expiresAt: string }): Promise<void> {
@@ -741,7 +746,13 @@ export async function initializeDatabase() {
 }
 
 // تصدير الأنواع
-export type { Admin, Device, Message, IncomingMessage, AnalyticsEvent }
-export type { Admin, Device, Message, IncomingMessage, Contact }
-export type { Admin, Device, Message, IncomingMessage, RefreshToken }
+export type {
+  Admin,
+  Device,
+  Message,
+  IncomingMessage,
+  Contact,
+  AnalyticsEvent,
+  RefreshToken,
+}
 
