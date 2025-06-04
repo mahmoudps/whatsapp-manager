@@ -20,6 +20,7 @@ npm run dev
 
 ## الرابط:
 http://localhost:3000 أو http://localhost:3001
+يستمع الخادم افتراضيًا على `0.0.0.0`. يمكن تغيير العنوان عبر المتغير `HOST` في بيئة التشغيل.
 
 ---
 
@@ -45,4 +46,5 @@ Running `npm run setup` will create the database schema as defined in
 
 ## URL:
 http://localhost:3000 or http://localhost:3001
+The server listens on `0.0.0.0` by default. Set the `HOST` environment variable to change this.
 
