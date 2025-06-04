@@ -3,6 +3,9 @@ import { AuthService } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 
 export async function POST() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 })
+  }
   try {
     logger.info("POST /api/auth/test called")
 
