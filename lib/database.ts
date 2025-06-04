@@ -64,6 +64,7 @@ interface Contact {
   phoneNumber: string
   createdAt: string
   updatedAt: string
+}
 
 interface RefreshToken {
   id: number
@@ -609,6 +610,7 @@ class DatabaseManager {
     if (!this.db) throw new Error("Database not initialized")
 
     this.db.prepare(`DELETE FROM contacts WHERE id = ?`).run(id)
+
   // Refresh token operations
   async createRefreshToken(data: { userId: number; token: string; expiresAt: string }): Promise<void> {
     if (!this.db) throw new Error("Database not initialized")
@@ -671,3 +673,4 @@ export async function initializeDatabase() {
 // تصدير الأنواع
 export type { Admin, Device, Message, IncomingMessage, Contact }
 export type { Admin, Device, Message, IncomingMessage, RefreshToken }
+
