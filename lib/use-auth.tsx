@@ -1,64 +1,89 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { useRouter } from "next/navigation"
+import type React from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
 
-interface User {
+export interface User {
   id: string
   username: string
-  role: string
-  created_at: string
+  email?: string
+  role: "admin" | "user"
+  createdAt: Date
+  lastLogin?: Date
 }
 
-interface AuthContextType {
+export interface AuthState {
   user: User | null
-  token: string | null
-  login: (username: string, password: string) => Promise<boolean>
-  logout: () => void
   isLoading: boolean
-  error: string | null
+  isAuthenticated: boolean
+  token: string | null
+}
+
+interface AuthContextType extends AuthState {
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>
+  logout: () => Promise<void>
+  refreshToken: () => Promise<boolean>
+  checkAuth: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
+    isAuthenticated: false,
+    token: null,
+  })
 
+  // Check authentication status on mount
   useEffect(() => {
     checkAuth()
   }, [])
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async (): Promise<boolean> => {
     try {
+      setState((prev) => ({ ...prev, isLoading: true }))
+
       const response = await fetch("/api/auth/me", {
         credentials: "include",
       })
 
       if (response.ok) {
         const data = await response.json()
-        setUser(data.user)
-        setToken(data.token)
-      } else {
-        setUser(null)
-        setToken(null)
+        if (data.success && data.user) {
+          setState({
+            user: data.user,
+            isLoading: false,
+            isAuthenticated: true,
+            token: data.token || null,
+          })
+          return true
+        }
       }
+
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        token: null,
+      })
+      return false
     } catch (error) {
       console.error("Auth check failed:", error)
-      setUser(null)
-      setToken(null)
-    } finally {
-      setIsLoading(false)
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        token: null,
+      })
+      return false
     }
-  }
+  }, [])
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (username: string, password: string) => {
     try {
-      setError(null)
-      setIsLoading(true)
+      setState((prev) => ({ ...prev, isLoading: true }))
 
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -71,53 +96,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json()
 
-      if (response.ok) {
-        setUser(data.user)
-        setToken(data.token)
-        router.push("/")
-        return true
+      if (response.ok && data.success) {
+        setState({
+          user: data.user,
+          isLoading: false,
+          isAuthenticated: true,
+          token: data.token || null,
+        })
+        return { success: true }
       } else {
-        setError(data.error || "فشل في تسجيل الدخول")
-        return false
+        setState((prev) => ({ ...prev, isLoading: false }))
+        return { success: false, error: data.error || "فشل تسجيل الدخول" }
       }
     } catch (error) {
-      console.error("Login failed:", error)
-      setError("خطأ في الاتصال بالخادم")
-      return false
-    } finally {
-      setIsLoading(false)
+      setState((prev) => ({ ...prev, isLoading: false }))
+      return { success: false, error: "خطأ في الاتصال بالخادم" }
     }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       })
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("Logout error:", error)
     } finally {
-      setUser(null)
-      setToken(null)
-      router.push("/login")
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        token: null,
+      })
     }
+  }, [])
+
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setState((prev) => ({
+            ...prev,
+            token: data.token || null,
+          }))
+          return true
+        }
+      }
+      return false
+    } catch (error) {
+      console.error("Token refresh failed:", error)
+      return false
+    }
+  }, [])
+
+  const value: AuthContextType = {
+    ...state,
+    login,
+    logout,
+    refreshToken,
+    checkAuth,
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        isLoading,
-        error,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

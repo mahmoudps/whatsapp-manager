@@ -1,18 +1,10 @@
-import type React from "react"
-import type { Metadata } from "next"
-import ClientLayout from "./client-layout"
+import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: "WhatsApp Manager",
-  description: "Professional WhatsApp Management System",
-  generator: "Next.js",
-  keywords: ["WhatsApp", "Manager", "Business", "Communication"],
-  authors: [{ name: "WhatsApp Manager Team" }],
-}
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
+  title: 'v0 App',
+  description: 'Created with v0',
+  generator: 'v0.dev',
 }
 
 export default function RootLayout({
@@ -20,5 +12,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <ClientLayout>{children}</ClientLayout>
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
 }

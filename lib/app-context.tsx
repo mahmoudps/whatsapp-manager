@@ -1,28 +1,95 @@
 "use client"
 
-import { createContext, useContext, useReducer, type ReactNode } from "react"
+import type React from "react"
+import { createContext, useContext, useReducer, useCallback } from "react"
 
-// تعريف الأنواع
-interface Notification {
+export interface Notification {
   id: string
   type: "success" | "error" | "warning" | "info"
   title: string
   message: string
-  timestamp: number
+  timestamp: Date
+  duration?: number
 }
 
-interface AppState {
+export interface AppState {
   notifications: Notification[]
   isLoading: boolean
+  theme: "light" | "dark" | "system"
+  sidebarOpen: boolean
   user: any | null
 }
 
 type AppAction =
-  | { type: "ADD_NOTIFICATION"; payload: Notification }
+  | { type: "ADD_NOTIFICATION"; payload: Omit<Notification, "id" | "timestamp"> }
   | { type: "REMOVE_NOTIFICATION"; payload: string }
   | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_USER"; payload: any | null }
+  | { type: "SET_THEME"; payload: "light" | "dark" | "system" }
+  | { type: "TOGGLE_SIDEBAR" }
+  | { type: "SET_USER"; payload: any }
   | { type: "CLEAR_NOTIFICATIONS" }
+
+const initialState: AppState = {
+  notifications: [],
+  isLoading: false,
+  theme: "system",
+  sidebarOpen: true,
+  user: null,
+}
+
+function appReducer(state: AppState, action: AppAction): AppState {
+  switch (action.type) {
+    case "ADD_NOTIFICATION":
+      const newNotification: Notification = {
+        ...action.payload,
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(),
+      }
+      return {
+        ...state,
+        notifications: [...state.notifications, newNotification],
+      }
+
+    case "REMOVE_NOTIFICATION":
+      return {
+        ...state,
+        notifications: state.notifications.filter((n) => n.id !== action.payload),
+      }
+
+    case "SET_LOADING":
+      return {
+        ...state,
+        isLoading: action.payload,
+      }
+
+    case "SET_THEME":
+      return {
+        ...state,
+        theme: action.payload,
+      }
+
+    case "TOGGLE_SIDEBAR":
+      return {
+        ...state,
+        sidebarOpen: !state.sidebarOpen,
+      }
+
+    case "SET_USER":
+      return {
+        ...state,
+        user: action.payload,
+      }
+
+    case "CLEAR_NOTIFICATIONS":
+      return {
+        ...state,
+        notifications: [],
+      }
+
+    default:
+      return state
+  }
+}
 
 interface AppContextType {
   state: AppState
@@ -30,97 +97,58 @@ interface AppContextType {
     addNotification: (notification: Omit<Notification, "id" | "timestamp">) => void
     removeNotification: (id: string) => void
     setLoading: (loading: boolean) => void
-    setUser: (user: any | null) => void
+    setTheme: (theme: "light" | "dark" | "system") => void
+    toggleSidebar: () => void
+    setUser: (user: any) => void
     clearNotifications: () => void
   }
 }
 
-// الحالة الأولية
-const initialState: AppState = {
-  notifications: [],
-  isLoading: false,
-  user: null,
-}
-
-// Reducer
-function appReducer(state: AppState, action: AppAction): AppState {
-  switch (action.type) {
-    case "ADD_NOTIFICATION":
-      return {
-        ...state,
-        notifications: [...state.notifications, action.payload],
-      }
-    case "REMOVE_NOTIFICATION":
-      return {
-        ...state,
-        notifications: state.notifications.filter((n) => n.id !== action.payload),
-      }
-    case "SET_LOADING":
-      return {
-        ...state,
-        isLoading: action.payload,
-      }
-    case "SET_USER":
-      return {
-        ...state,
-        user: action.payload,
-      }
-    case "CLEAR_NOTIFICATIONS":
-      return {
-        ...state,
-        notifications: [],
-      }
-    default:
-      return state
-  }
-}
-
-// Context
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
-// Provider
-export function AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
   const actions = {
-    addNotification: (notification: Omit<Notification, "id" | "timestamp">) => {
-      const notificationId = Math.random().toString(36).substr(2, 9)
-      const newNotification: Notification = {
-        ...notification,
-        id: notificationId,
-        timestamp: Date.now(),
-      }
-      dispatch({
-        type: "ADD_NOTIFICATION",
-        payload: newNotification,
-      })
+    addNotification: useCallback((notification: Omit<Notification, "id" | "timestamp">) => {
+      dispatch({ type: "ADD_NOTIFICATION", payload: notification })
 
-      // إزالة الإشعار تلقائياً بعد 5 ثوان
-      setTimeout(() => {
-        dispatch({
-          type: "REMOVE_NOTIFICATION",
-          payload: notificationId,
-        })
-      }, 5000)
-    },
-    removeNotification: (id: string) => {
+      // Auto-remove notification after duration
+      if (notification.duration !== 0) {
+        setTimeout(() => {
+          dispatch({ type: "REMOVE_NOTIFICATION", payload: notification.id || "" })
+        }, notification.duration || 5000)
+      }
+    }, []),
+
+    removeNotification: useCallback((id: string) => {
       dispatch({ type: "REMOVE_NOTIFICATION", payload: id })
-    },
-    setLoading: (loading: boolean) => {
+    }, []),
+
+    setLoading: useCallback((loading: boolean) => {
       dispatch({ type: "SET_LOADING", payload: loading })
-    },
-    setUser: (user: any | null) => {
+    }, []),
+
+    setTheme: useCallback((theme: "light" | "dark" | "system") => {
+      dispatch({ type: "SET_THEME", payload: theme })
+    }, []),
+
+    toggleSidebar: useCallback(() => {
+      dispatch({ type: "TOGGLE_SIDEBAR" })
+    }, []),
+
+    setUser: useCallback((user: any) => {
       dispatch({ type: "SET_USER", payload: user })
-    },
-    clearNotifications: () => {
+    }, []),
+
+    clearNotifications: useCallback(() => {
       dispatch({ type: "CLEAR_NOTIFICATIONS" })
-    },
+    }, []),
   }
 
   return <AppContext.Provider value={{ state, actions }}>{children}</AppContext.Provider>
 }
 
-// Hook
 export function useApp() {
   const context = useContext(AppContext)
   if (context === undefined) {
