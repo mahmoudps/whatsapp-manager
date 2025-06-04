@@ -22,7 +22,9 @@ const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 // Load configuration explicitly using __dirname to avoid path issues
 const path = require("path")
-const configPath = path.join(__dirname, "lib", "config.js")
+// Explicitly resolve the config path so Node can locate the file even when
+// the server is executed from a different working directory
+const configPath = path.resolve(__dirname, "lib", "config.js")
 const { JWT_SECRET, JWT_EXPIRES_IN } = require(configPath)
 
 console.log("🚀 Starting WhatsApp Manager WebSocket Server v8.0.0")
