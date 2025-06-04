@@ -1,64 +1,42 @@
 #!/bin/bash
 
-# سكريبت التشغيل السريع لنظام إدارة واتساب
-# Quick Start Script for WhatsApp Manager
+# سكريبت تشغيل WhatsApp Manager
 
-echo "🚀 بدء تشغيل نظام إدارة واتساب..."
-echo "🚀 Starting WhatsApp Manager System..."
+echo "🚀 بدء تشغيل WhatsApp Manager"
 
-# التحقق من Node.js
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js غير مثبت. يرجى تثبيت Node.js أولاً"
-    echo "❌ Node.js is not installed. Please install Node.js first"
+# التحقق من وجود ملف .env
+if [ ! -f ".env" ]; then
+    echo "❌ ملف .env غير موجود"
+    echo "⚠️ قم بنسخ .env.example إلى .env وتعديل القيم"
     exit 1
 fi
 
-# التحقق من npm
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm غير مثبت. يرجى تثبيت npm أولاً"
-    echo "❌ npm is not installed. Please install npm first"
+# إنشاء المجلدات المطلوبة
+mkdir -p data/whatsapp_sessions data/media logs
+
+# التحقق من قاعدة البيانات
+if [ ! -f "./data/whatsapp_manager.db" ]; then
+    echo "⚠️ قاعدة البيانات غير موجودة، سيتم إنشاؤها..."
+    node scripts/init-database.js
+fi
+
+# إيقاف أي نسخة قديمة
+pm2 stop all 2>/dev/null || true
+pm2 delete all 2>/dev/null || true
+
+# تشغيل التطبيق
+pm2 start ecosystem.config.js
+
+if [ $? -eq 0 ]; then
+    echo "✅ تم تشغيل التطبيق بنجاح"
+    pm2 save
+    sleep 3
+    pm2 status
+    echo ""
+    echo "🌐 واجهة المستخدم: http://localhost:3000"
+    echo "👤 اسم المستخدم: admin"
+    echo "🔑 كلمة المرور: admin123"
+else
+    echo "❌ فشل تشغيل التطبيق"
     exit 1
 fi
-
-echo "✅ Node.js و npm متوفران"
-echo "✅ Node.js and npm are available"
-
-# تثبيت التبعيات إذا لم تكن مثبتة
-if [ ! -d "node_modules" ]; then
-    echo "📦 تثبيت التبعيات..."
-    echo "📦 Installing dependencies..."
-    npm install --legacy-peer-deps
-fi
-
-# إعداد قاعدة البيانات
-echo "🗄️ إعداد قاعدة البيانات..."
-echo "🗄️ Setting up database..."
-npm run setup
-
-# بدء التشغيل
-echo "🌟 بدء تشغيل النظام..."
-echo "🌟 Starting the system..."
-
-# التحقق من المنفذ المتاح
-PORT=3000
-if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null ; then
-    echo "⚠️ المنفذ $PORT مستخدم، سيتم استخدام منفذ بديل"
-    echo "⚠️ Port $PORT is in use, will use alternative port"
-    PORT=3001
-fi
-
-echo "🌐 النظام سيعمل على: http://localhost:$PORT"
-echo "🌐 System will run on: http://localhost:$PORT"
-echo ""
-echo "🔐 بيانات الدخول الافتراضية:"
-echo "🔐 Default login credentials:"
-echo "   اسم المستخدم / Username: admin"
-echo "   كلمة المرور / Password: admin123"
-echo ""
-echo "⏳ انتظر حتى يكتمل التحميل ثم افتح الرابط في المتصفح"
-echo "⏳ Wait for loading to complete then open the link in browser"
-echo ""
-
-# تشغيل النظام
-npm run dev
-

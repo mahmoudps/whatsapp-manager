@@ -5,7 +5,7 @@ const next = require("next")
 const helmet = require("helmet")
 const compression = require("compression")
 const rateLimit = require("express-rate-limit")
-const { initializeDatabase } = require("./lib/database")
+const { initializeDatabase } = require("./lib/database.js")
 
 const dev = process.env.NODE_ENV !== "production"
 const hostname = process.env.HOST || "0.0.0.0"

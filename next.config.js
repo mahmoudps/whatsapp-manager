@@ -4,7 +4,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // دعم Ubuntu 24.04 LTS
+  // إعدادات الإنتاج
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
@@ -13,45 +13,39 @@ const nextConfig = {
 
   // إعدادات الصور
   images: {
-    domains: ["localhost"],
+    domains: ["localhost", "wa-api.developments.world"],
     formats: ["image/webp", "image/avif"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    unoptimized: true,
+    unoptimized: false,
   },
 
-  // إعدادات الأمان
+  // إعدادات الأمان (مخففة للملفات الثابتة)
   headers: async () => [
     {
-      source: "/(.*)",
+      source: "/_next/static/(.*)",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
+    {
+      source: "/((?!_next/static|favicon.ico).*)",
       headers: [
         {
           key: "X-Frame-Options",
-          value: "DENY",
+          value: "SAMEORIGIN",
         },
         {
           key: "X-Content-Type-Options",
           value: "nosniff",
         },
-        {
-          key: "X-XSS-Protection",
-          value: "1; mode=block",
-        },
-        {
-          key: "Referrer-Policy",
-          value: "strict-origin-when-cross-origin",
-        },
-        {
-          key: "Strict-Transport-Security",
-          value: "max-age=63072000; includeSubDomains; preload",
-        },
       ],
     },
   ],
 
-  // إعدادات webpack محسنة لـ Ubuntu 24
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // تحسينات للإنتاج
+  // إعدادات webpack
+  webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: "all",
@@ -72,106 +66,27 @@ const nextConfig = {
       }
     }
 
-    // إعدادات خاصة بـ Ubuntu 24
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       net: false,
       tls: false,
-      crypto: false,
-      stream: false,
-      url: false,
-      zlib: false,
-      http: false,
-      https: false,
-      assert: false,
-      os: false,
-      path: false,
-      child_process: false,
     }
-
-    // استبعاد المكتبات الإشكالية
-    config.externals = [
-      ...(config.externals || []),
-      {
-        "whatsapp-web.js": "commonjs whatsapp-web.js",
-        puppeteer: "commonjs puppeteer",
-        sqlite3: "commonjs sqlite3",
-        ws: "commonjs ws",
-        canvas: "commonjs canvas",
-        sharp: "commonjs sharp",
-        "fluent-ffmpeg": "commonjs fluent-ffmpeg",
-        "utf-8-validate": "commonjs utf-8-validate",
-        bufferutil: "commonjs bufferutil",
-      },
-    ]
-
-    // إضافة alias للتعامل مع fluent-ffmpeg
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "./lib-cov/fluent-ffmpeg": false,
-    }
-
-    // تجاهل تحذيرات معينة
-    config.ignoreWarnings = [
-      /Critical dependency: the request of a dependency is an expression/,
-      /Module not found: Can't resolve 'canvas'/,
-      /Module not found: Can't resolve 'encoding'/,
-      /Module not found: Can't resolve '\.\/lib-cov\/fluent-ffmpeg'/,
-    ]
-
-    // إضافة loader للملفات الثنائية
-    config.module.rules.push({
-      test: /\.(node|so|dylib)$/,
-      use: "node-loader",
-    })
 
     return config
   },
 
   // إعدادات البناء
   output: "standalone",
+  compress: true,
+  trailingSlash: false,
 
-  // إعدادات TypeScript
+  // إعدادات TypeScript و ESLint
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  // إعدادات ESLint
   eslint: {
     ignoreDuringBuilds: true,
-  },
-
-  // إعدادات الضغط
-  compress: true,
-
-  // إعدادات الـ trailing slash
-  trailingSlash: false,
-
-  // إعدادات إعادة التوجيه
-  async redirects() {
-    return [
-      {
-        source: "/admin",
-        destination: "/dashboard",
-        permanent: true,
-      },
-      {
-        source: "/api",
-        destination: "/api/health",
-        permanent: false,
-      },
-    ]
-  },
-
-  // إعدادات إعادة الكتابة
-  async rewrites() {
-    return [
-      {
-        source: "/api/ws",
-        destination: "http://localhost:3001",
-      },
-    ]
   },
 }
 

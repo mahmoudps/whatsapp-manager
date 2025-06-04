@@ -22,8 +22,38 @@ const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 // Load configuration explicitly using __dirname to avoid path issues
 const path = require("path")
-const configPath = path.join(__dirname, "lib", "config.js")
-const { JWT_SECRET, JWT_EXPIRES_IN } = require(configPath)
+
+// Load configuration with proper error handling
+let JWT_SECRET, JWT_EXPIRES_IN
+
+try {
+  // Try to load from lib/config.js first
+  const configPath = path.join(__dirname, "lib", "config.js")
+  if (require("fs").existsSync(configPath)) {
+    const config = require(configPath)
+    JWT_SECRET = config.JWT_SECRET
+    JWT_EXPIRES_IN = config.JWT_EXPIRES_IN
+  } else {
+    // Fallback to environment variables
+    JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+    JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
+  }
+} catch (error) {
+  console.warn("⚠️  Could not load lib/config.js, using environment variables:", error.message)
+  JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+  JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
+}
+
+// Validate JWT_SECRET
+if (!JWT_SECRET) {
+  console.error("❌ JWT_SECRET is not defined!")
+  process.exit(1)
+}
+
+if (JWT_SECRET === "fallback-secret-key-change-in-production" && process.env.NODE_ENV === "production") {
+  console.error("❌ Please set a secure JWT_SECRET in production!")
+  process.exit(1)
+}
 
 console.log("🚀 Starting WhatsApp Manager WebSocket Server v8.0.0")
 console.log("🐧 Ubuntu 24.04 LTS Support: ✅")
