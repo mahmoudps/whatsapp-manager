@@ -8,3 +8,5 @@ backups/
 .next/
 *.db*
 data/whatsapp_manager.db*
+*.bak
+backup_*/
