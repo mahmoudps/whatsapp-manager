@@ -15,6 +15,7 @@
     "build": "next build",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
+    "pretest": "node -e \"const fs=require('fs');if(!fs.existsSync('node_modules')){console.log('node_modules missing. Installing...');require('child_process').execSync('npm install',{stdio:'inherit'});} \"",
     "test": "jest",
     "test:watch": "jest --watch",
     "ws-server": "node websocket-server.js",
