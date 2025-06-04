@@ -8,7 +8,7 @@ const rateLimit = require("express-rate-limit")
 const { initializeDatabase } = require("./lib/database")
 
 const dev = process.env.NODE_ENV !== "production"
-const hostname = process.env.HOST || "127.0.0.1"
+const hostname = process.env.HOST || "0.0.0.0"
 const port = Number.parseInt(process.env.PORT, 10) || 3000
 
 // تكوين حد معدل الطلبات
