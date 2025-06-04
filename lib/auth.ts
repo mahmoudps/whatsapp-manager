@@ -3,11 +3,14 @@ import jwt from "jsonwebtoken"
 import type { NextRequest } from "next/server"
 import { db } from "./database"
 import { logger } from "@/lib/logger"
-import { JWT_SECRET, JWT_EXPIRES_IN } from "@/lib/config"
+import { JWT_SECRET, JWT_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@/lib/config"
 const MAX_LOGIN_ATTEMPTS = Number.parseInt(process.env.MAX_AUTH_ATTEMPTS || "5")
 const LOCK_TIME = 15 * 60 * 1000 // 15 دقيقة
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
+
+// تخزين رموز التحديث في الذاكرة في حال عدم توفر قاعدة البيانات
+const refreshStore = new Map<string, { userId: number; expiresAt: number }>()
 
 export interface LoginCredentials {
   username: string
@@ -22,11 +25,17 @@ export interface AuthUser {
 export interface AuthResult {
   success: boolean
   token?: string
+  refreshToken?: string
   message: string
   user?: {
     id: number
     username: string
   }
+}
+
+export interface TokenPair {
+  accessToken: string
+  refreshToken: string
 }
 
 export interface User {
@@ -78,6 +87,30 @@ export function generateAuthToken(user: AuthUser): string {
   }
 }
 
+export async function generateTokenPair(user: AuthUser): Promise<TokenPair> {
+  const accessToken = generateAuthToken(user)
+  const refreshToken = jwt.sign(
+    { userId: user.id, username: user.username },
+    JWT_SECRET,
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN },
+  )
+
+  const decoded: any = jwt.decode(refreshToken)
+  const expiresAt = decoded?.exp ? new Date(decoded.exp * 1000).toISOString() : new Date(Date.now()).toISOString()
+
+  try {
+    if (db) {
+      await db.createRefreshToken({ userId: user.id, token: refreshToken, expiresAt })
+    } else {
+      refreshStore.set(refreshToken, { userId: user.id, expiresAt: decoded.exp * 1000 })
+    }
+  } catch (err) {
+    logger.error("Error storing refresh token:", err)
+  }
+
+  return { accessToken, refreshToken }
+}
+
 export async function authenticateUser(username: string, password: string): Promise<AuthResult> {
   try {
     logger.info("🔐 Authenticating user:", username)
@@ -94,11 +127,12 @@ export async function authenticateUser(username: string, password: string): Prom
         }
       }
 
-      const token = generateAuthToken(user)
+      const { accessToken, refreshToken } = await generateTokenPair(user)
 
       return {
         success: true,
-        token,
+        token: accessToken,
+        refreshToken,
         message: "تم تسجيل الدخول بنجاح",
         user: {
           id: user.id,
@@ -192,19 +226,16 @@ export async function authenticateUser(username: string, password: string): Prom
       })
 
       // إنشاء JWT token
-      const token = jwt.sign(
-        {
-          userId: admin.id,
-          username: admin.username,
-        },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN },
-      )
+      const { accessToken, refreshToken } = await generateTokenPair({
+        id: admin.id,
+        username: admin.username,
+      })
 
       logger.info("✅ Authentication successful")
       return {
         success: true,
-        token,
+        token: accessToken,
+        refreshToken,
         message: "تم تسجيل الدخول بنجاح",
         user: {
           id: admin.id,
@@ -225,11 +256,12 @@ export async function authenticateUser(username: string, password: string): Prom
         }
       }
 
-      const token = generateAuthToken(user)
+      const { accessToken, refreshToken } = await generateTokenPair(user)
 
       return {
         success: true,
-        token,
+        token: accessToken,
+        refreshToken,
         message: "تم تسجيل الدخول بنجاح",
         user: {
           id: user.id,
@@ -256,6 +288,20 @@ export function verifyToken(token: string): { valid: boolean; userId?: number; u
     }
   } catch (error) {
     logger.error("Token verification error:", error)
+    return { valid: false }
+  }
+}
+
+export function verifyRefreshToken(token: string): { valid: boolean; userId?: number; username?: string } {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any
+    return {
+      valid: true,
+      userId: decoded.userId,
+      username: decoded.username,
+    }
+  } catch (error) {
+    logger.error("Refresh token verification error:", error)
     return { valid: false }
   }
 }
@@ -356,6 +402,24 @@ export class AuthService {
 
   static async getCurrentUser(request: NextRequest): Promise<User | null> {
     return await getCurrentUser(request)
+  }
+
+  static async refreshAccessToken(token: string): Promise<TokenPair | null> {
+    const decoded = verifyRefreshToken(token)
+    if (!decoded.valid || !decoded.userId) return null
+
+    if (db) {
+      const stored = await db.getRefreshToken(token)
+      if (!stored) return null
+      await db.deleteRefreshToken(token)
+    } else {
+      const existing = refreshStore.get(token)
+      if (!existing) return null
+      refreshStore.delete(token)
+    }
+
+    const user: AuthUser = { id: decoded.userId, username: decoded.username! }
+    return await generateTokenPair(user)
   }
 
   static getJwtExpiryInSeconds(): number {
