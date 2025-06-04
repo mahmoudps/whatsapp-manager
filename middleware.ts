@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { verifyToken, AuthService } from "@/lib/auth"
 
 // المسارات التي لا تتطلب مصادقة
 const publicPaths = [
   "/login",
   "/api/auth/login",
   "/api/auth/logout",
+  "/api/auth/refresh",
   "/api/health",
   "/api/docs",
 ]
@@ -16,7 +18,7 @@ const adminPaths = [
   "/api/admin",
 ]
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // السماح بالمسارات العامة
@@ -32,26 +34,37 @@ export function middleware(request: NextRequest) {
   // فحص التوكن
   const token = request.cookies.get("auth-token")?.value
 
-  if (!token) {
-    // إعادة توجيه إلى صفحة تسجيل الدخول
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (token) {
+    const decoded = verifyToken(token)
+    if (decoded.valid) {
+      return NextResponse.next()
     }
-    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // التحقق البسيط من وجود التوكن (سيتم التحقق الكامل في API routes)
-  if (!token || token.length < 10) {
-    // إزالة التوكن غير الصحيح
-    const response = pathname.startsWith("/api/")
-      ? NextResponse.json({ error: "Invalid token" }, { status: 401 })
-      : NextResponse.redirect(new URL("/login", request.url))
-    
-    response.cookies.delete("auth-token")
-    return response
+  // محاولة استخدام رمز التحديث
+  const refreshToken = request.cookies.get("refresh-token")?.value
+  if (refreshToken) {
+    const newTokens = await AuthService.refreshAccessToken(refreshToken)
+    if (newTokens) {
+      const response = NextResponse.next()
+      response.cookies.set("auth-token", newTokens.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      })
+      response.cookies.set("refresh-token", newTokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      })
+      return response
+    }
   }
 
-  return NextResponse.next()
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  return NextResponse.redirect(new URL("/login", request.url))
 }
 
 export const config = {
