@@ -20,7 +20,10 @@ const jwt = require("jsonwebtoken")
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
-const { JWT_SECRET, JWT_EXPIRES_IN } = require("./lib/config")
+// Load configuration explicitly using __dirname to avoid path issues
+const path = require("path")
+const configPath = path.join(__dirname, "lib", "config.js")
+const { JWT_SECRET, JWT_EXPIRES_IN } = require(configPath)
 
 console.log("🚀 Starting WhatsApp Manager WebSocket Server v8.0.0")
 console.log("🐧 Ubuntu 24.04 LTS Support: ✅")
