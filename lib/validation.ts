@@ -20,6 +20,11 @@ export const SendBulkMessageSchema = z.object({
   message: z.string().min(1, "نص الرسالة مطلوب").max(1000, "الرسالة طويلة جداً"),
 })
 
+export const ContactSchema = z.object({
+  name: z.string().min(1, "اسم جهة الاتصال مطلوب"),
+  phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
+})
+
 // تصدير إضافي للتوافق مع الكود القديم
 export const loginSchema = LoginSchema
 
@@ -48,6 +53,15 @@ export const ValidationSchemas = {
       return SendBulkMessageSchema.parse(data)
     } catch (error) {
       console.error("Bulk message validation error:", error)
+      return null
+    }
+  },
+
+  contact: (data: any) => {
+    try {
+      return ContactSchema.parse(data)
+    } catch (error) {
+      console.error("Contact validation error:", error)
       return null
     }
   },
