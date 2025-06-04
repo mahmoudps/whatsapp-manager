@@ -626,6 +626,9 @@ class DatabaseManager {
 
     const result = this.db
       .prepare(`INSERT INTO contacts (name, phone_number) VALUES (?, ?)`)
+      .prepare(
+        `INSERT INTO contacts (name, phone_number) VALUES (?, ?)`,
+      )
       .run(name, phoneNumber)
 
     const contact = this.db
@@ -756,3 +759,5 @@ export type {
   RefreshToken,
 }
 
+
+export type { Admin, Device, Message, IncomingMessage, Contact }
