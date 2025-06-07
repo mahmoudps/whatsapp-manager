@@ -4,6 +4,8 @@ echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
 # التأكد من وجود المجلدات الضرورية
 mkdir -p logs data backups
+# Ensure proper ownership so the container can write to the database and logs
+chown -R 1001:1001 data logs
 
 # إنشاء قاعدة البيانات إذا لم تكن موجودة
 if [ ! -f "data/whatsapp_manager.db" ]; then
