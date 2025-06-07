@@ -23,6 +23,7 @@ For a production build you can use Docker:
 ```bash
 docker-compose up --build -d
 ```
+The compose file uses the `Dockerfile` in the repository root to build the image.
 
 The application will be available on `http://localhost:3000`.
 
