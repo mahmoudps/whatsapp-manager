@@ -2,7 +2,7 @@
 
 ## للتشغيل الفوري:
 \`\`\`bash
-./start.sh
+./wa-manager.sh start
 \`\`\`
 
 ## أو يدوياً:
@@ -34,7 +34,7 @@ http://localhost:3000 أو http://localhost:3001
 
 ## For immediate start:
 \`\`\`bash
-./start.sh
+wa-manager start
 \`\`\`
 
 ## Or manually:
