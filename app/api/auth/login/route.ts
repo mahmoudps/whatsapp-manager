@@ -69,11 +69,11 @@ export async function POST(request: NextRequest) {
     }
 
     // البحث عن المستخدم في قاعدة البيانات
-    let admin
+    let user
     try {
       // تأكد من تهيئة قاعدة البيانات
       await db.ensureInitialized()
-      admin = await db.getAdminByUsername(username)
+      user = db.getUserByUsername(username)
     } catch (error) {
       logger.error("Database error:", error)
       return NextResponse.json(
@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!admin) {
-      logger.warn("Admin not found", { username })
+    if (!user) {
+      logger.warn("User not found", { username })
       return NextResponse.json(
         {
           success: false,
@@ -96,22 +96,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // التحقق من قفل الحساب
-    if (admin.lockedUntil && new Date(admin.lockedUntil) > new Date()) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "تم قفل الحساب بسبب محاولات تسجيل دخول فاشلة متكررة",
-          lockedUntil: admin.lockedUntil,
-        },
-        { status: 403 },
-      )
-    }
-
     // التحقق من كلمة المرور
     let passwordMatch = false
     try {
-      passwordMatch = await bcrypt.compare(password, admin.passwordHash)
+      passwordMatch = await bcrypt.compare(password, user.password)
     } catch (error) {
       logger.error("Password comparison error:", error)
       return NextResponse.json(
@@ -124,27 +112,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!passwordMatch) {
-      // زيادة عدد محاولات تسجيل الدخول الفاشلة
-      const maxAttempts = Number.parseInt(process.env.MAX_AUTH_ATTEMPTS || "5")
-      const loginAttempts = (admin.loginAttempts || 0) + 1
-
-      let lockedUntil = null
-      if (loginAttempts >= maxAttempts) {
-        // قفل الحساب لمدة ساعة
-        const lockTime = new Date()
-        lockTime.setHours(lockTime.getHours() + 1)
-        lockedUntil = lockTime.toISOString()
-      }
-
-      try {
-        await db.updateAdmin(admin.id, {
-          loginAttempts,
-          lockedUntil,
-        })
-      } catch (error) {
-        logger.error("Error updating admin login attempts:", error)
-      }
-
       return NextResponse.json(
         {
           success: false,
@@ -154,15 +121,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // إعادة تعيين محاولات تسجيل الدخول الفاشلة
+    // تحديث آخر تسجيل دخول
     try {
-      await db.updateAdmin(admin.id, {
-        loginAttempts: 0,
-        lockedUntil: null,
-        lastLogin: new Date().toISOString(),
-      })
+      db.updateUserLastLogin(user.id)
     } catch (error) {
-      logger.error("Error updating admin after successful login:", error)
+      logger.error("Error updating user after successful login:", error)
     }
 
     // إنشاء رمز JWT باستخدام نفس السر المستخدم في التحقق
@@ -170,21 +133,12 @@ export async function POST(request: NextRequest) {
     try {
       token = jwt.sign(
         {
-          userId: admin.id,
-          username: admin.username,
-          role: "admin",
+          userId: user.id,
+          username: user.username,
+          role: user.role,
         },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN },
-      )
-    } catch (error) {
-      logger.error("JWT creation error:", error)
-      return NextResponse.json(
-        {
-          success: false,
-          message: "خطأ في إنشاء رمز المصادقة",
-        },
-        { status: 500 },
       )
     }
 
@@ -195,9 +149,9 @@ export async function POST(request: NextRequest) {
       message: "تم تسجيل الدخول بنجاح",
       token,
       user: {
-        id: admin.id,
-        username: admin.username,
-        role: "admin",
+        id: user.id,
+        username: user.username,
+        role: user.role,
       },
     })
 

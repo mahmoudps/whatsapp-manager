@@ -10,10 +10,10 @@ export async function GET() {
     return NextResponse.json({ error: "Not Found" }, { status: 404 })
   }
   try {
-    // فحص المدير في قاعدة البيانات
-    const admin = db.getAdminByUsername("admin")
+    // فحص المستخدم في قاعدة البيانات
+    const user = db.getUserByUsername("admin")
 
-    if (!admin) {
+    if (!user) {
       return NextResponse.json({
         error: "Admin not found in database",
         admins: Array.from((db as any).admins?.values() || []),
@@ -25,20 +25,19 @@ export async function GET() {
     const results = []
 
     for (const pwd of testPasswords) {
-      const isValid = await bcrypt.compare(pwd, admin.passwordHash)
+      const isValid = await bcrypt.compare(pwd, user.password)
       results.push({
         password: pwd,
         isValid,
-        hash: admin.passwordHash,
+        hash: user.password,
       })
     }
 
     return NextResponse.json({
       admin: {
-        id: admin.id,
-        username: admin.username,
-        isActive: admin.isActive,
-        passwordHash: admin.passwordHash,
+        id: user.id,
+        username: user.username,
+        passwordHash: user.password,
       },
       passwordTests: results,
       bcryptWorking: await bcrypt.compare("test", await bcrypt.hash("test", 12)),
