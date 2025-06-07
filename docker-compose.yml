@@ -3,6 +3,7 @@ version: '3.8'
 services:
   whatsapp-manager:
     build: .
+    image: whatsapp-manager:latest
     container_name: whatsapp-manager
     restart: unless-stopped
     ports:
@@ -25,7 +26,7 @@ services:
       - ./logs:/app/logs
       - /dev/shm:/dev/shm
     networks:
-      - whatsapp-network
+      - whatsapp-manager-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -64,7 +65,7 @@ services:
       whatsapp-manager:
         condition: service_healthy
     networks:
-      - whatsapp-network
+      - whatsapp-manager-network
     deploy:
       resources:
         limits:
@@ -84,7 +85,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - whatsapp-network
+      - whatsapp-manager-network
     deploy:
       resources:
         limits:
@@ -97,7 +98,8 @@ services:
       - no-new-privileges:true
 
 networks:
-  whatsapp-network:
+  whatsapp-manager-network:
+    name: whatsapp-manager-network
     driver: bridge
 
 volumes:
