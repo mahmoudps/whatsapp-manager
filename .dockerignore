@@ -1,0 +1,38 @@
+# Node dependencies
+node_modules/
+
+# Build artifacts
+.next/
+out/
+coverage/
+dist/
+
+# Logs and runtime data
+logs/
+data/
+*.log
+*.db
+
+# Environment and SSL files
+.env*
+ssl/
+
+# Development files and documentation
+scripts/
+tests/
+*.sh
+*.md
+*.test.*
+*.spec.*
+
+# Docker and compose files not needed in the image
+Dockerfile.*
+Dockerfile-*
+docker-compose.yml
+docker-compose*.yml
+
+# Version control and editor directories
+.git/
+.gitignore
+.vscode/
+.idea/
