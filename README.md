@@ -33,6 +33,17 @@ docker-compose up --build -d
 ```
 The compose file uses the `Dockerfile` in the repository root to build the image.
 
+By default the Nginx container binds to ports `80` and `443`. You can override
+these using the `HTTP_PORT` and `HTTPS_PORT` environment variables when starting
+the stack. This is handy when another web server already occupies the default
+ports.
+
+```bash
+HTTP_PORT=8080 HTTPS_PORT=8443 docker-compose up -d
+```
+The application will then be served through Nginx on `http://localhost:8080` (or
+`https://localhost:8443` when HTTPS is configured).
+
 The application will be available on `http://localhost:3000`.
 
 ## Environment
