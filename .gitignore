@@ -16,3 +16,7 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# SSL certificates
+ssl/live/wa-api.developments.world/privkey.pem
+ssl/live/wa-api.developments.world/fullchain.pem

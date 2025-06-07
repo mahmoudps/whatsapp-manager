@@ -31,6 +31,19 @@ The application will be available on `http://localhost:3000`.
 
 Copy `.env.example` to `.env` and adjust values as needed before running the application.
 
+## Generating SSL certificates
+
+Use Certbot to create the TLS certificate files expected by the Nginx configuration:
+
+```bash
+sudo certbot certonly --webroot -w ./certbot-webroot -d wa-api.developments.world
+mkdir -p ssl/live/wa-api.developments.world
+cp -L /etc/letsencrypt/live/wa-api.developments.world/fullchain.pem ssl/live/wa-api.developments.world/
+cp -L /etc/letsencrypt/live/wa-api.developments.world/privkey.pem ssl/live/wa-api.developments.world/
+```
+
+These files are ignored by Git and required when running Nginx in production.
+
 ## License
 
 MIT
