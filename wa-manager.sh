@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # WhatsApp Manager CLI
 # إصدار: 1.0.0

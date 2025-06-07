@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # ألوان
 RED='\033[0;31m'

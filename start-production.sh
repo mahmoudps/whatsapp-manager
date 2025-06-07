@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
