@@ -33,6 +33,15 @@ docker-compose up --build -d
 ```
 The compose file uses the `Dockerfile` in the repository root to build the image.
 
+Make sure the `data` and `logs` directories on the host are writable by UID 1001
+(the user inside the container). Without the correct permissions the container
+will fail with an “attempt to write a readonly database” error.
+You can adjust the ownership with:
+
+```bash
+sudo chown -R 1001:1001 data logs
+```
+
 The application will be available on `http://localhost:3000`.
 
 ## Environment
