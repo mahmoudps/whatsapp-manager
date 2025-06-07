@@ -43,6 +43,14 @@ HTTP_PORT=8080 HTTPS_PORT=8443 docker-compose up -d
 ```
 The application will then be served through Nginx on `http://localhost:8080` (or
 `https://localhost:8443` when HTTPS is configured).
+Make sure the `data` and `logs` directories on the host are writable by UID 1001
+(the user inside the container). Without the correct permissions the container
+will fail with an “attempt to write a readonly database” error.
+You can adjust the ownership with:
+
+```bash
+sudo chown -R 1001:1001 data logs
+```
 
 The application will be available on `http://localhost:3000`.
 
