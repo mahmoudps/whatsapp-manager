@@ -232,9 +232,9 @@ export interface DatabaseOperations {
   ) => Promise<{ data: IncomingMessage | null; error: string | null }>
   getIncomingMessages: (filters?: MessageFilters) => Promise<{ data: IncomingMessage[]; error: string | null }>
 
-  // عمليات المديرين
-  getAdminByUsername: (username: string) => Promise<{ data: Admin | null; error: string | null }>
-  updateAdmin: (id: number, data: Partial<Admin>) => Promise<{ data: Admin | null; error: string | null }>
+  // عمليات المستخدمين
+  getUserByUsername: (username: string) => Promise<{ data: Admin | null; error: string | null }>
+  updateUserLastLogin: (id: number) => Promise<void> | void
 
   // إحصائيات النظام
   getSystemStats: () => Promise<{ data: SystemStats | null; error: string | null }>
