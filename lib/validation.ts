@@ -1,0 +1,82 @@
+import { z } from "zod"
+
+// Contact validation schema
+const contactSchema = z.object({
+  name: z.string().min(1, "الاسم مطلوب").max(100, "الاسم طويل جداً"),
+  phoneNumber: z.string().min(10, "رقم الهاتف قصير جداً").max(20, "رقم الهاتف طويل جداً"),
+})
+
+// Device validation schema
+const deviceSchema = z.object({
+  name: z.string().min(1, "اسم الجهاز مطلوب").max(50, "اسم الجهاز طويل جداً"),
+})
+
+// Message validation schema
+const messageSchema = z.object({
+  to: z.string().min(10, "رقم المستقبل مطلوب"),
+  message: z.string().min(1, "الرسالة مطلوبة").max(1000, "الرسالة طويلة جداً"),
+  type: z.enum(["text", "image", "document"]).optional().default("text"),
+})
+
+// Bulk message validation schema
+const bulkMessageSchema = z.object({
+  recipients: z.array(z.string()).min(1, "قائمة المستقبلين مطلوبة"),
+  message: z.string().min(1, "الرسالة مطلوبة").max(1000, "الرسالة طويلة جداً"),
+  delay: z.number().min(100).max(10000).optional().default(1000),
+})
+
+// User validation schema
+const userSchema = z.object({
+  username: z.string().min(3, "اسم المستخدم قصير جداً").max(50, "اسم المستخدم طويل جداً"),
+  password: z.string().min(6, "كلمة المرور قصيرة جداً").max(100, "كلمة المرور طويلة جداً"),
+})
+
+export const ValidationSchemas = {
+  contact: (data: any) => {
+    try {
+      return contactSchema.parse(data)
+    } catch (error) {
+      console.error("Contact validation error:", error)
+      return null
+    }
+  },
+
+  device: (data: any) => {
+    try {
+      return deviceSchema.parse(data)
+    } catch (error) {
+      console.error("Device validation error:", error)
+      return null
+    }
+  },
+
+  message: (data: any) => {
+    try {
+      return messageSchema.parse(data)
+    } catch (error) {
+      console.error("Message validation error:", error)
+      return null
+    }
+  },
+
+  bulkMessage: (data: any) => {
+    try {
+      return bulkMessageSchema.parse(data)
+    } catch (error) {
+      console.error("Bulk message validation error:", error)
+      return null
+    }
+  },
+
+  user: (data: any) => {
+    try {
+      return userSchema.parse(data)
+    } catch (error) {
+      console.error("User validation error:", error)
+      return null
+    }
+  },
+}
+
+// Export individual schemas for direct use
+export { contactSchema, deviceSchema, messageSchema, bulkMessageSchema, userSchema }
