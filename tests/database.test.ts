@@ -43,6 +43,7 @@ test('createAnalyticsEvent stores event and summary returns counts', async () =>
   const summary = await db.getAnalyticsSummary();
   const row = summary.find((s: any) => s.eventType === 'test_event');
   expect(row?.count).toBeGreaterThanOrEqual(1);
+});
 
 test('createContact inserts a new contact', async () => {
   const contact = await db.createContact('Tester', '12345');
