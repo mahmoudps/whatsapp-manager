@@ -15,8 +15,10 @@ NC='\033[0m' # No Color
 
 # المسار الافتراضي
 DEFAULT_PATH="/opt/whatsapp-manager"
+# مسار السكريبت
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # المسار الحالي
-CURRENT_PATH=$(pwd)
+CURRENT_PATH="$SCRIPT_DIR"
 
 # التحقق من تشغيل السكريبت بصلاحيات الجذر
 require_root() {
@@ -158,7 +160,7 @@ install_full() {
     mkdir -p $DEFAULT_PATH/ssl
     
     # نسخ الملفات
-    cp -r $CURRENT_PATH/* $DEFAULT_PATH/
+    cp -r "$SCRIPT_DIR"/* "$DEFAULT_PATH/"
     
     # إنشاء ملف .env
     cat > $DEFAULT_PATH/.env << EOL
