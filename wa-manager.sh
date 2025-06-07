@@ -307,6 +307,7 @@ version: '3.8'
 services:
   whatsapp-manager:
     build: .
+    image: whatsapp-manager:latest
     container_name: whatsapp-manager
     restart: unless-stopped
     ports:
@@ -333,7 +334,7 @@ services:
       - ./logs:/app/logs
       - /dev/shm:/dev/shm
     networks:
-      - whatsapp-network
+      - whatsapp-manager-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -355,10 +356,11 @@ services:
     depends_on:
       - whatsapp-manager
     networks:
-      - whatsapp-network
+      - whatsapp-manager-network
 
 networks:
-  whatsapp-network:
+  whatsapp-manager-network:
+    name: whatsapp-manager-network
     driver: bridge
 EOL
     
