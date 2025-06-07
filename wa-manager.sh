@@ -157,6 +157,8 @@ install_full() {
     mkdir -p $DEFAULT_PATH
     mkdir -p $DEFAULT_PATH/data
     mkdir -p $DEFAULT_PATH/logs
+    # Ensure correct permissions for database and log directories
+    chown -R 1001:1001 $DEFAULT_PATH/data $DEFAULT_PATH/logs
     mkdir -p $DEFAULT_PATH/ssl
     
     # نسخ الملفات
@@ -432,6 +434,8 @@ start_system() {
     
     # إنشاء المجلدات
     mkdir -p data logs
+    # ضبط الصلاحيات للسماح للحاوية بالكتابة على الملفات
+    chown -R 1001:1001 data logs
     
     # تشغيل Docker Compose
     docker-compose up -d
