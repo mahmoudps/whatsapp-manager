@@ -29,7 +29,13 @@ The application will be available on `http://localhost:3000`.
 
 ## Environment
 
-Copy `.env.example` to `.env` and adjust values as needed before running the application.
+The application relies on environment variables defined in `.env`.
+Create this file by copying the provided example and then modify the values to suit your setup:
+
+```bash
+cp .env.example .env
+# edit .env to customise the variables
+```
 
 ## License
 
