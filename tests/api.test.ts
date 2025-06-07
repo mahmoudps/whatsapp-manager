@@ -21,6 +21,10 @@ jest.mock('@/lib/middleware', () => ({
   verifyAuth: jest.fn().mockResolvedValue({ success: true, user: { id: 1, username: 'test' } })
 }));
 
+jest.mock('@/lib/auth', () => ({
+  verifyAuth: jest.fn().mockResolvedValue({ success: true, user: { id: 1, username: 'test' } })
+}));
+
 jest.mock('@/lib/whatsapp-client-manager', () => {
   return {
     whatsappManager: {
@@ -37,6 +41,8 @@ let analyticsGet: any;
 
 let createContactPost: any;
 let whatsappManagerMock: any;
+let statsGet: any;
+let devicesGet: any;
 
 beforeAll(async () => {
   process.env.DATABASE_PATH = ':memory:';
@@ -51,6 +57,8 @@ beforeAll(async () => {
   createDevicePost = (await import('../app/api/devices/route')).POST;
   sendMessagePost = (await import('../app/api/devices/[id]/send/route')).POST;
   analyticsGet = (await import('../app/api/analytics/route')).GET;
+  statsGet = (await import('../app/api/stats/route')).GET;
+  devicesGet = (await import('../app/api/devices/route')).GET;
 
   createContactPost = (await import('../app/api/contacts/route')).POST;
 });
@@ -112,4 +120,26 @@ test('POST /api/contacts creates a contact', async () => {
   expect(res.status).toBe(201);
   expect(data.success).toBe(true);
   expect(data.contact).toBeDefined();
+});
+
+test('GET /api/stats returns numeric stats', async () => {
+  const req: any = { url: 'http://localhost/api/stats', headers: new Headers(), cookies: { get: () => undefined } };
+  const res = await statsGet(req);
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.success).toBe(true);
+  expect(typeof data.stats.totalDevices).toBe('number');
+  expect(typeof data.stats.connectedDevices).toBe('number');
+  expect(typeof data.stats.totalMessages).toBe('number');
+  expect(typeof data.stats.sentMessages).toBe('number');
+});
+
+test('GET /api/devices returns devices array', async () => {
+  await db.createDevice('List Device');
+  const req: any = { url: 'http://localhost/api/devices', headers: new Headers(), cookies: { get: () => undefined } };
+  const res = await devicesGet(req);
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.success).toBe(true);
+  expect(Array.isArray(data.devices)).toBe(true);
 });
