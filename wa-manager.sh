@@ -15,8 +15,18 @@ NC='\033[0m' # No Color
 
 # المسار الافتراضي
 DEFAULT_PATH="/opt/whatsapp-manager"
+# مسار السكريبت
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # المسار الحالي
-CURRENT_PATH=$(pwd)
+CURRENT_PATH="$SCRIPT_DIR"
+
+# التحقق من تشغيل السكريبت بصلاحيات الجذر
+require_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "Please run as root"
+        exit 1
+    fi
+}
 
 # التحقق من وجود الملفات المطلوبة
 check_files() {
@@ -45,7 +55,7 @@ show_help() {
     echo -e "  ${GREEN}restart${NC}     إعادة تشغيل النظام"
     echo -e "  ${GREEN}status${NC}      عرض حالة النظام"
     echo -e "  ${GREEN}logs${NC}        عرض سجلات النظام"
-    echo -e "  ${GREEN}install${NC}     تثبيت النظام (docker|pm2|full)"
+    echo -e "  ${GREEN}install${NC}     تثبيت النظام (docker|pm2|full|cli)"
     echo -e "  ${GREEN}uninstall${NC}   إزالة النظام"
     echo -e "  ${GREEN}clean${NC}       تنظيف الملفات المؤقتة"
     echo -e "  ${GREEN}monitor${NC}     مراقبة النظام"
@@ -57,12 +67,14 @@ show_help() {
     echo -e "${YELLOW}أمثلة:${NC}"
     echo -e "  ${CYAN}wa-manager install docker${NC}    تثبيت Docker و Docker Compose"
     echo -e "  ${CYAN}wa-manager install full${NC}      تثبيت كامل مع دعم SSL"
+    echo -e "  ${CYAN}wa-manager install cli${NC}       تثبيت الأمر فقط"
     echo -e "  ${CYAN}wa-manager start${NC}             تشغيل النظام"
     echo -e "  ${CYAN}wa-manager env${NC}               عرض متغيرات البيئة"
 }
 
 # تثبيت Docker و Docker Compose
 install_docker() {
+    require_root
     echo -e "${BLUE}🐳 تثبيت Docker و Docker Compose...${NC}"
     
     # التحقق من وجود Docker
@@ -100,6 +112,7 @@ install_docker() {
 
 # تثبيت PM2
 install_pm2() {
+    require_root
     echo -e "${BLUE}📦 تثبيت PM2...${NC}"
     
     # التحقق من وجود Node.js و npm
@@ -125,6 +138,7 @@ install_pm2() {
 
 # تثبيت كامل مع SSL
 install_full() {
+    require_root
     echo -e "${BLUE}🚀 تثبيت كامل لـ WhatsApp Manager...${NC}"
     
     # طلب معلومات الدومين
@@ -146,7 +160,7 @@ install_full() {
     mkdir -p $DEFAULT_PATH/ssl
     
     # نسخ الملفات
-    cp -r $CURRENT_PATH/* $DEFAULT_PATH/
+    cp -r "$SCRIPT_DIR"/* "$DEFAULT_PATH/"
     
     # إنشاء ملف .env
     cat > $DEFAULT_PATH/.env << EOL
@@ -375,25 +389,44 @@ EOL
 
 # تثبيت الأمر في النظام
 install_system_command() {
+    require_root
     echo -e "${BLUE}📦 تثبيت الأمر في النظام...${NC}"
-    
+
     # نسخ السكريبت إلى /usr/local/bin
     cp $0 /usr/local/bin/wa-manager
     chmod +x /usr/local/bin/wa-manager
-    
+
     echo -e "${GREEN}✅ تم تثبيت الأمر بنجاح${NC}"
     echo -e "${YELLOW}يمكنك الآن استخدام الأمر 'wa-manager' من أي مكان${NC}"
+}
+
+# تثبيت CLI فقط
+install_cli() {
+    install_system_command
 }
 
 # تشغيل النظام
 start_system() {
     echo -e "${BLUE}🚀 تشغيل WhatsApp Manager...${NC}"
-    
+
     # التحقق من المسار
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
     fi
-    
+
+    # فحص وجود Docker Compose
+    if ! command -v docker-compose &> /dev/null; then
+        echo -e "${RED}❌ Docker Compose غير مثبت!${NC}"
+        echo -e "${YELLOW}🔧 شغل: wa-manager install docker${NC}"
+        return 1
+    fi
+
+    # فحص تشغيل Docker
+    if ! systemctl is-active --quiet docker; then
+        echo -e "${YELLOW}🔄 تشغيل خدمة Docker...${NC}"
+        systemctl start docker
+    fi
+
     # التحقق من وجود الملفات
     check_files || return 1
     
@@ -680,6 +713,7 @@ restore_database() {
 
 # تحديث النظام
 update_system() {
+    require_root
     echo -e "${BLUE}🔄 تحديث WhatsApp Manager...${NC}"
     
     # التحقق من المسار
@@ -745,9 +779,12 @@ case "$1" in
             full)
                 install_full
                 ;;
+            cli)
+                install_cli
+                ;;
             *)
                 echo -e "${RED}❌ خيار تثبيت غير صالح${NC}"
-                echo -e "${YELLOW}الخيارات المتاحة: docker, pm2, full${NC}"
+                echo -e "${YELLOW}الخيارات المتاحة: docker, pm2, full, cli${NC}"
                 exit 1
                 ;;
         esac
