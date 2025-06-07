@@ -140,6 +140,9 @@ export async function POST(request: NextRequest) {
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN },
       )
+    } catch (error) {
+      logger.error("JWT sign error:", error)
+      throw error
     }
 
     logger.info("Login successful", { username })
