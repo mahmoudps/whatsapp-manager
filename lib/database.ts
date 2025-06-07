@@ -74,6 +74,12 @@ class DatabaseManager {
     this.init()
   }
 
+  public async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      this.init()
+    }
+  }
+
   private init(): void {
     try {
       // التأكد من وجود مجلد البيانات
@@ -611,6 +617,7 @@ class DatabaseManager {
 export const db = new DatabaseManager()
 
 // Explicit initialization function
-export function initializeDatabase() {
+export async function initializeDatabase() {
+  await db.ensureInitialized()
   return db
 }
