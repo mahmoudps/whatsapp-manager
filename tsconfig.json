@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "target": "es5",
     "lib": ["dom", "dom.iterable", "es6"],
     "allowJs": true,
+=======
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "target": "ES6",
+>>>>>>> 83e0b5f7cbb5c54a0d6a252d420d7c6ecc85a6da
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -18,7 +24,10 @@
         "name": "next"
       }
     ],
+<<<<<<< HEAD
     "baseUrl": ".",
+=======
+>>>>>>> 83e0b5f7cbb5c54a0d6a252d420d7c6ecc85a6da
     "paths": {
       "@/*": ["./*"]
     }
