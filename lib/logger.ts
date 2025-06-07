@@ -40,9 +40,20 @@ class Logger {
     }
   }
 
-  error(message: string, ...args: any[]): void {
+  error(messageOrError: string | Error, ...args: any[]): void {
     if (currentLogLevel <= LOG_LEVELS.error) {
-      console.error(this.formatMessage("error", message, ...args))
+      let message: string
+      const processedArgs = args.map((arg) =>
+        arg instanceof Error ? arg.stack || String(arg) : arg,
+      )
+
+      if (messageOrError instanceof Error) {
+        message = messageOrError.stack || String(messageOrError)
+      } else {
+        message = messageOrError
+      }
+
+      console.error(this.formatMessage("error", message, ...processedArgs))
     }
   }
 }
