@@ -18,6 +18,14 @@ DEFAULT_PATH="/opt/whatsapp-manager"
 # المسار الحالي
 CURRENT_PATH=$(pwd)
 
+# التحقق من تشغيل السكريبت بصلاحيات الجذر
+require_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "Please run as root"
+        exit 1
+    fi
+}
+
 # التحقق من وجود الملفات المطلوبة
 check_files() {
     if [ ! -f "docker-compose.yml" ]; then
@@ -63,6 +71,7 @@ show_help() {
 
 # تثبيت Docker و Docker Compose
 install_docker() {
+    require_root
     echo -e "${BLUE}🐳 تثبيت Docker و Docker Compose...${NC}"
     
     # التحقق من وجود Docker
@@ -100,6 +109,7 @@ install_docker() {
 
 # تثبيت PM2
 install_pm2() {
+    require_root
     echo -e "${BLUE}📦 تثبيت PM2...${NC}"
     
     # التحقق من وجود Node.js و npm
@@ -125,6 +135,7 @@ install_pm2() {
 
 # تثبيت كامل مع SSL
 install_full() {
+    require_root
     echo -e "${BLUE}🚀 تثبيت كامل لـ WhatsApp Manager...${NC}"
     
     # طلب معلومات الدومين
@@ -375,6 +386,7 @@ EOL
 
 # تثبيت الأمر في النظام
 install_system_command() {
+    require_root
     echo -e "${BLUE}📦 تثبيت الأمر في النظام...${NC}"
     
     # نسخ السكريبت إلى /usr/local/bin
@@ -680,6 +692,7 @@ restore_database() {
 
 # تحديث النظام
 update_system() {
+    require_root
     echo -e "${BLUE}🔄 تحديث WhatsApp Manager...${NC}"
     
     # التحقق من المسار
