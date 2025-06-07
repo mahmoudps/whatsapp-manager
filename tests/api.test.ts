@@ -97,6 +97,7 @@ test('GET /api/analytics returns summary', async () => {
   expect(res.status).toBe(200);
   expect(data.success).toBe(true);
   expect(Array.isArray(data.summary)).toBe(true);
+});
 
 
 test('POST /api/contacts creates a contact', async () => {
