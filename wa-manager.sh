@@ -20,6 +20,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # المسار الحالي
 CURRENT_PATH="$SCRIPT_DIR"
 
+# Exit immediately if a command exits with a non-zero status
+set -e
+
 # التحقق من تشغيل السكريبت بصلاحيات الجذر
 require_root() {
     if [[ $EUID -ne 0 ]]; then
@@ -383,12 +386,16 @@ EOL
     
     # تشغيل النظام
     cd $DEFAULT_PATH
-    docker-compose up -d
-    
-    echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
-    echo -e "${BLUE}🌐 يمكنك الوصول للنظام عبر: https://${DOMAIN_NAME}${NC}"
-    echo -e "${YELLOW}👤 المستخدم: admin${NC}"
-    echo -e "${YELLOW}🔑 كلمة المرور: admin123${NC}"
+
+    if docker-compose up -d; then
+        echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
+        echo -e "${BLUE}🌐 يمكنك الوصول للنظام عبر: https://${DOMAIN_NAME}${NC}"
+        echo -e "${YELLOW}👤 المستخدم: admin${NC}"
+        echo -e "${YELLOW}🔑 كلمة المرور: admin123${NC}"
+    else
+        echo -e "${RED}❌ فشل تشغيل الحاويات عبر Docker Compose${NC}"
+        exit 1
+    fi
 }
 
 # تثبيت الأمر في النظام
