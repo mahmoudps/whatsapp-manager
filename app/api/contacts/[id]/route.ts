@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/middleware"
+import { verifyAuth } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
