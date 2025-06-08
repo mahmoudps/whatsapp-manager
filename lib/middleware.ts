@@ -1,8 +1,7 @@
 import type { NextRequest } from "next/server"
 import jwt from "jsonwebtoken"
 import { logger } from "./logger"
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key"
+import { JWT_SECRET } from "./config"
 
 interface AuthResult {
   success: boolean

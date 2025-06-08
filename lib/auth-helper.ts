@@ -1,8 +1,7 @@
 import type { NextRequest } from "next/server"
 import { logger } from "./logger"
 import jwt from "jsonwebtoken"
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key"
+import { JWT_SECRET } from "./config"
 
 export async function verifyAuth(request: NextRequest) {
   try {
