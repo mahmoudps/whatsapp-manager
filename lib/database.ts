@@ -67,6 +67,14 @@ export interface User {
   lastLogin?: string
 }
 
+export interface Contact {
+  id: number
+  name: string
+  phoneNumber: string
+  createdAt: string
+  updatedAt: string
+}
+
 class DatabaseManager {
   private db: Database.Database | null = null
   private initialized = false
@@ -365,6 +373,45 @@ class DatabaseManager {
     return device
   }
 
+  getDeviceById(id: number): Device | undefined {
+    return this.getDevice(id)
+  }
+
+  // Contact operations
+  createContact(name: string, phoneNumber: string): Contact {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const result = this.db
+      .prepare(`
+      INSERT INTO contacts (name, phone_number) VALUES (?, ?)
+    `)
+      .run(name, phoneNumber)
+
+    const contact = this.db
+      .prepare(`
+      SELECT id, name, phone_number as phoneNumber,
+             created_at as createdAt, updated_at as updatedAt
+      FROM contacts WHERE id = ?
+    `)
+      .get(result.lastInsertRowid) as Contact
+
+    return contact
+  }
+
+  listContacts(): Contact[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const contacts = this.db
+      .prepare(`
+      SELECT id, name, phone_number as phoneNumber,
+             created_at as createdAt, updated_at as updatedAt
+      FROM contacts ORDER BY name
+    `)
+      .all() as Contact[]
+
+    return contacts
+  }
+
   // Message operations
   createMessage(data: Omit<Message, "id" | "createdAt" | "updatedAt">): Message {
     if (!this.db) throw new Error("Database not initialized")
@@ -532,6 +579,42 @@ class DatabaseManager {
         data.messageId || null,
         data.details ? JSON.stringify(data.details) : null,
       )
+  }
+
+  getAnalyticsEvents(limit = 50, offset = 0): AnalyticsEvent[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const rows = this.db
+      .prepare(`
+      SELECT id, event_type as eventType, device_id as deviceId,
+             message_id as messageId, data, created_at as createdAt
+      FROM analytics
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `)
+      .all(limit, offset) as any[]
+
+    return rows.map((r) => ({
+      id: r.id,
+      eventType: r.eventType,
+      deviceId: r.deviceId,
+      messageId: r.messageId,
+      data: r.data,
+      details: r.data ? JSON.parse(r.data) : undefined,
+      createdAt: r.createdAt,
+    }))
+  }
+
+  getAnalyticsSummary(): { eventType: string; count: number }[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const summary = this.db
+      .prepare(
+        `SELECT event_type as eventType, COUNT(*) as count FROM analytics GROUP BY event_type`
+      )
+      .all() as { eventType: string; count: number }[]
+
+    return summary
   }
 
   // User operations
