@@ -37,7 +37,7 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8080"
+      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001"
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)
