@@ -3,10 +3,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import { logger } from "./logger"
 import { db } from "./database"
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key"
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d"
+import { JWT_SECRET, JWT_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "./config"
 
 export interface User {
   id: number

@@ -34,13 +34,12 @@ try {
     JWT_SECRET = config.JWT_SECRET
     JWT_EXPIRES_IN = config.JWT_EXPIRES_IN
   } else {
-    // Fallback to environment variables
-    JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+    JWT_SECRET = process.env.JWT_SECRET
     JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
   }
 } catch (error) {
   console.warn("⚠️  Could not load lib/config.js, using environment variables:", error.message)
-  JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+  JWT_SECRET = process.env.JWT_SECRET
   JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
 }
 

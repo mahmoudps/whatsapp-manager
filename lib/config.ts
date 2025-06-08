@@ -1,14 +1,22 @@
 // إعدادات المشروع
 
 // إعدادات المصادقة
-export const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(`Environment variable ${name} is required`)
+  }
+  return value
+}
+
+export const JWT_SECRET = requireEnv("JWT_SECRET")
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
 export const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d"
 export const MAX_AUTH_ATTEMPTS = Number.parseInt(process.env.MAX_AUTH_ATTEMPTS || "5")
 
 // إعدادات المصادقة الإدارية
-export const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
+export const ADMIN_USERNAME = requireEnv("ADMIN_USERNAME")
+export const ADMIN_PASSWORD = requireEnv("ADMIN_PASSWORD")
 
 // إعدادات الخادم
 export const PORT = Number.parseInt(process.env.PORT || "3000")

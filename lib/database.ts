@@ -3,6 +3,7 @@ import { logger } from "./logger"
 import path from "path"
 import fs from "fs"
 import bcrypt from "bcryptjs"
+import { ADMIN_USERNAME, ADMIN_PASSWORD } from "./config"
 
 const DB_PATH = process.env.DATABASE_PATH || "./data/whatsapp_manager.db"
 
@@ -232,8 +233,8 @@ class DatabaseManager {
     if (!this.db) throw new Error("Database not initialized")
 
     try {
-      const username = process.env.ADMIN_USERNAME || "admin"
-      const password = process.env.ADMIN_PASSWORD || "admin123"
+      const username = ADMIN_USERNAME
+      const password = ADMIN_PASSWORD
 
       // التحقق من وجود المدير
       const existingUser = this.db.prepare("SELECT id FROM users WHERE username = ?").get(username)

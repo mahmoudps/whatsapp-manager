@@ -2,6 +2,7 @@ import { createServer } from "http"
 import { Server } from "socket.io"
 import jwt from "jsonwebtoken"
 import * as logger from "./logger"
+import { JWT_SECRET } from "./config"
 
 interface WebSocketServerInstance {
   io: Server | null
@@ -44,7 +45,7 @@ export function initializeWebSocketServer(port = 3001): WebSocketServerInstance 
       }
 
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret")
+        const decoded = jwt.verify(token, JWT_SECRET)
         socket.user = decoded
         logger.info(`✅ Authenticated socket user: ${(decoded as any).username}`)
       } catch (error) {

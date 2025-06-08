@@ -2,6 +2,11 @@
 
 echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
+if [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
+  echo "❌ ADMIN_USERNAME, ADMIN_PASSWORD, and JWT_SECRET must be set"
+  exit 1
+fi
+
 # التأكد من وجود المجلدات الضرورية
 mkdir -p logs data backups
 # Ensure proper ownership so the container can write to the database and logs
