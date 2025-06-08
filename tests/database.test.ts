@@ -15,14 +15,14 @@ afterAll(() => {
 });
 
 test('createDevice inserts a new device', async () => {
-  const device = await db.createDevice('Test Device');
+  const device = await db.createDevice({ name: 'Test Device' });
   expect(device).toBeDefined();
   expect(device.name).toBe('Test Device');
   expect(device.status).toBe('disconnected');
 });
 
 test('createMessage inserts a new message', async () => {
-  const device = await db.createDevice('Message Device');
+  const device = await db.createDevice({ name: 'Message Device' });
   const message = await db.createMessage({
     deviceId: device.id,
     recipient: '123456789',
@@ -36,13 +36,15 @@ test('createMessage inserts a new message', async () => {
 });
 
 test('createAnalyticsEvent stores event and summary returns counts', async () => {
-  const device = await db.createDevice('Analytics Device');
+  const device = await db.createDevice({ name: 'Analytics Device' });
   const event = await db.createAnalyticsEvent({ eventType: 'test_event', deviceId: device.id });
   expect(event).toBeDefined();
   expect(event.eventType).toBe('test_event');
   const summary = await db.getAnalyticsSummary();
   const row = summary.find((s: any) => s.eventType === 'test_event');
   expect(row?.count).toBeGreaterThanOrEqual(1);
+  const events = await db.getAnalyticsEvents(10, 0);
+  expect(events.length).toBeGreaterThan(0);
 });
 
 test('createContact inserts a new contact', async () => {
@@ -50,4 +52,6 @@ test('createContact inserts a new contact', async () => {
   expect(contact).toBeDefined();
   expect(contact.name).toBe('Tester');
   expect(contact.phoneNumber).toBe('12345');
+  const contacts = await db.listContacts();
+  expect(contacts.find((c: any) => c.phoneNumber === '12345')).toBeDefined();
 });

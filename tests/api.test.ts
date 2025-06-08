@@ -79,7 +79,7 @@ test('POST /api/devices creates a device', async () => {
 });
 
 test('POST /api/devices/[id]/send sends a message', async () => {
-  const device = await db.createDevice('Send Device');
+  const device = await db.createDevice({ name: 'Send Device' });
 
   const req: any = {
     json: async () => ({ recipient: '123456789', message: 'hi' }),
@@ -132,7 +132,7 @@ test('GET /api/stats returns numeric stats', async () => {
 });
 
 test('GET /api/devices returns devices array', async () => {
-  await db.createDevice('List Device');
+  await db.createDevice({ name: 'List Device' });
   const req: any = { url: 'http://localhost/api/devices', headers: new Headers(), cookies: { get: () => undefined } };
   const res = await devicesGet(req);
   const data = await res.json();
