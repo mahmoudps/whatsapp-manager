@@ -105,7 +105,7 @@ wa-manager stop    # stop containers
 wa-manager status  # check status
 ```
 
-For production with SSL certificates run `wa-manager install full` and follow the prompts for your domain. The CLI sets up Nginx and obtains Let's Encrypt certificates automatically. If you already have certificates, place them in `ssl/live/<your-domain>/` and adjust `nginx-ssl.conf` as needed.
+For production with SSL certificates run `wa-manager install full`. If you simply press **Enter** when asked, the default domain `wa-api.developments.world` and email `info@wa-api.developments.world` will be used. The CLI sets up Nginx and obtains Let's Encrypt certificates automatically. If you already have certificates, place them in `ssl/live/<your-domain>/` and adjust `nginx-ssl.conf` as needed.
 
 ## Running tests
 

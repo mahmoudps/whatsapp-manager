@@ -36,4 +36,4 @@ export const WHATSAPP_SERVER_PORT = Number.parseInt(process.env.WHATSAPP_SERVER_
 export const PUPPETEER_EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH
 
 // إعدادات السجلات
-export const LOG_LEVEL = process.env.LOG_LEVEL || "info"
+export const LOG_LEVEL = process.env.LOG_LEVEL || "debug"

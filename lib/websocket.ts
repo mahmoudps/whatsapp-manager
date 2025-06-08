@@ -26,7 +26,7 @@ export function initializeWebSocketServer(port = 3001): WebSocketServerInstance 
     const server = createServer()
     const io = new Server(server, {
       cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || "https://wa-api.developments.world",
         methods: ["GET", "POST"],
         credentials: true,
       },

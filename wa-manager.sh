@@ -66,6 +66,7 @@ show_help() {
     echo -e "  ${GREEN}update${NC}      تحديث النظام"
     echo -e "  ${GREEN}backup${NC}      نسخ احتياطي لقاعدة البيانات"
     echo -e "  ${GREEN}restore${NC}     استعادة قاعدة البيانات"
+    echo -e "  ${GREEN}rebuild${NC}     إعادة تهيئة ملف .env"
     echo ""
     echo -e "${YELLOW}أمثلة:${NC}"
     echo -e "  ${CYAN}wa-manager install docker${NC}    تثبيت Docker و Docker Compose"
@@ -73,6 +74,7 @@ show_help() {
     echo -e "  ${CYAN}wa-manager install cli${NC}       تثبيت الأمر فقط"
     echo -e "  ${CYAN}wa-manager start${NC}             تشغيل النظام"
     echo -e "  ${CYAN}wa-manager env${NC}               عرض متغيرات البيئة"
+    echo -e "  ${CYAN}wa-manager rebuild${NC}           إعادة تهيئة ملف .env"
 }
 
 # تثبيت Docker و Docker Compose
@@ -167,8 +169,10 @@ install_full() {
     echo -e "${BLUE}🚀 تثبيت كامل لـ WhatsApp Manager...${NC}"
     
     # طلب معلومات الدومين
-    read -p "أدخل اسم الدومين (مثال: wa.example.com): " DOMAIN_NAME
-    read -p "أدخل البريد الإلكتروني (لشهادة SSL): " EMAIL
+    read -p "أدخل اسم الدومين (مثال: wa.example.com) [wa-api.developments.world]: " DOMAIN_NAME
+    DOMAIN_NAME=${DOMAIN_NAME:-wa-api.developments.world}
+    read -p "أدخل البريد الإلكتروني (لشهادة SSL) [info@wa-api.developments.world]: " EMAIL
+    EMAIL=${EMAIL:-info@wa-api.developments.world}
     
     # تثبيت Docker
     install_docker
@@ -221,7 +225,7 @@ NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws
 CORS_ORIGIN=https://${DOMAIN_NAME}
 
 # إعدادات السجلات
-LOG_LEVEL=info
+LOG_LEVEL=debug
 
 # إعدادات Puppeteer
 PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
@@ -352,7 +356,7 @@ services:
       - JWT_EXPIRES_IN=\${JWT_EXPIRES_IN:-24h}
       - ENABLE_WEBSOCKET=\${ENABLE_WEBSOCKET:-true}
       - WEBSOCKET_PORT=\${WEBSOCKET_PORT:-3001}
-      - LOG_LEVEL=\${LOG_LEVEL:-info}
+      - LOG_LEVEL=\${LOG_LEVEL:-debug}
       - NEXT_PUBLIC_DOMAIN_NAME=\${NEXT_PUBLIC_DOMAIN_NAME}
       - NEXT_PUBLIC_WHATSAPP_API_URL=\${NEXT_PUBLIC_WHATSAPP_API_URL}
       - FRONTEND_URL=\${FRONTEND_URL}
@@ -758,6 +762,68 @@ restore_database() {
     echo -e "${YELLOW}⚠️ تم إنشاء نسخة احتياطية للملف الحالي: data/whatsapp_manager.db.bak${NC}"
 }
 
+# إعادة تهيئة ملف .env
+rebuild_env() {
+    echo -e "${BLUE}🔄 إعادة تهيئة ملف .env...${NC}"
+
+    if [ -d "$DEFAULT_PATH" ]; then
+        cd $DEFAULT_PATH
+    fi
+
+    read -p "أدخل اسم الدومين (مثال: wa.example.com) [wa-api.developments.world]: " DOMAIN_NAME
+    DOMAIN_NAME=${DOMAIN_NAME:-wa-api.developments.world}
+    read -p "أدخل البريد الإلكتروني (لشهادة SSL) [info@wa-api.developments.world]: " EMAIL
+    EMAIL=${EMAIL:-info@wa-api.developments.world}
+
+    cat > .env <<EOL
+# إعدادات الخادم
+PORT=3000
+HOST=localhost
+NODE_ENV=production
+
+# إعدادات قاعدة البيانات
+DATABASE_PATH=/app/data/whatsapp_manager.db
+
+# إعدادات المصادقة
+JWT_SECRET=$(openssl rand -hex 32)
+JWT_EXPIRES_IN=24h
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+# بيانات الإدارة الافتراضية
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+
+# إعدادات الأمان
+MAX_AUTH_ATTEMPTS=5
+RATE_LIMIT_MAX_REQUESTS=100
+
+# إعدادات WebSocket
+ENABLE_WEBSOCKET=true
+WEBSOCKET_PORT=3001
+NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws
+
+# إعدادات CORS
+CORS_ORIGIN=https://${DOMAIN_NAME}
+
+# إعدادات السجلات
+LOG_LEVEL=debug
+
+# إعدادات Puppeteer
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# إعدادات الدومين
+NEXT_PUBLIC_DOMAIN_NAME=${DOMAIN_NAME}
+NEXT_PUBLIC_WHATSAPP_API_URL=https://${DOMAIN_NAME}/api
+FRONTEND_URL=https://${DOMAIN_NAME}
+EOL
+
+    echo -e "${GREEN}✅ تم إنشاء ملف .env بنجاح${NC}"
+    echo -e "${YELLOW}🔄 إعادة تشغيل الخدمات لتطبيق التغييرات...${NC}"
+    docker-compose down
+    docker-compose up -d
+}
+
 # تحديث النظام
 update_system() {
     require_root
@@ -856,6 +922,9 @@ case "$1" in
         ;;
     restore)
         restore_database
+        ;;
+    rebuild)
+        rebuild_env
         ;;
     *)
         echo -e "${RED}❌ أمر غير صالح: $1${NC}"
