@@ -114,6 +114,13 @@ npm install
 npm test
 ```
 
+## Development login test
+
+The repository includes a small component `components/login-test.tsx` for
+verifying the authentication flow during development. It automatically returns
+`null` when `NODE_ENV` is `production` so it won't appear in the production UI.
+Import and use this component only when debugging login issues locally.
+
 ## Generating SSL certificates
 
 Use Certbot to create the TLS certificate files expected by the Nginx configuration:
