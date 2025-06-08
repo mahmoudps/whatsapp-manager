@@ -197,7 +197,7 @@ install_full() {
     cat > $DEFAULT_PATH/.env << EOL
 # إعدادات الخادم
 PORT=3000
-HOST=localhost
+HOST=0.0.0.0
 NODE_ENV=production
 
 # إعدادات قاعدة البيانات
@@ -774,7 +774,7 @@ rebuild_env() {
     cat > .env <<EOL
 # إعدادات الخادم
 PORT=3000
-HOST=localhost
+HOST=0.0.0.0
 NODE_ENV=production
 
 # إعدادات قاعدة البيانات
