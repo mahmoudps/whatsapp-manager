@@ -123,10 +123,10 @@ export default function MessagesPage() {
   const fetchDevices = async () => {
     try {
       const response = await fetch("/api/devices")
-      const data = await response.json()
+      const data: { success: boolean; devices?: Device[] } = await response.json()
 
       if (data.success) {
-        setDevices(data.data)
+        setDevices(data.devices || [])
       } else {
         logger.warn("Failed to fetch devices", { error: data.error })
       }
