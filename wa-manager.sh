@@ -228,7 +228,7 @@ CORS_ORIGIN=https://${DOMAIN_NAME}
 LOG_LEVEL=debug
 
 # إعدادات Puppeteer
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # إعدادات الدومين
@@ -350,7 +350,7 @@ services:
       - ADMIN_USERNAME=\${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=\${ADMIN_PASSWORD:-admin123}
       - JWT_SECRET=\${JWT_SECRET}
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - MAX_AUTH_ATTEMPTS=\${MAX_AUTH_ATTEMPTS:-5}
       - JWT_EXPIRES_IN=\${JWT_EXPIRES_IN:-24h}
@@ -809,7 +809,7 @@ CORS_ORIGIN=https://${DOMAIN_NAME}
 LOG_LEVEL=debug
 
 # إعدادات Puppeteer
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # إعدادات الدومين
