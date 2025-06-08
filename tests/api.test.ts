@@ -12,7 +12,7 @@ jest.mock('next/server', () => ({
 jest.mock('@/lib/validation', () => ({
   ValidationSchemas: {
     createDevice: jest.fn().mockReturnValue({ name: 'API Device' }),
-    createMessage: jest.fn().mockReturnValue({ recipient: '123456789', message: 'hi', deviceId: 1 }),
+    message: jest.fn().mockReturnValue({ recipient: '123456789', message: 'hi', deviceId: 1 }),
     contact: jest.fn().mockReturnValue({ name: 'Test Contact', phoneNumber: '12345' }),
   },
 }));
