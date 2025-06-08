@@ -73,9 +73,14 @@ Create a `.env` file and provide the required variables:
 - `ADMIN_USERNAME` and `ADMIN_PASSWORD`
 - `DATABASE_PATH` (default: `./data/whatsapp_manager.db`)
 - `JWT_SECRET`
-- `FRONTEND_URL` – base URL of your frontend used by the WebSocket server
 
-Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set.
+Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set:
+
+- `ENABLE_WEBSOCKET` (default: `false`)
+- `WEBSOCKET_PORT` – port for the WebSocket server (default: `3001`)
+- `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
+  `ws://localhost:3001` or `wss://example.com/ws`
+- `FRONTEND_URL` – allowed frontend origin for WebSocket connections
 
 To allow cross-origin requests, set `CORS_ORIGIN` to a comma-separated list of allowed origins (e.g. `https://example.com,http://localhost:3000`).
 If left unset, only same-origin requests are permitted.
