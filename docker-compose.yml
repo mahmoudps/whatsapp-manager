@@ -20,7 +20,7 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
       - ENABLE_WEBSOCKET=${ENABLE_WEBSOCKET:-true}
       - WEBSOCKET_PORT=${WEBSOCKET_PORT:-3001}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs

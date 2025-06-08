@@ -24,7 +24,7 @@ module.exports = {
         NEXT_PUBLIC_DOMAIN_NAME: process.env.NEXT_PUBLIC_DOMAIN_NAME,
         NEXT_PUBLIC_WHATSAPP_API_URL: process.env.NEXT_PUBLIC_WHATSAPP_API_URL,
         FRONTEND_URL: process.env.FRONTEND_URL || "https://wa-api.developments.world",
-        LOG_LEVEL: process.env.LOG_LEVEL || "info",
+        LOG_LEVEL: process.env.LOG_LEVEL || "debug",
         ENABLE_WEBSOCKET: "false", // تعطيل WebSocket في التطبيق الرئيسي
         WEBSOCKET_PORT: process.env.WEBSOCKET_PORT || "3001",
         NEXT_PUBLIC_WEBSOCKET_URL: process.env.NEXT_PUBLIC_WEBSOCKET_URL,
@@ -55,7 +55,7 @@ module.exports = {
         FRONTEND_URL: process.env.FRONTEND_URL || "https://wa-api.developments.world",
         JWT_SECRET: process.env.JWT_SECRET,
         JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "24h",
-        LOG_LEVEL: process.env.LOG_LEVEL || "info",
+        LOG_LEVEL: process.env.LOG_LEVEL || "debug",
       },
       error_file: "logs/websocket-error.log",
       out_file: "logs/websocket-out.log",

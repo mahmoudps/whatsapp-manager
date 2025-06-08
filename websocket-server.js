@@ -20,7 +20,7 @@ const jwt = require("jsonwebtoken")
 // إعدادات البيئة
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://wa-api.developments.world"
 
 let JWT_SECRET, JWT_EXPIRES_IN
 try {
@@ -72,7 +72,7 @@ app.use(
 app.use(compression())
 app.use(
   cors({
-    origin: [FRONTEND_URL, "http://localhost:3000", "https://localhost:3000"],
+    origin: [FRONTEND_URL, "https://wa-api.developments.world"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -84,7 +84,7 @@ app.use(express.json({ limit: "10mb" }))
 // إعداد Socket.IO مع دعم Ubuntu 24
 const io = new Server(server, {
   cors: {
-    origin: [FRONTEND_URL, "http://localhost:3000", "https://localhost:3000"],
+    origin: [FRONTEND_URL, "https://wa-api.developments.world"],
     methods: ["GET", "POST"],
     credentials: true,
   },
