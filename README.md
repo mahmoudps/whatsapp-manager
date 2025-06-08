@@ -76,6 +76,9 @@ Create a `.env` file and provide the required variables:
 
 Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set.
 
+- `DEBUG_ROUTES` (default: `false`) enables debug-only API endpoints. Avoid
+  enabling this in production.
+
 ## CLI installation
 
 The repository includes a helper CLI called `wa-manager`.
