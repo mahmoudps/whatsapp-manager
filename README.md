@@ -143,12 +143,20 @@ For production with SSL certificates run `wa-manager install full`. If you simpl
 
 ## Running tests
 
-Install dependencies and run the test suite:
+Install dependencies and run the test suite. The tests rely on dev
+dependencies such as **Jest**, so be sure to install everything first:
 
 ```bash
 npm install
 npm test
 ```
+
+For automated environments you can also run:
+
+```bash
+npm run test:ci
+```
+which installs dependencies using `npm ci` before running Jest.
 
 ## Development login test
 
