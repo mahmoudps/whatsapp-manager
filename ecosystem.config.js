@@ -12,8 +12,6 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3000,
         HOST: "0.0.0.0",
-        PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium",
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true",
         PUPPETEER_ARGS: "--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage",
         JWT_SECRET: process.env.JWT_SECRET,
         JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "24h",

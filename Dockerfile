@@ -2,7 +2,6 @@ FROM node:18-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    chromium \
     libnss3 \
     libfreetype6 \
     libharfbuzz0b \
@@ -16,8 +15,6 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Puppeteer environment
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV NODE_ENV=production
 
 # Create app directory

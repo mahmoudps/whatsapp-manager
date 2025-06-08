@@ -5,6 +5,7 @@ import { logger } from "./logger"
 import path from "path"
 import fs from "fs"
 import { EventEmitter } from "events"
+import { PUPPETEER_EXECUTABLE_PATH } from "./config"
 
 // التأكد من وجود مجلد الجلسات
 const SESSION_DIR = path.join(process.cwd(), "data", "whatsapp_sessions")
@@ -154,48 +155,53 @@ class WhatsAppClientManager extends EventEmitter {
       })
 
       // تكوين عميل WhatsApp
+      const puppeteerOptions: any = {
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--single-process",
+          "--disable-gpu",
+          "--disable-web-security",
+          "--disable-features=VizDisplayCompositor",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+          "--disable-field-trial-config",
+          "--disable-back-forward-cache",
+          "--disable-ipc-flooding-protection",
+          "--disable-extensions",
+          "--disable-default-apps",
+          "--disable-sync",
+          "--metrics-recording-only",
+          "--no-default-browser-check",
+          "--disable-prompt-on-repost",
+          "--disable-hang-monitor",
+          "--disable-client-side-phishing-detection",
+          "--disable-component-update",
+          "--disable-domain-reliability",
+          "--disable-features=TranslateUI",
+          "--disable-translate",
+          "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          `--user-data-dir=${path.join(SESSION_DIR, `session-device_${deviceId}`)}`,
+        ],
+        timeout: 60000,
+      }
+
+      if (PUPPETEER_EXECUTABLE_PATH) {
+        puppeteerOptions.executablePath = PUPPETEER_EXECUTABLE_PATH
+      }
+
       const client = new Client({
         authStrategy: new LocalAuth({
           clientId: `device_${deviceId}`,
           dataPath: SESSION_DIR,
         }),
-        puppeteer: {
-          headless: true,
-          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
-          args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-accelerated-2d-canvas",
-            "--no-first-run",
-            "--no-zygote",
-            "--single-process",
-            "--disable-gpu",
-            "--disable-web-security",
-            "--disable-features=VizDisplayCompositor",
-            "--disable-background-timer-throttling",
-            "--disable-backgrounding-occluded-windows",
-            "--disable-renderer-backgrounding",
-            "--disable-field-trial-config",
-            "--disable-back-forward-cache",
-            "--disable-ipc-flooding-protection",
-            "--disable-extensions",
-            "--disable-default-apps",
-            "--disable-sync",
-            "--metrics-recording-only",
-            "--no-default-browser-check",
-            "--disable-prompt-on-repost",
-            "--disable-hang-monitor",
-            "--disable-client-side-phishing-detection",
-            "--disable-component-update",
-            "--disable-domain-reliability",
-            "--disable-features=TranslateUI",
-            "--disable-translate",
-            "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            `--user-data-dir=${path.join(SESSION_DIR, `session-device_${deviceId}`)}`,
-          ],
-          timeout: 60000,
-        },
+        puppeteer: puppeteerOptions,
         webVersionCache: {
           type: "remote",
           remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
