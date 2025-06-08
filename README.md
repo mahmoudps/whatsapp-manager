@@ -76,6 +76,9 @@ Create a `.env` file and provide the required variables:
 
 Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set.
 
+To allow cross-origin requests, set `CORS_ORIGIN` to a comma-separated list of allowed origins (e.g. `https://example.com,http://localhost:3000`).
+If left unset, only same-origin requests are permitted.
+
 ## CLI installation
 
 The repository includes a helper CLI called `wa-manager`.
