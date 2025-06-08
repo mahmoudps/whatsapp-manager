@@ -3,8 +3,12 @@ FROM node:18-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libnss3 \
+    libnspr4 \
     libfreetype6 \
     libharfbuzz0b \
+    libgtk-3-0 \
+    libappindicator3-1 \
+    libdbus-1-3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
     libx11-xcb1 \
@@ -18,7 +22,10 @@ RUN apt-get update && apt-get install -y \
     libpangocairo-1.0-0 \
     libpangoft2-1.0-0 \
     fonts-freefont-ttf \
+    fonts-liberation \
     fonts-noto-color-emoji \
+    xdg-utils \
+    ca-certificates \
     python3 \
     procps \
     make \
