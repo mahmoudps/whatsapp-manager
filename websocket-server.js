@@ -7,6 +7,7 @@
  */
 
 require("dotenv").config()
+const path = require("path")
 const { createServer } = require("http")
 const { Server } = require("socket.io")
 const WebSocket = require("ws")
