@@ -33,6 +33,10 @@ docker-compose up --build -d
 ```
 The compose file uses the `Dockerfile` in the repository root to build the image.
 
+**Security notice:** The `.env.example` file ships with placeholder credentials
+(`ADMIN_USERNAME=admin` and `ADMIN_PASSWORD=admin123`). Be sure to change these
+values in your `.env` before deploying.
+
 By default the Nginx container binds to ports `80` and `443`. You can override
 these using the `HTTP_PORT` and `HTTPS_PORT` environment variables when starting
 the stack. This is handy when another web server already occupies the default
