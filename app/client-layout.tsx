@@ -14,6 +14,9 @@ export default function ClientLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body className={inter.className}>
         <AppProvider>{children}</AppProvider>
       </body>
