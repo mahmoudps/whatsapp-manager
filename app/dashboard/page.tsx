@@ -45,30 +45,70 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const formatUptime = (seconds: number) => {
+    if (!seconds) return "0 دقيقة"
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    if (hours > 0) return `${hours} ساعة ${minutes} دقيقة`
+    return `${minutes} دقيقة`
+  }
+
   const fetchStats = async () => {
     try {
       setError(null)
       setLoading(true)
 
-      const response = await fetch("/api/stats", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const [statsRes, systemRes] = await Promise.all([
+        fetch("/api/stats", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }),
+        fetch("/api/stats/system", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }),
+      ])
+
+      if (!statsRes.ok) {
+        throw new Error(`HTTP error! status: ${statsRes.status}`)
+      }
+
+      const statsData = await statsRes.json()
+      if (!statsData.success) {
+        throw new Error(statsData.error || "فشل في جلب الإحصائيات")
+      }
+
+      let systemData: any = null
+      if (systemRes.ok) {
+        const sd = await systemRes.json()
+        if (sd.success) systemData = sd.data
+      }
+
+      const combined: Stats = {
+        devices: {
+          total: statsData.stats?.totalDevices || 0,
+          connected: statsData.stats?.connectedDevices || 0,
+          disconnected:
+            (statsData.stats?.totalDevices || 0) -
+            (statsData.stats?.connectedDevices || 0),
         },
-        credentials: "include",
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        messages: {
+          total: statsData.stats?.totalMessages || 0,
+          sent: statsData.stats?.sentMessages || 0,
+          failed:
+            (statsData.stats?.totalMessages || 0) -
+            (statsData.stats?.sentMessages || 0),
+          pending: 0,
+        },
+        system: {
+          uptime: systemData ? formatUptime(systemData.system?.uptime || 0) : "0 دقيقة",
+          timestamp: systemData?.timestamp || new Date().toISOString(),
+        },
       }
 
-      const data = await response.json()
-
-      if (data.success) {
-        setStats(data.stats || stats)
-      } else {
-        throw new Error(data.error || "فشل في جلب الإحصائيات")
-      }
+      setStats(combined)
     } catch (err) {
       console.error("Error fetching stats:", err)
       const errorMessage = err instanceof Error ? err.message : "حدث خطأ أثناء جلب الإحصائيات"
