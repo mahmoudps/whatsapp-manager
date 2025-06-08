@@ -59,3 +59,9 @@ export ADMIN_PASSWORD=supersecret
 ## URL:
 http://localhost:3000 or http://localhost:3001
 The server listens on `0.0.0.0` by default. Set the `HOST` environment variable to change this.
+
+### Development login test
+
+For local debugging you can use the `components/login-test.tsx` component to
+verify authentication. It renders nothing when `NODE_ENV` is `production`, so it
+should not be included in production builds.
