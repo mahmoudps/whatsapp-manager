@@ -13,7 +13,7 @@ export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
 // إعدادات الخادم
 export const PORT = Number.parseInt(process.env.PORT || "3000")
 export const HOST = process.env.HOST || "0.0.0.0"
-export const CORS_ORIGIN = process.env.CORS_ORIGIN || "*"
+export const CORS_ORIGIN = process.env.CORS_ORIGIN
 export const RATE_LIMIT_MAX_REQUESTS = Number.parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100")
 
 // إعدادات قاعدة البيانات

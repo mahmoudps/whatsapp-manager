@@ -14,6 +14,7 @@ const fs = require("fs")
 const cors = require("cors")
 const compression = require("compression")
 const helmet = require("helmet")
+const { CORS_ORIGIN } = require("./lib/config")
 
 // تهيئة المتغيرات
 const dev = process.env.NODE_ENV !== "production"
@@ -51,7 +52,7 @@ app.prepare().then(() => {
   server.use(compression())
   server.use(
     cors({
-      origin: process.env.CORS_ORIGIN || "*",
+      origin: CORS_ORIGIN ? CORS_ORIGIN.split(',') : false,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
