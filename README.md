@@ -107,11 +107,11 @@ For production with SSL certificates run `wa-manager install full` and follow th
 
 ## Running tests
 
-Install dependencies and execute Jest:
+Install dependencies and run the test suite:
 
 ```bash
 npm install
-npx jest
+npm test
 ```
 
 ## Generating SSL certificates
