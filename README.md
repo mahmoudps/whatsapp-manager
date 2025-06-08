@@ -108,6 +108,13 @@ For local development you can launch it manually with:
 ```bash
 node websocket-server.js
 ```
+Before running this command make sure the project dependencies are installed:
+
+```bash
+npm install # or `pnpm install`
+```
+Docker builds run this step for you during `docker-compose up`, but if you start
+the WebSocket server manually you need to install the packages yourself.
 
 For process management you can also use PM2 with the provided
 `ecosystem.config.js`:
