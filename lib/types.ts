@@ -18,29 +18,29 @@ export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse
 export interface Device {
   id: number
   name: string
-  phone_number?: string
+  phoneNumber?: string
   status: "disconnected" | "connecting" | "qr_ready" | "connected" | "error" | "auth_failed"
-  qr_code?: string
-  last_seen?: string
-  created_at: string
-  updated_at: string
-  error_message?: string
-  connection_attempts: number
+  qrCode?: string
+  lastSeen?: string
+  createdAt: string
+  updatedAt: string
+  errorMessage?: string
+  connectionAttempts: number
 }
 
 export type DeviceStatus = "disconnected" | "connecting" | "qr_ready" | "connected" | "error" | "auth_failed"
 
 export interface Message {
   id: number
-  device_id: number
+  deviceId: number
   recipient: string
   message: string
   status: "pending" | "sent" | "failed"
-  sent_at: string
-  error_message?: string
-  message_type: MessageType
-  media_url?: string
-  delivered_at?: string
+  sentAt: string
+  errorMessage?: string
+  messageType: MessageType
+  mediaUrl?: string
+  deliveredAt?: string
 }
 
 export type MessageStatus = "pending" | "sent" | "delivered" | "failed"
@@ -48,24 +48,24 @@ export type MessageType = "text" | "image" | "video" | "audio" | "document"
 
 export interface IncomingMessage {
   id: number
-  device_id: number
+  deviceId: number
   sender: string
   message: string
-  message_id: string
-  message_type: MessageType
-  media_url?: string
-  received_at: string
+  messageId: string
+  messageType: MessageType
+  mediaUrl?: string
+  receivedAt: string
 }
 
 export interface Admin {
   id: number
   username: string
-  password_hash: string
-  last_login?: string
-  login_attempts: number
-  locked_until?: string
-  created_at: string
-  is_active: boolean
+  passwordHash: string
+  lastLogin?: string
+  loginAttempts: number
+  lockedUntil?: string
+  createdAt: string
+  isActive: boolean
 }
 
 // أنواع البيانات المشتركة
