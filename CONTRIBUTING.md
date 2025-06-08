@@ -56,6 +56,9 @@ npm run type-check
 
 # بناء المشروع
 npm run build
+
+# تشغيل الاختبارات
+npm test
 \`\`\`
 
 ### 5. Commit التغييرات
