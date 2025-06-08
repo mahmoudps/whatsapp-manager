@@ -8,7 +8,8 @@
     "start": "next start",
     "production": "npm run build && npm start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "npm ci && npm test"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.14",
