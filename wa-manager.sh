@@ -85,9 +85,16 @@ install_docker() {
         echo -e "${GREEN}✅ Docker مثبت بالفعل${NC}"
     else
         echo -e "${YELLOW}⏳ تثبيت Docker...${NC}"
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-        rm get-docker.sh
+        if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
+            echo -e "${RED}❌ فشل تحميل برنامج تثبيت Docker${NC}"
+            return 1
+        fi
+        if ! sh get-docker.sh; then
+            echo -e "${RED}❌ فشل تثبيت Docker${NC}"
+            rm -f get-docker.sh
+            return 1
+        fi
+        rm -f get-docker.sh
         
         # تمكين وتشغيل Docker
         systemctl enable docker
@@ -106,9 +113,15 @@ install_docker() {
         echo -e "${YELLOW}⏳ تثبيت Docker Compose...${NC}"
         
         # تثبيت Docker Compose
-        curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-        
+        if ! curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose; then
+            echo -e "${RED}❌ فشل تحميل Docker Compose${NC}"
+            return 1
+        fi
+        if ! chmod +x /usr/local/bin/docker-compose; then
+            echo -e "${RED}❌ فشل إعداد صلاحيات Docker Compose${NC}"
+            return 1
+        fi
+
         echo -e "${GREEN}✅ تم تثبيت Docker Compose بنجاح${NC}"
     fi
 }
@@ -121,8 +134,14 @@ install_pm2() {
     # التحقق من وجود Node.js و npm
     if ! command -v node &> /dev/null; then
         echo -e "${YELLOW}⏳ تثبيت Node.js...${NC}"
-        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-        apt-get install -y nodejs
+        if ! curl -fsSL https://deb.nodesource.com/setup_18.x | bash -; then
+            echo -e "${RED}❌ فشل إعداد مستودع Node.js${NC}"
+            return 1
+        fi
+        if ! apt-get install -y nodejs; then
+            echo -e "${RED}❌ فشل تثبيت Node.js${NC}"
+            return 1
+        fi
     fi
     
     # التحقق من وجود PM2
@@ -130,7 +149,10 @@ install_pm2() {
         echo -e "${GREEN}✅ PM2 مثبت بالفعل${NC}"
     else
         echo -e "${YELLOW}⏳ تثبيت PM2...${NC}"
-        npm install -g pm2
+        if ! npm install -g pm2; then
+            echo -e "${RED}❌ فشل تثبيت PM2${NC}"
+            return 1
+        fi
         
         # تكوين PM2 للتشغيل عند بدء النظام
         pm2 startup
