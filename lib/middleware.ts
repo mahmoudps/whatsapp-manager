@@ -48,8 +48,14 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
   }
 }
 
-export function createAuthToken(user: { id: number; username: string }) {
-  const payload = { userId: user.id, username: user.username }
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+export function createAuthToken(payload: { id: number; username: string }) {
+  return jwt.sign(
+    {
+      userId: payload.id,
+      username: payload.username,
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN },
+  )
 }
 
