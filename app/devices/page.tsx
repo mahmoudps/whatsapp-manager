@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Smartphone, Plus, Loader2, RefreshCw } from "lucide-react"
+import { DeviceCard } from "@/components/device-card"
+import { MessageDialog } from "@/components/message-dialog"
 import { MainLayout } from "@/components/layout/main-layout"
 import { useApp } from "@/lib/app-context"
 
@@ -22,6 +24,8 @@ export default function DevicesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [newDeviceName, setNewDeviceName] = useState("")
   const [isAddingDevice, setIsAddingDevice] = useState(false)
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false)
+  const [activeDevice, setActiveDevice] = useState<{ id: number; name: string } | null>(null)
   const { actions } = useApp()
 
   useEffect(() => {
@@ -112,6 +116,135 @@ export default function DevicesPage() {
     }
   }
 
+  const handleConnect = async (deviceId: number) => {
+    try {
+      const res = await fetch(`/api/devices/${deviceId}/connect`, {
+        method: "POST",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "فشل الاتصال بالجهاز")
+      }
+      actions.addNotification({
+        type: "success",
+        title: "نجح",
+        message: data.message || "تم بدء الاتصال بالجهاز",
+      })
+      fetchDevices()
+    } catch (err) {
+      console.error("Error connecting device:", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل الاتصال بالجهاز",
+      })
+    }
+  }
+
+  const handleDisconnect = async (deviceId: number) => {
+    try {
+      const res = await fetch(`/api/devices/${deviceId}/disconnect`, {
+        method: "POST",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "فشل قطع الاتصال")
+      }
+      actions.addNotification({
+        type: "success",
+        title: "نجح",
+        message: data.message || "تم قطع الاتصال",
+      })
+      fetchDevices()
+    } catch (err) {
+      console.error("Error disconnecting device:", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل في قطع الاتصال",
+      })
+    }
+  }
+
+  const handleDelete = async (deviceId: number) => {
+    try {
+      const res = await fetch(`/api/devices/${deviceId}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "فشل حذف الجهاز")
+      }
+      actions.addNotification({
+        type: "success",
+        title: "نجح",
+        message: data.message || "تم حذف الجهاز",
+      })
+      fetchDevices()
+    } catch (err) {
+      console.error("Error deleting device:", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل في حذف الجهاز",
+      })
+    }
+  }
+
+  const openMessageDialog = (deviceId: number) => {
+    const device = devices.find((d) => d.id === deviceId)
+    if (device) {
+      setActiveDevice({ id: device.id, name: device.name })
+      setMessageDialogOpen(true)
+    }
+  }
+
+  const handleSendMessage = async (data: {
+    deviceId: number
+    recipient?: string
+    recipients?: string[]
+    message: string
+    isBulk: boolean
+  }) => {
+    try {
+      const url = data.isBulk
+        ? `/api/devices/${data.deviceId}/send-bulk`
+        : `/api/devices/${data.deviceId}/send`
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(
+          data.isBulk
+            ? { recipients: data.recipients, message: data.message }
+            : { recipient: data.recipient, message: data.message },
+        ),
+      })
+
+      const resp = await res.json()
+      if (!res.ok || !resp.success) {
+        throw new Error(resp.error || "فشل إرسال الرسالة")
+      }
+
+      actions.addNotification({
+        type: "success",
+        title: "نجح",
+        message: resp.message || "تم إرسال الرسالة",
+      })
+    } catch (err) {
+      console.error("Error sending message:", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل في إرسال الرسالة",
+      })
+    }
+  }
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -179,28 +312,27 @@ export default function DevicesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {devices.map((device) => (
-              <Card key={device.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{device.name}</CardTitle>
-                  <CardDescription>الحالة: {device.status}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      <strong>الرقم:</strong> {device.phoneNumber || "لم يتم تعيين رقم"}
-                    </p>
-                    {device.lastSeen && (
-                      <p className="text-sm text-gray-600">
-                        <strong>آخر ظهور:</strong> {new Date(device.lastSeen).toLocaleString("ar-SA")}
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <DeviceCard
+                key={device.id}
+                device={device}
+                onConnect={handleConnect}
+                onDisconnect={handleDisconnect}
+                onDelete={handleDelete}
+                onSendMessage={openMessageDialog}
+              />
             ))}
           </div>
         )}
       </div>
+      {activeDevice && (
+        <MessageDialog
+          open={messageDialogOpen}
+          onOpenChange={setMessageDialogOpen}
+          deviceId={activeDevice.id}
+          deviceName={activeDevice.name}
+          onSendMessage={handleSendMessage}
+        />
+      )}
     </MainLayout>
   )
 }
