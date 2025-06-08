@@ -33,6 +33,9 @@ docker-compose up --build -d
 ```
 The compose file uses the `Dockerfile` in the repository root to build the image.
 
+Chromium is now downloaded automatically during installation, so no additional
+`PUPPETEER_*` environment variables are required.
+
 **Security notice:** The `.env.example` file ships with placeholder credentials
 (`ADMIN_USERNAME=admin` and `ADMIN_PASSWORD=admin123`). Be sure to change these
 values in your `.env` before deploying.

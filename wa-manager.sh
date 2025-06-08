@@ -227,9 +227,7 @@ CORS_ORIGIN=https://${DOMAIN_NAME}
 # إعدادات السجلات
 LOG_LEVEL=debug
 
-# إعدادات Puppeteer
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# إعدادات Puppeteer (استخدم المسار الافتراضي للمتصفح المدمج)
 
 # إعدادات الدومين
 NEXT_PUBLIC_DOMAIN_NAME=${DOMAIN_NAME}
@@ -350,8 +348,6 @@ services:
       - ADMIN_USERNAME=\${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=\${ADMIN_PASSWORD:-admin123}
       - JWT_SECRET=\${JWT_SECRET}
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - MAX_AUTH_ATTEMPTS=\${MAX_AUTH_ATTEMPTS:-5}
       - JWT_EXPIRES_IN=\${JWT_EXPIRES_IN:-24h}
       - ENABLE_WEBSOCKET=\${ENABLE_WEBSOCKET:-true}
@@ -809,8 +805,6 @@ CORS_ORIGIN=https://${DOMAIN_NAME}
 LOG_LEVEL=debug
 
 # إعدادات Puppeteer
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # إعدادات الدومين
 NEXT_PUBLIC_DOMAIN_NAME=${DOMAIN_NAME}
