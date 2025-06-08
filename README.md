@@ -84,20 +84,16 @@ If left unset, only same-origin requests are permitted.
 
 ## CLI installation
 
-The repository includes a helper CLI called `wa-manager`.
+The repository includes a helper CLI script called `wa-manager.sh`.
 
-Run the installer with root privileges:
-
-```bash
-sudo ./install.sh
-```
-
-This copies `wa-manager.sh` to `/usr/local/bin/wa-manager` so it can be used from anywhere. If you prefer a manual install:
+To use it globally, copy the script into your `PATH` and make it executable:
 
 ```bash
 sudo cp wa-manager.sh /usr/local/bin/wa-manager
 sudo chmod +x /usr/local/bin/wa-manager
 ```
+
+After this you can run `wa-manager` from anywhere or execute the script directly with `./wa-manager.sh`.
 
 ## Managing the service
 
