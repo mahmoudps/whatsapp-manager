@@ -17,9 +17,6 @@ jest.mock('@/lib/validation', () => ({
   },
 }));
 
-jest.mock('@/lib/middleware', () => ({
-  verifyAuth: jest.fn().mockResolvedValue({ success: true, user: { id: 1, username: 'test' } })
-}));
 
 jest.mock('@/lib/auth', () => ({
   verifyAuth: jest.fn().mockResolvedValue({ success: true, user: { id: 1, username: 'test' } })

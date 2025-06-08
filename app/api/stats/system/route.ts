@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { verifyAuth } from "@/lib/middleware"
+import { verifyAuth } from "@/lib/auth"
 import os from "os"
 import fs from "fs"
 

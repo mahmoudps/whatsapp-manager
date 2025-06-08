@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/middleware"
+import { verifyAuth } from "@/lib/auth"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 
 export const runtime = "nodejs"
