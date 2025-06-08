@@ -116,7 +116,14 @@ class DatabaseManager {
 
       this.initialized = true
       logger.info("Database initialized successfully")
-    } catch (error) {
+    } catch (error: any) {
+      if (error.code === "SQLITE_CANTOPEN" || error.code === "EACCES") {
+        logger.error(
+          `Unable to open database file at ${DB_PATH}. ` +
+            `Ensure the data directory exists and is writable. ` +
+            `On the host, run: sudo chown -R 1001:1001 data logs`
+        )
+      }
       logger.error("Database initialization error:", error)
       throw error
     }
