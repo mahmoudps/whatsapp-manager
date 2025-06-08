@@ -36,7 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     console.log("📝 Request body:", body)
 
     // التحقق من صحة البيانات
-    const messageData = ValidationSchemas.createMessage({
+    const messageData = ValidationSchemas.message({
       deviceId,
       recipient: body.recipient,
       message: body.message,
