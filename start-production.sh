@@ -21,7 +21,7 @@ fi
 # تشغيل WebSocket Server
 if [ "$ENABLE_WEBSOCKET" = "true" ]; then
   echo "📡 تشغيل WebSocket Server..."
-  node -e "require('./lib/websocket-server.js')" &
+  node ./websocket-server.js &
   WS_PID=$!
   echo "WebSocket Server PID: $WS_PID"
 fi
