@@ -31,9 +31,10 @@ For a production build you can use Docker:
 ```bash
 docker-compose up --build -d
 ```
-The compose file uses the `Dockerfile` in the repository root to build the image.
-The container now runs the `start-production.sh` script which automatically
-launches the WebSocket server when `ENABLE_WEBSOCKET=true`.
+The compose file uses the `Dockerfile` in the repository root to build the
+image. The resulting `whatsapp-manager` container runs the `start-production.sh`
+script, which launches the WebSocket server inside the same container when
+`ENABLE_WEBSOCKET=true`.
 
 Chromium and all required system libraries are downloaded automatically during
 installation, so no additional `PUPPETEER_*` environment variables are required.
@@ -102,7 +103,8 @@ To broadcast real-time events you can enable the optional WebSocket server. Set
 - `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
   `ws://localhost:3001` or `wss://example.com/ws`
 
-When running via Docker Compose the WebSocket server starts automatically.
+When running via Docker Compose the WebSocket server is started from within the
+`whatsapp-manager` container whenever `ENABLE_WEBSOCKET=true`.
 For local development you can launch it manually with:
 
 ```bash
