@@ -6,8 +6,8 @@
  * الإصدار 8.0.0
  */
 
-require("dotenv").config()
 const path = require("path")
+require("dotenv").config()
 const { createServer } = require("http")
 const { Server } = require("socket.io")
 const WebSocket = require("ws")
