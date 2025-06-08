@@ -7,9 +7,6 @@ import jwt from "jsonwebtoken"
 import { db } from "@/lib/database"
 import { logger } from "@/lib/logger"
 import { JWT_SECRET, JWT_EXPIRES_IN, ADMIN_USERNAME, ADMIN_PASSWORD } from "@/lib/config"
-
-// القيم المطلوبة من متغيرات البيئة يتم التحقق منها في lib/config
-
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()

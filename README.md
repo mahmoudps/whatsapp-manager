@@ -76,6 +76,12 @@ Create a `.env` file and provide the required variables:
 
 Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set.
 
+To allow cross-origin requests, set `CORS_ORIGIN` to a comma-separated list of allowed origins (e.g. `https://example.com,http://localhost:3000`).
+If left unset, only same-origin requests are permitted.
+
+- `DEBUG_ROUTES` (default: `false`) enables debug-only API endpoints. Avoid
+  enabling this in production.
+
 ## CLI installation
 
 The repository includes a helper CLI called `wa-manager`.
@@ -113,6 +119,13 @@ Install dependencies and run the test suite:
 npm install
 npm test
 ```
+
+## Development login test
+
+The repository includes a small component `components/login-test.tsx` for
+verifying the authentication flow during development. It automatically returns
+`null` when `NODE_ENV` is `production` so it won't appear in the production UI.
+Import and use this component only when debugging login issues locally.
 
 ## Generating SSL certificates
 

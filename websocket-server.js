@@ -20,12 +20,8 @@ const jwt = require("jsonwebtoken")
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
-// Load configuration explicitly using __dirname to avoid path issues
-const path = require("path")
 
-// Load configuration with proper error handling
 let JWT_SECRET, JWT_EXPIRES_IN
-
 try {
   // Try to load from lib/config.js first
   const configPath = path.join(__dirname, "lib", "config.js")
