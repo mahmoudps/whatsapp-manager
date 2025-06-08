@@ -71,7 +71,13 @@ class WhatsAppClientManager extends EventEmitter {
 
       // حذف ملفات القفل
       if (fs.existsSync(sessionPath)) {
-        const lockFiles = ["SingletonLock", ".lock", "chrome_debug.log"]
+        const lockFiles = [
+          "SingletonLock",
+          "SingletonCookie",
+          "SingletonSocket",
+          ".lock",
+          "chrome_debug.log",
+        ]
         for (const lockFile of lockFiles) {
           const lockPath = path.join(sessionPath, lockFile)
           if (fs.existsSync(lockPath)) {
