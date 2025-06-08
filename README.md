@@ -73,6 +73,7 @@ Create a `.env` file and provide the required variables:
 - `ADMIN_USERNAME` and `ADMIN_PASSWORD`
 - `DATABASE_PATH` (default: `./data/whatsapp_manager.db`)
 - `JWT_SECRET`
+- `FRONTEND_URL` – base URL of your frontend used by the WebSocket server
 
 Additional options such as `PORT`, `HOST`, and WebSocket settings can also be set.
 
