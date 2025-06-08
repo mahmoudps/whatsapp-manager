@@ -23,9 +23,19 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 
 let JWT_SECRET, JWT_EXPIRES_IN
 try {
-  ;({ JWT_SECRET, JWT_EXPIRES_IN } = require("./lib/config"))
-} catch (err) {
-  JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
+  // Try to load from lib/config.js first
+  const configPath = path.join(__dirname, "lib", "config.js")
+  if (require("fs").existsSync(configPath)) {
+    const config = require(configPath)
+    JWT_SECRET = config.JWT_SECRET
+    JWT_EXPIRES_IN = config.JWT_EXPIRES_IN
+  } else {
+    JWT_SECRET = process.env.JWT_SECRET
+    JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
+  }
+} catch (error) {
+  console.warn("⚠️  Could not load lib/config.js, using environment variables:", error.message)
+  JWT_SECRET = process.env.JWT_SECRET
   JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
 }
 

@@ -462,7 +462,19 @@ start_system() {
 
     # التحقق من وجود الملفات
     check_files || return 1
-    
+
+    # التحقق من متغيرات البيئة الهامة
+    if [ -f ".env" ]; then
+        source .env
+        if [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
+            echo -e "${RED}❌ يجب ضبط ADMIN_USERNAME و ADMIN_PASSWORD و JWT_SECRET في .env${NC}"
+            return 1
+        fi
+    else
+        echo -e "${RED}❌ ملف .env غير موجود${NC}"
+        return 1
+    fi
+
     # إنشاء المجلدات
     mkdir -p data logs
     # ضبط الصلاحيات للسماح للحاوية بالكتابة على الملفات

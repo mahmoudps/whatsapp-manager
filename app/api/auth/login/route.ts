@@ -6,12 +6,7 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { db } from "@/lib/database"
 import { logger } from "@/lib/logger"
-import { JWT_SECRET } from "@/lib/config"
-
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
-
+import { JWT_SECRET, JWT_EXPIRES_IN, ADMIN_USERNAME, ADMIN_PASSWORD } from "@/lib/config"
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()
