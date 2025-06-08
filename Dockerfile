@@ -3,11 +3,31 @@ FROM node:18-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libnss3 \
+    libnspr4 \
     libfreetype6 \
     libharfbuzz0b \
-    ca-certificates \
+    libgtk-3-0 \
+    libappindicator3-1 \
+    libdbus-1-3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libcups2 \
+    libasound2 \
+    libxshmfence1 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
     fonts-freefont-ttf \
+    fonts-liberation \
+    fonts-noto-color-emoji \
+    xdg-utils \
+    ca-certificates \
     python3 \
+    procps \
     make \
     g++ \
     sqlite3 \
@@ -28,6 +48,9 @@ RUN npm install --production && npm cache clean --force
 
 # Copy app source
 COPY . .
+
+# Make production script executable
+RUN chmod +x start-production.sh
 
 # Build the application
 RUN npm run build
@@ -50,5 +73,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start application
-CMD ["sh", "-c", "if [ -z \"$ADMIN_USERNAME\" ] || [ -z \"$ADMIN_PASSWORD\" ] || [ -z \"$JWT_SECRET\" ]; then echo 'Required environment variables are missing'; exit 1; fi && npm start"]
+# Start application using the production helper script
+CMD ["sh", "-c", "if [ -z \"$ADMIN_USERNAME\" ] || [ -z \"$ADMIN_PASSWORD\" ] || [ -z \"$JWT_SECRET\" ]; then echo 'Required environment variables are missing'; exit 1; fi && ./start-production.sh"]

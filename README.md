@@ -32,9 +32,11 @@ For a production build you can use Docker:
 docker-compose up --build -d
 ```
 The compose file uses the `Dockerfile` in the repository root to build the image.
+The container now runs the `start-production.sh` script which automatically
+launches the WebSocket server when `ENABLE_WEBSOCKET=true`.
 
-Chromium is now downloaded automatically during installation, so no additional
-`PUPPETEER_*` environment variables are required.
+Chromium and all required system libraries are downloaded automatically during
+installation, so no additional `PUPPETEER_*` environment variables are required.
 
 **Security notice:** The `.env.example` file ships with placeholder credentials
 (`ADMIN_USERNAME=admin` and `ADMIN_PASSWORD=admin123`). Be sure to change these
@@ -100,7 +102,8 @@ To broadcast real-time events you can enable the optional WebSocket server. Set
 - `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
   `ws://localhost:3001` or `wss://example.com/ws`
 
-Start the server separately with:
+When running via Docker Compose the WebSocket server starts automatically.
+For local development you can launch it manually with:
 
 ```bash
 node websocket-server.js
