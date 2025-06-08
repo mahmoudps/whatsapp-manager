@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import jwt from "jsonwebtoken"
 import { logger } from "./logger"
-import { JWT_SECRET } from "./config"
+import { JWT_SECRET, JWT_EXPIRES_IN } from "./config"
 
 interface AuthResult {
   success: boolean
@@ -47,3 +47,9 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
     }
   }
 }
+
+export function createAuthToken(user: { id: number; username: string }) {
+  const payload = { userId: user.id, username: user.username }
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+}
+
