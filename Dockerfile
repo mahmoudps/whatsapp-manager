@@ -20,11 +20,16 @@ RUN apt-get update && apt-get install -y \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    xdg-utils \
+    libxshmfence1 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
     libfreetype6 \
     libharfbuzz0b \
     fonts-freefont-ttf \
+    fonts-noto-color-emoji \
+    xdg-utils \
     python3 \
+    procps \
     make \
     g++ \
     sqlite3 \
@@ -32,41 +37,31 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Set Puppeteer environment
 ENV NODE_ENV=production
 
-# Create app directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install --production && npm cache clean --force
 
-# Copy app source
 COPY . .
 
-# Build the application
+RUN chmod +x start-production.sh
+
 RUN npm run build
 
-# Create non-root user
 RUN addgroup --gid 1001 nodejs && \
     adduser --system --uid 1001 --gid 1001 whatsapp
 
-# Create directories and set permissions
 RUN mkdir -p data logs && \
     chown -R whatsapp:nodejs /app
 
-# Switch to non-root user
 USER whatsapp
 
-# Expose port
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start application
-CMD ["sh", "-c", "if [ -z \"$ADMIN_USERNAME\" ] || [ -z \"$ADMIN_PASSWORD\" ] || [ -z \"$JWT_SECRET\" ]; then echo 'Required environment variables are missing'; exit 1; fi && npm start"]
+CMD ["sh", "-c", "if [ -z \"$ADMIN_USERNAME\" ] || [ -z \"$ADMIN_PASSWORD\" ] || [ -z \"$JWT_SECRET\" ]; then echo 'Required environment variables are missing'; exit 1; fi && ./start-production.sh"]
