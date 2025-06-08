@@ -184,7 +184,7 @@ export default function MessagesPage() {
     const matchesSearch =
       message.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getDeviceName(message.device_id).toLowerCase().includes(searchTerm.toLowerCase())
+      getDeviceName(message.deviceId).toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === "all" || message.status === statusFilter
 
@@ -423,9 +423,9 @@ export default function MessagesPage() {
                                 <StatusIcon className={`h-3 w-3 ${statusConfig.color}`} />
                                 {statusConfig.label}
                               </Badge>
-                              <span className="text-sm text-gray-500">{getDeviceName(message.device_id)}</span>
+                              <span className="text-sm text-gray-500">{getDeviceName(message.deviceId)}</span>
                               <span className="text-sm text-gray-500">
-                                {new Date(message.sent_at).toLocaleString("ar-SA")}
+                                {new Date(message.sentAt).toLocaleString("ar-SA")}
                               </span>
                             </div>
 
@@ -438,9 +438,9 @@ export default function MessagesPage() {
                               {message.message}
                             </p>
 
-                            {message.error_message && (
+                            {message.errorMessage && (
                               <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-400">
-                                <strong>خطأ:</strong> {message.error_message}
+                                <strong>خطأ:</strong> {message.errorMessage}
                               </div>
                             )}
                           </div>
