@@ -29,6 +29,14 @@ interface SystemStatus {
   }
 }
 
+interface EnvConfig {
+  PORT: number
+  WHATSAPP_SERVER_PORT: number
+  WEBSOCKET_PORT: number
+  ENABLE_WEBSOCKET: boolean
+  DATABASE_PATH: string
+}
+
 export default function DiagnosticsPage() {
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     api: { status: "checking", message: "جاري التحقق..." },
@@ -36,6 +44,7 @@ export default function DiagnosticsPage() {
     database: { status: "checking", message: "جاري التحقق..." },
   })
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [envVars, setEnvVars] = useState<EnvConfig | null>(null)
 
   useEffect(() => {
     checkSystemStatus()
@@ -43,6 +52,9 @@ export default function DiagnosticsPage() {
 
   const checkSystemStatus = async () => {
     setIsRefreshing(true)
+
+    // جلب متغيرات البيئة من الخادم
+    await fetchEnvVariables()
 
     // تحقق من حالة API
     await checkApiStatus()
@@ -158,6 +170,18 @@ export default function DiagnosticsPage() {
           message: `فشل التحقق من حالة قاعدة البيانات: ${(error as Error).message}`,
         },
       }))
+    }
+  }
+
+  const fetchEnvVariables = async () => {
+    try {
+      const response = await fetch("/api/env")
+      if (response.ok) {
+        const data = await response.json()
+        setEnvVars(data)
+      }
+    } catch (error) {
+      setEnvVars(null)
     }
   }
 
@@ -313,19 +337,19 @@ export default function DiagnosticsPage() {
                 <h3 className="font-medium mb-2">متغيرات الخادم</h3>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <strong>PORT:</strong> {process.env.PORT || "3000"}
+                    <strong>PORT:</strong> {envVars?.PORT ?? "غير متاح"}
                   </p>
                   <p>
-                    <strong>WHATSAPP_SERVER_PORT:</strong> {process.env.WHATSAPP_SERVER_PORT || "غير محدد"}
+                    <strong>WHATSAPP_SERVER_PORT:</strong> {envVars?.WHATSAPP_SERVER_PORT ?? "غير متاح"}
                   </p>
                   <p>
-                    <strong>WEBSOCKET_PORT:</strong> {process.env.WEBSOCKET_PORT || "غير محدد"}
+                    <strong>WEBSOCKET_PORT:</strong> {envVars?.WEBSOCKET_PORT ?? "غير متاح"}
                   </p>
                   <p>
-                    <strong>ENABLE_WEBSOCKET:</strong> {process.env.ENABLE_WEBSOCKET || "غير محدد"}
+                    <strong>ENABLE_WEBSOCKET:</strong> {envVars?.ENABLE_WEBSOCKET !== undefined ? String(envVars.ENABLE_WEBSOCKET) : "غير متاح"}
                   </p>
                   <p>
-                    <strong>DATABASE_PATH:</strong> {process.env.DATABASE_PATH || "غير محدد"}
+                    <strong>DATABASE_PATH:</strong> {envVars?.DATABASE_PATH ?? "غير متاح"}
                   </p>
                 </div>
               </div>
