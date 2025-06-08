@@ -13,6 +13,7 @@ interface AppContextType {
   notifications: Notification[]
   actions: {
     addNotification: (notification: Omit<Notification, "id">) => void
+    removeNotification: (id: string) => void
     clearNotifications: () => void
   }
 }
@@ -21,6 +22,7 @@ const AppContext = createContext<AppContextType>({
   notifications: [],
   actions: {
     addNotification: () => {},
+    removeNotification: () => {},
     clearNotifications: () => {},
   },
 })
@@ -38,6 +40,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 3000)
   }
 
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id))
+  }
+
   const clearNotifications = () => {
     setNotifications([])
   }
@@ -48,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         notifications,
         actions: {
           addNotification,
+          removeNotification,
           clearNotifications,
         },
       }}

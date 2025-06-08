@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button"
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react"
 
 export function Notifications() {
-  const { notifications, actions } = useAppContext()
+  const {
+    notifications,
+    actions: { removeNotification },
+  } = useAppContext()
 
   if (notifications.length === 0) {
     return null
@@ -50,7 +53,7 @@ export function Notifications() {
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0"
-              onClick={() => actions.removeNotification(notification.id)}
+              onClick={() => removeNotification(notification.id)}
             >
               <X className="h-4 w-4" />
             </Button>
