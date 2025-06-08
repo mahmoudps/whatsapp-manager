@@ -1,22 +1,23 @@
-FROM node:18-alpine
+FROM node:18-slim
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     chromium \
-    nss \
-    freetype \
-    harfbuzz \
+    libnss3 \
+    libfreetype6 \
+    libharfbuzz0b \
     ca-certificates \
-    ttf-freefont \
+    fonts-freefont-ttf \
     python3 \
     make \
     g++ \
-    sqlite \
-    curl
+    sqlite3 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set Puppeteer environment
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV NODE_ENV=production
 
 # Create app directory
@@ -35,8 +36,8 @@ COPY . .
 RUN npm run build
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S whatsapp -u 1001 -G nodejs
+RUN addgroup --gid 1001 nodejs && \
+    adduser --system --uid 1001 --gid 1001 whatsapp
 
 # Create directories and set permissions
 RUN mkdir -p data logs && \
