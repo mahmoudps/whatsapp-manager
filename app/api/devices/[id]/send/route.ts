@@ -36,9 +36,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     console.log("📝 Request body:", body)
 
     // التحقق من صحة البيانات
-    const messageData = ValidationSchemas.createMessage({
-      deviceId,
-      recipient: body.recipient,
+    const messageData = ValidationSchemas.message({
+      to: body.recipient,
       message: body.message,
     })
 
@@ -83,10 +82,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
 
-    console.log(`📤 Sending message from device ${deviceId} to ${messageData.recipient}`)
+    console.log(`📤 Sending message from device ${deviceId} to ${messageData.to}`)
 
     // إرسال الرسالة
-    const success = await whatsappManager.sendMessage(deviceId, messageData.recipient, messageData.message)
+    const success = await whatsappManager.sendMessage(deviceId, messageData.to, messageData.message)
 
     if (success) {
       console.log("✅ Message sent successfully")
