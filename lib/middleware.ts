@@ -58,3 +58,4 @@ export function createAuthToken(payload: { id: number; username: string }) {
     { expiresIn: JWT_EXPIRES_IN },
   )
 }
+
