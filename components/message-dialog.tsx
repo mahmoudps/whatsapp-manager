@@ -8,12 +8,21 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Loader2, Send, Users, MessageSquare } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { Device } from "@/lib/types"
 
 interface MessageDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  deviceId: number
-  deviceName: string
+  deviceId?: number
+  deviceName?: string
+  devices?: Device[]
   onSendMessage: (data: {
     deviceId: number
     recipient?: string
@@ -23,12 +32,13 @@ interface MessageDialogProps {
   }) => void
 }
 
-export function MessageDialog({ open, onOpenChange, deviceId, deviceName, onSendMessage }: MessageDialogProps) {
+export function MessageDialog({ open, onOpenChange, deviceId, deviceName, devices, onSendMessage }: MessageDialogProps) {
   const [recipient, setRecipient] = useState("")
   const [bulkRecipients, setBulkRecipients] = useState("")
   const [message, setMessage] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [activeTab, setActiveTab] = useState("single")
+  const [selectedDeviceId, setSelectedDeviceId] = useState<number | undefined>(deviceId ?? devices?.[0]?.id)
 
   const handleSendMessage = async () => {
     if (activeTab === "single" && (!recipient || !message)) {
@@ -42,9 +52,14 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, onSend
     setIsSending(true)
 
     try {
+      const targetDeviceId = selectedDeviceId ?? deviceId
+      if (!targetDeviceId) {
+        throw new Error("deviceId is required")
+      }
+
       if (activeTab === "single") {
         await onSendMessage({
-          deviceId,
+          deviceId: targetDeviceId,
           recipient,
           message,
           isBulk: false,
@@ -55,7 +70,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, onSend
           .map((r) => r.trim())
           .filter((r) => r)
         await onSendMessage({
-          deviceId,
+          deviceId: targetDeviceId,
           recipients,
           message,
           isBulk: true,
@@ -80,9 +95,25 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, onSend
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            إرسال رسالة عبر {deviceName}
+            {deviceName ? `إرسال رسالة عبر ${deviceName}` : "إرسال رسالة"}
           </DialogTitle>
         </DialogHeader>
+
+        {!deviceName && devices && (
+          <div className="mb-4">
+            <Label>اختر الجهاز</Label>
+            <Select value={selectedDeviceId?.toString()} onValueChange={(val) => setSelectedDeviceId(Number(val))}>
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="اختر الجهاز" />
+              </SelectTrigger>
+              <SelectContent>
+                {devices.map((d) => (
+                  <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">

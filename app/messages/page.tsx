@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
+import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
@@ -22,6 +23,7 @@ export default function MessagesPage() {
   const { actions } = useApp()
   const ws = useRef<WebSocket | null>(null)
   const reconnectAttempts = useRef(0)
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
   useEffect(() => {
     fetchMessages()
@@ -200,6 +202,49 @@ export default function MessagesPage() {
 
   const stats = getMessageStats()
 
+  const handleSendMessage = async (data: {
+    deviceId: number
+    recipient?: string
+    recipients?: string[]
+    message: string
+    isBulk: boolean
+  }) => {
+    try {
+      const url = data.isBulk
+        ? `/api/devices/${data.deviceId}/send-bulk`
+        : `/api/devices/${data.deviceId}/send`
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(
+          data.isBulk
+            ? { recipients: data.recipients, message: data.message }
+            : { recipient: data.recipient, message: data.message },
+        ),
+      })
+
+      const resp = await res.json()
+      if (!res.ok || !resp.success) {
+        throw new Error(resp.error || "فشل إرسال الرسالة")
+      }
+
+      actions.addNotification({
+        type: "success",
+        title: "نجح",
+        message: resp.message || "تم إرسال الرسالة",
+      })
+    } catch (err) {
+      console.error("Error sending message:", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل في إرسال الرسالة",
+      })
+    }
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -208,10 +253,16 @@ export default function MessagesPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">إدارة الرسائل</h1>
             <p className="text-gray-600 dark:text-gray-400">عرض وإدارة جميع الرسائل المرسلة</p>
           </div>
-          <Button onClick={fetchMessages} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            تحديث
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setMessageDialogOpen(true)} variant="outline" size="sm">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              إرسال رسالة
+            </Button>
+            <Button onClick={fetchMessages} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              تحديث
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -403,6 +454,14 @@ export default function MessagesPage() {
           )}
         </AnimatePresence>
       </div>
+      {devices.length > 0 && (
+        <MessageDialog
+          open={messageDialogOpen}
+          onOpenChange={setMessageDialogOpen}
+          devices={devices}
+          onSendMessage={handleSendMessage}
+        />
+      )}
     </MainLayout>
   )
 }
