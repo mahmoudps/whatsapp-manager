@@ -20,26 +20,11 @@ const jwt = require("jsonwebtoken")
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
-// Load configuration explicitly using __dirname to avoid path issues
-const path = require("path")
 
-// Load configuration with proper error handling
 let JWT_SECRET, JWT_EXPIRES_IN
-
 try {
-  // Try to load from lib/config.js first
-  const configPath = path.join(__dirname, "lib", "config.js")
-  if (require("fs").existsSync(configPath)) {
-    const config = require(configPath)
-    JWT_SECRET = config.JWT_SECRET
-    JWT_EXPIRES_IN = config.JWT_EXPIRES_IN
-  } else {
-    // Fallback to environment variables
-    JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
-    JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
-  }
-} catch (error) {
-  console.warn("⚠️  Could not load lib/config.js, using environment variables:", error.message)
+  ;({ JWT_SECRET, JWT_EXPIRES_IN } = require("./lib/config"))
+} catch (err) {
   JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-in-production"
   JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h"
 }

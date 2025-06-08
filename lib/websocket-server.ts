@@ -6,12 +6,12 @@ import helmet from "helmet"
 import compression from "compression"
 import jwt from "jsonwebtoken"
 import { logger } from "./logger"
+import { JWT_SECRET } from "./config"
 
 // إعدادات البيئة
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key"
 
 interface WebSocketServerInstance {
   server: any
