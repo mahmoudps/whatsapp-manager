@@ -82,6 +82,28 @@ If left unset, only same-origin requests are permitted.
 - `DEBUG_ROUTES` (default: `false`) enables debug-only API endpoints. Avoid
   enabling this in production.
 
+## WebSocket support
+
+To broadcast real-time events you can enable the optional WebSocket server. Set
+`ENABLE_WEBSOCKET=true` in your `.env` file and adjust the related variables:
+
+- `WEBSOCKET_PORT` – port for the WebSocket server (default: `3001`)
+- `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
+  `ws://localhost:3001` or `wss://example.com/ws`
+
+Start the server separately with:
+
+```bash
+node websocket-server.js
+```
+
+For process management you can also use PM2 with the provided
+`ecosystem.config.js`:
+
+```bash
+pm2 start ecosystem.config.js
+```
+
 ## CLI installation
 
 The repository includes a helper CLI script called `wa-manager.sh`.
