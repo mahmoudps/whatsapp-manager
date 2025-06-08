@@ -37,6 +37,11 @@ http://localhost:3000 أو http://localhost:3001
 wa-manager start
 \`\`\`
 
+To regenerate the environment configuration later run:
+\`\`\`bash
+wa-manager rebuild
+\`\`\`
+
 ## Or manually:
 \`\`\`bash
 npm install --legacy-peer-deps
