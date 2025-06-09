@@ -9,11 +9,11 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
-        ringColor: {
-                ring: 'hsl(var(--ring))',
-                'sidebar-ring': 'hsl(var(--sidebar-ring))'
-        },
         extend: {
+                ringColor: {
+                        ring: 'hsl(var(--ring))',
+                        'sidebar-ring': 'hsl(var(--sidebar-ring))',
+                },
                 colors: {
                         background: 'hsl(var(--background))',
                         foreground: 'hsl(var(--foreground))',
