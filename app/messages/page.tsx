@@ -41,10 +41,9 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      let wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001/ws"
-      if (!wsUrl.endsWith("/ws")) {
-        wsUrl = wsUrl.replace(/\/$/, "") + "/ws"
-      }
+      let wsUrl =
+        process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+        "ws://localhost:3001/ws/socket.io"
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)

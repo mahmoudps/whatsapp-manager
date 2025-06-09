@@ -68,7 +68,7 @@ cp .env.example .env
 - `PORT` و`HOST`: إعدادات الخادم الرئيسي.
 - `DATABASE_PATH`: مسار قاعدة البيانات (الافتراضي `./data/whatsapp_manager.db`).
 - `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
-- `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة.
+- `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة ويجب أن ينتهي بالمسار `/ws/socket.io`.
 - `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
 - `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
 

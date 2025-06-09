@@ -19,13 +19,15 @@ interface WebSocketState {
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const {
-    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:3001/ws",
+    url =
+      process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+      "http://localhost:3001/ws/socket.io",
     token,
     deviceId,
     autoConnect = true,
   } = options
 
-  const fullUrl = url.endsWith("/ws") ? url : url.replace(/\/$/, "") + "/ws"
+  const fullUrl = url
 
   const [state, setState] = useState<WebSocketState>({
     connected: false,
