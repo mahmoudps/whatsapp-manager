@@ -24,6 +24,11 @@ npm install
 npm run dev
 ```
 
+**Note:** Install dependencies with `npm install --legacy-peer-deps` to avoid
+peer-dependency conflicts with Jest packages. The included `.npmrc` already
+sets this option, but make sure to copy the file when building Docker images so
+the flag is honored there.
+
 ### Production
 
 For a production build you can use Docker:
