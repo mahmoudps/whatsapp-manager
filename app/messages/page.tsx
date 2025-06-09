@@ -310,7 +310,7 @@ export default function MessagesPage() {
         message: resp.message || "تم إرسال الرسالة",
       })
     } catch (err) {
-      console.error("Error sending message:", err)
+      logger.error("Error sending message:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",

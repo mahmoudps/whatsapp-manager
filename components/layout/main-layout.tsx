@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card"
 import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X, LogOut, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Notifications } from "@/components/notifications"
+import { logger } from "@/lib/logger"
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -55,7 +56,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       })
       window.location.href = "/login"
     } catch (error) {
-      console.error("Logout error:", error)
+      logger.error("Logout error:", error as Error)
       window.location.href = "/login"
     }
   }

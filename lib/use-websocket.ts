@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import { io, type Socket } from "socket.io-client"
+import { logger } from "./logger"
 
 interface UseWebSocketOptions {
   url?: string
@@ -53,7 +54,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       })
 
       socket.on("connect", () => {
-        console.log("✅ WebSocket connected")
+        logger.info("✅ WebSocket connected")
         setState((prev) => ({
           ...prev,
           connected: true,
@@ -67,7 +68,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       })
 
       socket.on("disconnect", (reason) => {
-        console.log("❌ WebSocket disconnected:", reason)
+        logger.info("❌ WebSocket disconnected:", reason)
         setState((prev) => ({
           ...prev,
           connected: false,
@@ -83,7 +84,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       })
 
       socket.on("connect_error", (error) => {
-        console.error("🚨 WebSocket connection error:", error)
+        logger.error("🚨 WebSocket connection error:", error as Error)
         setState((prev) => ({
           ...prev,
           connected: false,
@@ -102,7 +103,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
       socketRef.current = socket
     } catch (error) {
-      console.error("Failed to create socket:", error)
+      logger.error("Failed to create socket:", error as Error)
       setState((prev) => ({
         ...prev,
         connecting: false,

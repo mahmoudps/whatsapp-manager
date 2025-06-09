@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Loader2, Send, Users, MessageSquare } from "lucide-react"
+import { logger } from "@/lib/logger"
 import {
   Select,
   SelectContent,
@@ -93,7 +94,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setScheduledAt("")
       onOpenChange(false)
     } catch (error) {
-      console.error("Error sending message:", error)
+      logger.error("Error sending message:", error as Error)
     } finally {
       setIsSending(false)
     }

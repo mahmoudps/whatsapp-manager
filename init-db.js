@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
 require('ts-node/register');
+const { logger } = require('./lib/logger.ts');
 
 (async () => {
   try {
     const { initializeDatabase } = require('./lib/database.ts');
     await initializeDatabase();
-    console.log('✅ Database initialized successfully');
+    logger.info('✅ Database initialized successfully');
   } catch (err) {
-    console.error('❌ Failed to initialize database:', err);
+    logger.error('❌ Failed to initialize database:', err);
     process.exit(1);
   }
 })();

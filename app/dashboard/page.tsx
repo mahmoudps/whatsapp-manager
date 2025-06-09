@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Activity, MessageSquare, Smartphone, Users, RefreshCw, AlertCircle } from "lucide-react"
 import { MainLayout } from "@/components/layout/main-layout"
+import { logger } from "@/lib/logger"
 
 interface Stats {
   devices: {
@@ -110,7 +111,7 @@ export default function DashboardPage() {
 
       setStats(combined)
     } catch (err) {
-      console.error("Error fetching stats:", err)
+      logger.error("Error fetching stats:", err as Error)
       const errorMessage = err instanceof Error ? err.message : "حدث خطأ أثناء جلب الإحصائيات"
       setError(errorMessage)
     } finally {
