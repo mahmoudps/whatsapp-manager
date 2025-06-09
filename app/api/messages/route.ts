@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
     const limit = Number.parseInt(searchParams.get("limit") || "100")
     const offset = Number.parseInt(searchParams.get("offset") || "0")
     const deviceId = searchParams.get("deviceId")
+    const recipient = searchParams.get("recipient") || undefined
+    const isGroupParam = searchParams.get("isGroup")
+    const isGroup =
+      isGroupParam === "true" ? true : isGroupParam === "false" ? false : undefined
 
     logger.info(`📝 Fetching messages - limit: ${limit}, offset: ${offset}, deviceId: ${deviceId}`)
 
@@ -31,12 +35,13 @@ export async function GET(request: NextRequest) {
     await db.ensureInitialized()
 
     // جلب الرسائل
-    let messages
-    if (deviceId) {
-      messages = await db.getMessagesByDevice(Number.parseInt(deviceId), limit)
-    } else {
-      messages = await db.getAllMessages(limit, offset)
-    }
+    let messages = await db.getMessages({
+      deviceId: deviceId ? Number.parseInt(deviceId) : undefined,
+      recipient: recipient || undefined,
+      isGroup,
+      limit,
+      offset,
+    })
 
     logger.info(`📨 Found ${messages.length} messages`)
 

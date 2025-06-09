@@ -113,6 +113,7 @@ class DatabaseManager {
 
       // إنشاء المسؤول الافتراضي
       this.createDefaultAdmin()
+      this.applyDefaultSettings()
 
       this.initialized = true
       logger.info("Database initialized successfully")
@@ -141,6 +142,14 @@ class DatabaseManager {
         role TEXT DEFAULT 'admin',
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         last_login TEXT
+      )
+    `)
+
+    // جدول الإعدادات العامة
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
       )
     `)
 
@@ -182,6 +191,7 @@ class DatabaseManager {
         status TEXT DEFAULT 'pending',
         message_id TEXT,
         message_type TEXT DEFAULT 'text',
+        is_group INTEGER DEFAULT 0,
         sent_at TEXT,
         error_message TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -263,6 +273,23 @@ class DatabaseManager {
       }
     } catch (error) {
       logger.error("Error creating default admin:", error)
+    }
+  }
+
+  private applyDefaultSettings(): void {
+    if (!this.db) throw new Error("Database not initialized")
+
+    try {
+      const envKey = process.env.EXTERNAL_API_KEY
+      if (envKey) {
+        this.db
+          .prepare(
+            `INSERT INTO settings (key, value) VALUES ('external_api_key', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`,
+          )
+          .run(envKey)
+      }
+    } catch (error) {
+      logger.error("Error applying default settings:", error)
     }
   }
 
@@ -425,8 +452,8 @@ class DatabaseManager {
 
     const result = this.db
       .prepare(`
-      INSERT INTO messages (device_id, recipient, message, status, message_id, message_type, sent_at, error_message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO messages (device_id, recipient, message, status, message_id, message_type, sent_at, error_message, is_group)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
       .run(
         data.deviceId,
@@ -437,12 +464,14 @@ class DatabaseManager {
         data.messageType,
         data.sentAt || null,
         data.errorMessage || null,
+        data.isGroup ? 1 : 0,
       )
 
     const message = this.db
       .prepare(`
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
+             is_group as isGroup,
              sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
       FROM messages WHERE id = ?
@@ -459,10 +488,11 @@ class DatabaseManager {
       .prepare(`
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
+             is_group as isGroup,
              sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
-      FROM messages 
-      ORDER BY created_at DESC 
+      FROM messages
+      ORDER BY created_at DESC
       LIMIT ? OFFSET ?
     `)
       .all(limit, offset) as Message[]
@@ -477,16 +507,61 @@ class DatabaseManager {
       .prepare(`
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
+             is_group as isGroup,
              sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
-      FROM messages 
+      FROM messages
       WHERE device_id = ?
-      ORDER BY created_at DESC 
+      ORDER BY created_at DESC
       LIMIT ?
     `)
       .all(deviceId, limit) as Message[]
 
     return messages
+  }
+
+  getMessages(filters: {
+    deviceId?: number
+    recipient?: string
+    isGroup?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Message[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const conditions: string[] = []
+    const values: any[] = []
+
+    if (filters.deviceId !== undefined) {
+      conditions.push("device_id = ?")
+      values.push(filters.deviceId)
+    }
+    if (filters.recipient) {
+      conditions.push("recipient = ?")
+      values.push(filters.recipient)
+    }
+    if (filters.isGroup !== undefined) {
+      conditions.push("is_group = ?")
+      values.push(filters.isGroup ? 1 : 0)
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : ""
+    const limit = filters.limit ?? 100
+    const offset = filters.offset ?? 0
+
+    const stmt = this.db.prepare(
+      `SELECT id, device_id as deviceId, recipient, message, status,
+              message_id as messageId, message_type as messageType,
+              is_group as isGroup,
+              sent_at as sentAt, error_message as errorMessage,
+              created_at as createdAt, updated_at as updatedAt
+       FROM messages ${whereClause}
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+    )
+
+    const rows = stmt.all(...values, limit, offset) as Message[]
+    return rows
   }
 
   updateMessage(id: number, data: Partial<Message>): void {
@@ -569,6 +644,21 @@ class DatabaseManager {
       .all(limit, offset) as IncomingMessage[]
 
     return messages
+  }
+
+  // Settings operations
+  getSetting(key: string): string | null {
+    if (!this.db) throw new Error("Database not initialized")
+    const row = this.db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key) as { value: string } | undefined
+    return row?.value ?? null
+  }
+
+  setSetting(key: string, value: string): void {
+    if (!this.db) throw new Error("Database not initialized")
+    this.db.prepare(
+      `INSERT INTO settings (key, value) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value=excluded.value`,
+    ).run(key, value)
   }
 
   // Analytics operations

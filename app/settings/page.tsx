@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { User, Lock, Save, Loader2, Eye, EyeOff, Shield, Database, Server, Info } from "lucide-react"
+import { User, Lock, Save, Loader2, Eye, EyeOff, Shield, Database, Server, Info, Key } from "lucide-react"
 import { useApp } from "@/lib/app-context"
 import { MainLayout } from "@/components/layout/main-layout"
 
@@ -31,10 +31,15 @@ export default function SettingsPage() {
     confirmPassword: "",
   })
 
+  const [apiToken, setApiToken] = useState("")
+  const [showApiToken, setShowApiToken] = useState(false)
+  const [savingToken, setSavingToken] = useState(false)
+
   const { actions } = useApp()
 
   useEffect(() => {
     fetchUserInfo()
+    fetchApiToken()
   }, [])
 
   const fetchUserInfo = async () => {
@@ -50,6 +55,39 @@ export default function SettingsPage() {
       actions.addNotification({ type: "error", title: "خطأ", message: (err as Error).message })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchApiToken = async () => {
+    try {
+      const res = await fetch("/api/settings/external-api-key")
+      const data = await res.json()
+      if (data.success) {
+        setApiToken(data.value || "")
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleTokenSave = async () => {
+    setSavingToken(true)
+    try {
+      const res = await fetch("/api/settings/external-api-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: apiToken }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        actions.addNotification({ type: "success", title: "نجاح", message: "تم تحديث الرمز" })
+      } else {
+        throw new Error(data.error || "فشل التحديث")
+      }
+    } catch (err) {
+      actions.addNotification({ type: "error", title: "خطأ", message: (err as Error).message })
+    } finally {
+      setSavingToken(false)
     }
   }
 
@@ -172,6 +210,40 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* API Token */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              API Token
+            </CardTitle>
+            <CardDescription>إدارة رمز الواجهة البرمجية</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showApiToken ? "text" : "password"}
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+                placeholder="API Token"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowApiToken(!showApiToken)}
+              >
+                {showApiToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            <Button onClick={handleTokenSave} disabled={savingToken} className="w-full">
+              {savingToken ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              حفظ الرمز
+            </Button>
           </CardContent>
         </Card>
 

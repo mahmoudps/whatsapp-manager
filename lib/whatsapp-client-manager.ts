@@ -542,6 +542,8 @@ class WhatsAppClientManager extends EventEmitter {
     recipient: string,
     message: string,
   ): Promise<boolean> {
+    let formattedNumber = "";
+    let isGroup = false;
     try {
       const whatsappClient = this.clients.get(deviceId);
 
@@ -552,12 +554,13 @@ class WhatsAppClientManager extends EventEmitter {
       }
 
       // التحقق من صحة رقم الهاتف
-      if (!this.isValidPhoneNumber(recipient)) {
+      isGroup = recipient.endsWith("@g.us");
+      if (!isGroup && !this.isValidPhoneNumber(recipient)) {
         throw new Error("Invalid phone number format");
       }
 
       // تنسيق رقم الهاتف
-      const formattedNumber = this.formatPhoneNumber(recipient);
+      formattedNumber = isGroup ? recipient : this.formatPhoneNumber(recipient);
 
       logger.info(
         `Sending message from device ${deviceId} to ${formattedNumber}`,
@@ -579,6 +582,7 @@ class WhatsAppClientManager extends EventEmitter {
         status: "sent",
         sentAt: new Date().toISOString(),
         messageType: "text",
+        isGroup,
         messageId: sentMessage.id.id,
       });
 
@@ -613,11 +617,12 @@ class WhatsAppClientManager extends EventEmitter {
       // حفظ الرسالة الفاشلة
       db.createMessage({
         deviceId,
-        recipient,
+        recipient: formattedNumber,
         message,
         status: "failed",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         messageType: "text",
+        isGroup,
       });
 
       db.createAnalyticsEvent({
@@ -627,13 +632,13 @@ class WhatsAppClientManager extends EventEmitter {
 
       this.emit("message_failed", {
         deviceId,
-        recipient,
+        recipient: formattedNumber || recipient,
         message,
         error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       });
       wsEmit("broadcastToDevice", deviceId, "message_failed", {
-        recipient,
+        recipient: formattedNumber || recipient,
         message,
         error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
