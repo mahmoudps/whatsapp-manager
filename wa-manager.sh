@@ -136,7 +136,7 @@ install_pm2() {
     # التحقق من وجود Node.js و npm
     if ! command -v node &> /dev/null; then
         echo -e "${YELLOW}⏳ تثبيت Node.js...${NC}"
-        if ! curl -fsSL https://deb.nodesource.com/setup_18.x | bash -; then
+        if ! curl -fsSL https://deb.nodesource.com/setup_20.x | bash -; then
             echo -e "${RED}❌ فشل إعداد مستودع Node.js${NC}"
             return 1
         fi
