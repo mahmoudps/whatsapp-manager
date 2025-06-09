@@ -20,7 +20,7 @@ export async function POST() {
 
     if (loginResult.success) {
       // اختبار التحقق من الرمز المميز
-      const token = loginResult.token!
+      const token = loginResult.accessToken!
       const user = await AuthService.verifyToken(token)
 
       return NextResponse.json({

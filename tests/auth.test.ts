@@ -34,7 +34,7 @@ test('authenticateUser success without database', async () => {
   const res = await auth.authenticateUser('test_admin', 'test_pass');
   expect(res.success).toBe(true);
   expect(res.user?.username).toBe('test_admin');
-  expect(res.token).toBeDefined();
+  expect(res.accessToken).toBeDefined();
 });
 
 test('authenticateUser failure with bad credentials', async () => {
