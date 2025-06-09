@@ -26,9 +26,10 @@ export interface Message {
   deviceId: number
   recipient: string
   message: string
-  status: "pending" | "sent" | "failed"
+  status: "pending" | "sent" | "failed" | "scheduled"
   messageId?: string
   messageType: string
+  scheduledAt?: string
   sentAt?: string
   errorMessage?: string
   createdAt: string
@@ -815,6 +816,21 @@ class DatabaseManager {
       UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?
     `)
       .run(id)
+  }
+
+  getAllAdmins(): User[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const admins = this.db
+      .prepare(`
+      SELECT id, username, password, role,
+             created_at as createdAt, last_login as lastLogin
+      FROM users WHERE role = 'admin'
+      ORDER BY username
+    `)
+      .all() as User[]
+
+    return admins
   }
 
   // Refresh token operations
