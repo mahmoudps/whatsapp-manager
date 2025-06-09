@@ -107,7 +107,7 @@ export async function validateRefreshToken(token: string): Promise<boolean> {
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload
 
     // Check if token exists in database
-    const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token = ? AND revoked = 0")
+    const stmt = db.connection.prepare("SELECT * FROM refresh_tokens WHERE token = ? AND revoked = 0")
     const result = stmt.get(token)
 
     if (!result) {
@@ -131,7 +131,7 @@ export async function validateRefreshToken(token: string): Promise<boolean> {
 
 export async function revokeRefreshToken(token: string): Promise<boolean> {
   try {
-    const stmt = db.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE token = ?")
+    const stmt = db.connection.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE token = ?")
     const result = stmt.run(token)
     return result.changes > 0
   } catch (error) {
@@ -142,7 +142,7 @@ export async function revokeRefreshToken(token: string): Promise<boolean> {
 
 export async function revokeAllUserTokens(userId: number): Promise<boolean> {
   try {
-    const stmt = db.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?")
+    const stmt = db.connection.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?")
     const result = stmt.run(userId)
     return result.changes > 0
   } catch (error) {
@@ -153,7 +153,7 @@ export async function revokeAllUserTokens(userId: number): Promise<boolean> {
 
 export async function getUserById(userId: number): Promise<User | null> {
   try {
-    const stmt = db.prepare("SELECT id, username, role, created_at, last_login FROM users WHERE id = ?")
+    const stmt = db.connection.prepare("SELECT id, username, role, created_at, last_login FROM users WHERE id = ?")
     const user = stmt.get(userId) as User | undefined
     return user || null
   } catch (error) {
@@ -164,7 +164,7 @@ export async function getUserById(userId: number): Promise<User | null> {
 
 export async function getUserByUsername(username: string): Promise<User | null> {
   try {
-    const stmt = db.prepare("SELECT * FROM users WHERE username = ?")
+    const stmt = db.connection.prepare("SELECT * FROM users WHERE username = ?")
     const user = stmt.get(username) as User | undefined
     return user || null
   } catch (error) {
@@ -186,7 +186,7 @@ export async function validateUserCredentials(username: string, password: string
     }
 
     // Update last login time
-    const updateStmt = db.prepare("UPDATE users SET last_login = ? WHERE id = ?")
+    const updateStmt = db.connection.prepare("UPDATE users SET last_login = ? WHERE id = ?")
     updateStmt.run(new Date().toISOString(), user.id)
 
     // Remove password from returned user object
@@ -201,7 +201,7 @@ export async function validateUserCredentials(username: string, password: string
 export async function createUser(username: string, password: string, role = "user"): Promise<User | null> {
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
-    const stmt = db.prepare(
+    const stmt = db.connection.prepare(
       "INSERT INTO users (username, password, role, created_at, last_login) VALUES (?, ?, ?, ?, ?)",
     )
     const now = new Date().toISOString()
@@ -226,7 +226,7 @@ export async function createUser(username: string, password: string, role = "use
 export async function changePassword(userId: number, newPassword: string): Promise<boolean> {
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10)
-    const stmt = db.prepare("UPDATE users SET password = ? WHERE id = ?")
+    const stmt = db.connection.prepare("UPDATE users SET password = ? WHERE id = ?")
     const result = stmt.run(hashedPassword, userId)
     return result.changes > 0
   } catch (error) {
@@ -253,7 +253,7 @@ export class AuthService {
       const tokens = await generateTokens(result)
       return {
         success: true,
-        token: tokens.accessToken,
+        token: tokens.token,
         refreshToken: tokens.refreshToken,
         user: result,
         message: "تم تسجيل الدخول بنجاح",
@@ -290,7 +290,7 @@ export class AuthService {
 
     const tokens = await generateTokens(user)
     return {
-      accessToken: tokens.accessToken,
+      accessToken: tokens.token,
       refreshToken: tokens.refreshToken,
     }
   }
