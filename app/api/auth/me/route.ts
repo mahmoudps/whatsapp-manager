@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyToken, getUserById } from "@/lib/auth"
 import { db } from "@/lib/database"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Auth verification error:", error)
+    logger.error("Auth verification error:", error)
     return NextResponse.json({ success: false, message: "خطأ في الخادم" }, { status: 500 })
   }
 }

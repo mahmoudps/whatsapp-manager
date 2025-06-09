@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server"
 import { getWebSocketServer, initializeWebSocketServer } from "@/lib/websocket-server"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       },
     )
   } catch (error) {
-    console.error("Error checking WebSocket server:", error)
+    logger.error("Error checking WebSocket server:", error)
     return new Response(
       JSON.stringify({
         error: "WebSocket server error",
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 })
   } catch (error) {
-    console.error("Error in socket POST:", error)
+    logger.error("Error in socket POST:", error)
     return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 })
   }
 }

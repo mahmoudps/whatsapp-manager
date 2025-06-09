@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@/lib/auth"
 import os from "os"
 import fs from "fs"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("System stats error:", error)
+    logger.error("System stats error:", error)
     return NextResponse.json({ error: "Failed to get system stats" }, { status: 500 })
   }
 }

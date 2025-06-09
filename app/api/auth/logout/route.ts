@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🔍 POST /api/auth/logout - Starting request")
+    logger.info("🔍 POST /api/auth/logout - Starting request")
 
     // حذف ملف تعريف الارتباط
     const cookieStore = cookies()
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("❌ Error in POST /api/auth/logout:", error)
+    logger.error("❌ Error in POST /api/auth/logout:", error)
     return NextResponse.json(
       {
         success: false,

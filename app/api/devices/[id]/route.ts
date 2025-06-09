@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("Error getting device:", error)
+    logger.error("Error getting device:", error)
     return NextResponse.json(
       {
         success: false,
@@ -129,7 +130,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("Error updating device:", error)
+    logger.error("Error updating device:", error)
     return NextResponse.json(
       {
         success: false,
@@ -199,7 +200,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       )
     }
   } catch (error) {
-    console.error("Error deleting device:", error)
+    logger.error("Error deleting device:", error)
     return NextResponse.json(
       {
         success: false,
