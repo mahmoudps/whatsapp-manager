@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // تغيير كلمة المرور
-    const result = await AuthService.changePassword(user.id, currentPassword, newPassword)
+    const result = await AuthService.changePassword(user.userId, currentPassword, newPassword)
 
     if (result.success) {
       logger.info(`Password changed successfully for user: ${user.username}`)
