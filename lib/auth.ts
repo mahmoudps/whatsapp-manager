@@ -74,7 +74,7 @@ export async function generateTokens(user: { id: number; username: string; role?
     role: user.role || "user",
   }
 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
   const refreshToken = jwt.sign(payload, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN })
 
   // حساب تاريخ انتهاء الصلاحية
@@ -88,7 +88,7 @@ export async function generateTokens(user: { id: number; username: string; role?
     expiresAt: refreshExpires.toISOString(),
   })
 
-  return { token, refreshToken }
+  return { accessToken, refreshToken }
 }
 
 export function verifyToken(token: string): TokenPayload | null {
@@ -253,7 +253,7 @@ export class AuthService {
       const tokens = await generateTokens(result)
       return {
         success: true,
-        token: tokens.token,
+        accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         user: result,
         message: "تم تسجيل الدخول بنجاح",
@@ -290,7 +290,7 @@ export class AuthService {
 
     const tokens = await generateTokens(user)
     return {
-      accessToken: tokens.token,
+      accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     }
   }

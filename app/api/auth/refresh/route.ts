@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: "Invalid refresh token" }, { status: 401 })
   }
 
-  const response = NextResponse.json({ success: true, token: tokens.accessToken })
+  const response = NextResponse.json({ success: true, accessToken: tokens.accessToken })
   response.cookies.set("auth-token", tokens.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
