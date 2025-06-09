@@ -3,21 +3,22 @@
 const fs = require("fs")
 const path = require("path")
 const { execSync } = require("child_process")
+const { logger } = require("../lib/logger.ts")
 
-console.log("🔍 بدء تشخيص مشاكل البناء...\n")
+logger.info("🔍 بدء تشخيص مشاكل البناء...\n")
 
 // التحقق من وجود ملف babel.config.js
 const babelConfigPath = path.join(process.cwd(), "babel.config.js")
 if (fs.existsSync(babelConfigPath)) {
-  console.log("⚠️ تم العثور على ملف babel.config.js الذي يتعارض مع SWC")
-  console.log("   يجب حذف هذا الملف لتمكين SWC وتحسين أداء البناء")
-  console.log("   أمر الحذف: rm babel.config.js\n")
+  logger.info("⚠️ تم العثور على ملف babel.config.js الذي يتعارض مع SWC")
+  logger.info("   يجب حذف هذا الملف لتمكين SWC وتحسين أداء البناء")
+  logger.info("   أمر الحذف: rm babel.config.js\n")
 } else {
-  console.log("✅ لا يوجد ملف babel.config.js (جيد)\n")
+  logger.info("✅ لا يوجد ملف babel.config.js (جيد)\n")
 }
 
 // التحقق من التبعيات المفقودة
-console.log("🔍 التحقق من التبعيات المفقودة...")
+logger.info("🔍 التحقق من التبعيات المفقودة...")
 
 const packageJsonPath = path.join(process.cwd(), "package.json")
 const packageJson = require(packageJsonPath)
@@ -34,22 +35,22 @@ requiredDependencies.forEach((dep) => {
 })
 
 if (missingDependencies.length > 0) {
-  console.log("⚠️ التبعيات المفقودة:")
+  logger.info("⚠️ التبعيات المفقودة:")
   missingDependencies.forEach((dep) => {
-    console.log(`   - ${dep}`)
+    logger.info(`   - ${dep}`)
   })
-  console.log(`\n   أمر التثبيت: npm install ${missingDependencies.join(" ")}\n`)
+  logger.info(`\n   أمر التثبيت: npm install ${missingDependencies.join(" ")}\n`)
 } else {
-  console.log("✅ جميع التبعيات المطلوبة موجودة\n")
+  logger.info("✅ جميع التبعيات المطلوبة موجودة\n")
 }
 
 // التحقق من وجود ملف tsconfig.json
 const tsconfigPath = path.join(process.cwd(), "tsconfig.json")
 if (!fs.existsSync(tsconfigPath)) {
-  console.log("⚠️ ملف tsconfig.json غير موجود")
-  console.log("   يجب إنشاء ملف tsconfig.json لتمكين TypeScript\n")
+  logger.info("⚠️ ملف tsconfig.json غير موجود")
+  logger.info("   يجب إنشاء ملف tsconfig.json لتمكين TypeScript\n")
 } else {
-  console.log("✅ ملف tsconfig.json موجود\n")
+  logger.info("✅ ملف tsconfig.json موجود\n")
 }
 
 // التحقق من وجود دالة verifyAuth في lib/auth.ts
@@ -57,20 +58,20 @@ const authPath = path.join(process.cwd(), "lib", "auth.ts")
 if (fs.existsSync(authPath)) {
   const authContent = fs.readFileSync(authPath, "utf8")
   if (!authContent.includes("export async function verifyAuth")) {
-    console.log("⚠️ دالة verifyAuth غير موجودة في lib/auth.ts")
-    console.log("   يجب إضافة هذه الدالة لتمكين المصادقة\n")
+    logger.info("⚠️ دالة verifyAuth غير موجودة في lib/auth.ts")
+    logger.info("   يجب إضافة هذه الدالة لتمكين المصادقة\n")
   } else {
-    console.log("✅ دالة verifyAuth موجودة في lib/auth.ts\n")
+    logger.info("✅ دالة verifyAuth موجودة في lib/auth.ts\n")
   }
 } else {
-  console.log("⚠️ ملف lib/auth.ts غير موجود\n")
+  logger.info("⚠️ ملف lib/auth.ts غير موجود\n")
 }
 
 // التحقق من وجود مكونات UI
 const uiComponentsPath = path.join(process.cwd(), "components", "ui")
 if (!fs.existsSync(uiComponentsPath)) {
-  console.log("⚠️ مجلد components/ui غير موجود")
-  console.log("   يجب إنشاء مكونات UI باستخدام shadcn/ui\n")
+  logger.info("⚠️ مجلد components/ui غير موجود")
+  logger.info("   يجب إنشاء مكونات UI باستخدام shadcn/ui\n")
 } else {
   const requiredComponents = ["button.tsx", "card.tsx", "input.tsx", "badge.tsx", "avatar.tsx", "dropdown-menu.tsx"]
 
@@ -83,14 +84,14 @@ if (!fs.existsSync(uiComponentsPath)) {
   })
 
   if (missingComponents.length > 0) {
-    console.log("⚠️ مكونات UI المفقودة:")
+    logger.info("⚠️ مكونات UI المفقودة:")
     missingComponents.forEach((comp) => {
-      console.log(`   - ${comp}`)
+      logger.info(`   - ${comp}`)
     })
-    console.log("\n")
+    logger.info("\n")
   } else {
-    console.log("✅ جميع مكونات UI الأساسية موجودة\n")
+    logger.info("✅ جميع مكونات UI الأساسية موجودة\n")
   }
 }
 
-console.log("🔍 تشخيص اكتمل. قم بإصلاح المشاكل المذكورة أعلاه ثم أعد تشغيل البناء.")
+logger.info("🔍 تشخيص اكتمل. قم بإصلاح المشاكل المذكورة أعلاه ثم أعد تشغيل البناء.")

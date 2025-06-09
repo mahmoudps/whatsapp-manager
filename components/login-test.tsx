@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from "lucide-react"
+import { logger } from "@/lib/logger"
 
 // This component is only meant for development testing of the login API.
 // When NODE_ENV is set to "production" it will render nothing so it isn't
@@ -71,7 +72,7 @@ export default function LoginTest() {
               }))
             }
           } catch (error) {
-            console.error("خطأ في التحقق من المصادقة:", error)
+            logger.error("خطأ في التحقق من المصادقة:", error as Error)
           }
         }, 1000)
       } else {
@@ -114,7 +115,7 @@ export default function LoginTest() {
         })
       }
     } catch (error) {
-      console.error("خطأ في تسجيل الخروج:", error)
+      logger.error("خطأ في تسجيل الخروج:", error as Error)
     }
   }
 

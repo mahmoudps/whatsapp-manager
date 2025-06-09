@@ -11,6 +11,7 @@ import { MessageDialog } from "@/components/message-dialog"
 import { MainLayout } from "@/components/layout/main-layout"
 import { useApp } from "@/lib/app-context"
 import { useWebSocketContext } from "@/lib/websocket-provider"
+import { logger } from "@/lib/logger"
 
 interface Device {
   id: number
@@ -79,7 +80,7 @@ export default function DevicesPage() {
         throw new Error(data.error || "فشل في جلب الأجهزة")
       }
     } catch (err) {
-      console.error("Error fetching devices:", err)
+      logger.error("Error fetching devices:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",
@@ -133,7 +134,7 @@ export default function DevicesPage() {
         throw new Error(data.error || "فشل إضافة الجهاز")
       }
     } catch (err) {
-      console.error("Error adding device:", err)
+      logger.error("Error adding device:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",
@@ -165,7 +166,7 @@ export default function DevicesPage() {
         ),
       )
     } catch (err) {
-      console.error("Error connecting device:", err)
+      logger.error("Error connecting device:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",
@@ -195,7 +196,7 @@ export default function DevicesPage() {
         ),
       )
     } catch (err) {
-      console.error("Error disconnecting device:", err)
+      logger.error("Error disconnecting device:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",
@@ -221,7 +222,7 @@ export default function DevicesPage() {
       })
       setDevices((prev) => prev.filter((d) => d.id !== deviceId))
     } catch (err) {
-      console.error("Error deleting device:", err)
+      logger.error("Error deleting device:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",
@@ -301,7 +302,7 @@ export default function DevicesPage() {
         message: resp.message || "تم إرسال الرسالة",
       })
     } catch (err) {
-      console.error("Error sending message:", err)
+      logger.error("Error sending message:", err as Error)
       actions.addNotification({
         type: "error",
         title: "خطأ",

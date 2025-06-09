@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { logger } from "./logger"
 
 // Contact validation schema
 const contactSchema = z.object({
@@ -49,7 +50,7 @@ export const ValidationSchemas = {
     try {
       return contactSchema.parse(data)
     } catch (error) {
-      console.error("Contact validation error:", error)
+      logger.error("Contact validation error:", error as Error)
       return null
     }
   },
@@ -58,7 +59,7 @@ export const ValidationSchemas = {
     try {
       return deviceSchema.parse(data)
     } catch (error) {
-      console.error("Device validation error:", error)
+      logger.error("Device validation error:", error as Error)
       return null
     }
   },
@@ -67,7 +68,7 @@ export const ValidationSchemas = {
     try {
       return messageSchema.parse(data)
     } catch (error) {
-      console.error("Message validation error:", error)
+      logger.error("Message validation error:", error as Error)
       return null
     }
   },
@@ -76,7 +77,7 @@ export const ValidationSchemas = {
     try {
       return mediaMessageSchema.parse(data)
     } catch (error) {
-      console.error("Media message validation error:", error)
+      logger.error("Media message validation error:", error as Error)
       return null
     }
   },
@@ -85,7 +86,7 @@ export const ValidationSchemas = {
     try {
       return scheduledMessageSchema.parse(data)
     } catch (error) {
-      console.error("Scheduled message validation error:", error)
+      logger.error("Scheduled message validation error:", error as Error)
       return null
     }
   },
@@ -94,7 +95,7 @@ export const ValidationSchemas = {
     try {
       return bulkMessageSchema.parse(data)
     } catch (error) {
-      console.error("Bulk message validation error:", error)
+      logger.error("Bulk message validation error:", error as Error)
       return null
     }
   },
@@ -103,7 +104,7 @@ export const ValidationSchemas = {
     try {
       return userSchema.parse(data)
     } catch (error) {
-      console.error("User validation error:", error)
+      logger.error("User validation error:", error as Error)
       return null
     }
   },

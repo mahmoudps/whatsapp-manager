@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { logger } from "./logger"
 
 interface User {
   id: string
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      console.error("Auth check failed:", error)
+      logger.error("Auth check failed:", error as Error)
     } finally {
       setIsLoading(false)
     }
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false
     } catch (error) {
-      console.error("Login failed:", error)
+      logger.error("Login failed:", error as Error)
       return false
     }
   }
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       })
     } catch (error) {
-      console.error("Logout failed:", error)
+      logger.error("Logout failed:", error as Error)
     } finally {
       setUser(null)
     }

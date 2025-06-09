@@ -15,6 +15,7 @@ const cors = require("cors")
 const compression = require("compression")
 const helmet = require("helmet")
 const { CORS_ORIGIN } = require("./lib/config")
+const { logger } = require("./lib/logger")
 
 // تهيئة المتغيرات
 const dev = process.env.NODE_ENV !== "production"
@@ -34,7 +35,7 @@ const logsDir = path.join(__dirname, "logs")
 ;[dataDir, mediaDir, sessionsDir, logsDir].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
-    console.log(`📁 تم إنشاء مجلد ${dir}`)
+    logger.info(`📁 تم إنشاء مجلد ${dir}`)
   }
 })
 
@@ -69,7 +70,7 @@ app.prepare().then(() => {
   // بدء تشغيل الخادم
   const httpServer = http.createServer(server)
   httpServer.listen(port, () => {
-    console.log(`🚀 خادم WhatsApp Manager يعمل على المنفذ ${port}`)
+    logger.info(`🚀 خادم WhatsApp Manager يعمل على المنفذ ${port}`)
   })
 
   // إعداد خادم WebSocket إذا كان مفعلاً
@@ -77,12 +78,12 @@ app.prepare().then(() => {
     const wss = new WebSocket.Server({ port: wsPort })
 
     wss.on("connection", (ws) => {
-      console.log("🔌 اتصال WebSocket جديد")
+      logger.info("🔌 اتصال WebSocket جديد")
 
       ws.on("message", (message) => {
         try {
           const data = JSON.parse(message)
-          console.log(`📩 رسالة WebSocket واردة: ${data.event}`)
+          logger.debug(`📩 رسالة WebSocket واردة: ${data.event}`)
 
           // إعادة توجيه الرسالة إلى جميع العملاء المتصلين
           wss.clients.forEach((client) => {
@@ -91,12 +92,12 @@ app.prepare().then(() => {
             }
           })
         } catch (error) {
-          console.error("❌ خطأ في معالجة رسالة WebSocket:", error)
+          logger.error("❌ خطأ في معالجة رسالة WebSocket:", error)
         }
       })
 
       ws.on("close", () => {
-        console.log("🔌 انقطع اتصال WebSocket")
+        logger.info("🔌 انقطع اتصال WebSocket")
       })
 
       // إرسال رسالة ترحيب
@@ -111,6 +112,6 @@ app.prepare().then(() => {
       )
     })
 
-    console.log(`🔌 خادم WebSocket يعمل على المنفذ ${wsPort}`)
+    logger.info(`🔌 خادم WebSocket يعمل على المنفذ ${wsPort}`)
   }
 })
