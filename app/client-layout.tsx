@@ -3,7 +3,7 @@
 import type React from "react"
 import { Tajawal } from "next/font/google"
 import { AppProvider } from "@/lib/app-context"
-import { WebSocketProvider } from "@/lib/websocket-provider"
+import { WebSocketProvider } from "@/lib/websocket-context"
 import "./globals.css"
 
 const tajawal = Tajawal({
