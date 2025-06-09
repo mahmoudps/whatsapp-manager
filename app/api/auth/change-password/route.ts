@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { AuthService } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { currentPassword, newPassword } = await request.json()
 
