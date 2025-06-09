@@ -2,6 +2,9 @@
   "name": "whatsapp-manager",
   "version": "1.0.0",
   "description": "WhatsApp Manager with Docker",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
