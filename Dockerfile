@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY package*.json .npmrc ./
+COPY package.json package-lock.json .npmrc ./
 ENV NODE_ENV=development
 
 # Install all dependencies including dev packages for the build step
