@@ -100,5 +100,8 @@
     "puppeteer-core": {
       "tar-fs": "2.1.3"
     }
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
