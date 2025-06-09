@@ -48,6 +48,11 @@ these using the `HTTP_PORT` and `HTTPS_PORT` environment variables when starting
 the stack. This is handy when another web server already occupies the default
 ports.
 
+The WebSocket server listens on port `3001`. The compose file now exposes this
+port so you can connect directly if desired. Set `NEXT_PUBLIC_WEBSOCKET_URL`
+to `ws://localhost:3001` for local setups or `wss://<your-domain>/ws` when using
+Nginx as a reverse proxy.
+
 When using the provided Nginx examples inside Docker, make sure the upstream
 addresses target the `whatsapp-manager` service instead of `localhost`.
 
@@ -136,6 +141,11 @@ For process management you can also use PM2 with the provided
 pm2 start ecosystem.config.js
 ```
 
+The ecosystem file runs the main server and the standalone WebSocket
+process. Make sure `NEXT_PUBLIC_WEBSOCKET_URL` in your `.env` reflects the
+public address (for example `wss://example.com/ws`) so clients can connect
+when running under PM2.
+
 ## CLI installation
 
 The repository includes a helper CLI script called `wa-manager.sh`.
@@ -164,10 +174,13 @@ For production with SSL certificates run `wa-manager install full`. If you simpl
 ## Running tests
 
 Install dependencies and run the test suite. The tests rely on dev
-dependencies such as **Jest**, so be sure to install everything first:
+dependencies such as **Jest**, so be sure to install everything first.
+Create a `.env.test` file based on the provided `.env.example` and adjust the
+required variables (for example `JWT_SECRET` and the admin credentials):
 
 ```bash
-npm install
+cp .env.example .env.test
+PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
 
@@ -177,6 +190,23 @@ For automated environments you can also run:
 npm run test:ci
 ```
 which installs dependencies using `npm ci` before running Jest.
+
+## External API
+
+Set `EXTERNAL_API_KEY` in your `.env` file to enable programmatic access from
+other projects. Use the `/api/external/send-message` endpoint to send WhatsApp
+messages.
+
+Example request:
+
+```bash
+curl -X POST http://localhost:3000/api/external/send-message \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: your-key' \
+  -d '{"deviceId":1,"recipient":"+123456789","message":"Hello"}'
+```
+
+The endpoint returns a JSON object indicating success or failure.
 
 ## Development login test
 

@@ -11,6 +11,7 @@ const tajawal = Tajawal({
   weight: ["400", "500", "700"],
 })
 
+
 export default function ClientLayout({
   children,
 }: {

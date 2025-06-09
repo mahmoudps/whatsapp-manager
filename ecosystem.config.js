@@ -25,7 +25,9 @@ module.exports = {
         LOG_LEVEL: process.env.LOG_LEVEL || "debug",
         ENABLE_WEBSOCKET: "false", // تعطيل WebSocket في التطبيق الرئيسي
         WEBSOCKET_PORT: process.env.WEBSOCKET_PORT || "3001",
-        NEXT_PUBLIC_WEBSOCKET_URL: process.env.NEXT_PUBLIC_WEBSOCKET_URL,
+        NEXT_PUBLIC_WEBSOCKET_URL:
+          process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+          `ws://localhost:${process.env.WEBSOCKET_PORT || "3001"}`,
       },
       error_file: "logs/app-error.log",
       out_file: "logs/app-out.log",
