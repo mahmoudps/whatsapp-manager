@@ -4,12 +4,6 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["whatsapp-web.js", "puppeteer", "fluent-ffmpeg"],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       // إضافة externals للمكتبات التي تعمل فقط على الخادم

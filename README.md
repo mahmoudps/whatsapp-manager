@@ -51,14 +51,25 @@ docker-compose up --build -d
 ```bash
 cp .env.example .env
 ```
-أهم المتغيرات:
-- `ADMIN_USERNAME` و`ADMIN_PASSWORD` بيانات الدخول للوحة التحكم
-- `JWT_SECRET` مفتاح التوقيع للرموز
-- `DATABASE_PATH` مسار قاعدة البيانات (الافتراضي `./data/whatsapp_manager.db`)
-- `ENABLE_WEBSOCKET` لتشغيل خادم WebSocket
-- `NEXT_PUBLIC_WEBSOCKET_URL` عنوان الاتصال من الواجهة
+### شرح المتغيرات
+- `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم.
+- `JWT_SECRET`: مفتاح التوقيع للرموز.
+- `JWT_EXPIRES_IN` و`REFRESH_TOKEN_EXPIRES_IN`: مدة صلاحية التوكنات.
+- `PORT` و`HOST`: إعدادات الخادم الرئيسي.
+- `DATABASE_PATH`: مسار قاعدة البيانات (الافتراضي `./data/whatsapp_manager.db`).
+- `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
+- `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة.
+- `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
+- `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
 
-راجع بقية المتغيرات داخل `.env.example` حسب احتياجك.
+بقية المتغيرات موثقة داخل الملف `.env.example` ويمكن تعديلها حسب الحاجة.
+
+## تهيئة قاعدة البيانات
+بعد ضبط ملف البيئة قد تحتاج إلى إنشاء قاعدة البيانات الأولى:
+```bash
+node init-db.js
+```
+ستنشئ الأوامر الجداول الافتراضية وتضيف مستخدم الإدارة المعرَّف في المتغيرات.
 
 ## استخدام سكربت CLI
 يحتوي المستودع على سكربت `wa-manager.sh` الذي يسهل إدارة الخدمة.
@@ -75,10 +86,35 @@ wa-manager status   # حالة التشغيل
 ```
 استخدم `wa-manager install full` لإعداد Nginx وشهادة SSL تلقائيًا.
 
-## تشغيل الاختبارات
-تتطلب الاختبارات وجود جميع الاعتماديات وملف `.env.test`:
+## أوامر Docker و PM2 الشائعة
+لإدارة الحاويات يمكن استخدام الأوامر التالية:
 ```bash
-cp .env.example .env.test
+docker-compose up -d      # تشغيل الحاويات في الخلفية
+docker-compose stop       # إيقافها
+docker-compose logs -f    # متابعة السجلات
+```
+
+مع PM2:
+```bash
+pm2 start ecosystem.config.js       # تشغيل التطبيق
+pm2 status                          # عرض الحالة
+pm2 restart whatsapp-manager-app    # إعادة التشغيل
+pm2 logs whatsapp-manager-app       # متابعة السجلات
+```
+
+## نظرة على الواجهة الرسومية والـ CLI
+واجهة الويب توفِّر لوحة تحكم لإدارة الأجهزة والرسائل كما في الصورة التالية:
+
+![واجهة الويب](docs/images/web-ui.svg)
+
+يمكن تنفيذ معظم العمليات عبر سطر الأوامر أيضًا:
+
+![مثال CLI](docs/images/cli-example.svg)
+
+## تشغيل الاختبارات
+تتطلب الاختبارات وجود جميع الاعتماديات ونسخة من ملف `.env.test`:
+```bash
+cp .env.test .env
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
