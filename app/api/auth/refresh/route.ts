@@ -5,8 +5,14 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null)
-  const refreshToken = request.cookies.get("refresh-token")?.value || body?.refreshToken
+  let body: any = {}
+  try {
+    body = await request.json()
+  } catch {
+    body = {}
+  }
+  const refreshToken =
+    request.cookies.get("refresh-token")?.value || body?.refreshToken
 
   if (!refreshToken) {
     return NextResponse.json({ success: false, message: "Refresh token missing" }, { status: 401 })
