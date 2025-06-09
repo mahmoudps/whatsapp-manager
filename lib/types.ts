@@ -72,7 +72,7 @@ export interface Admin {
 
 // أنواع البيانات المشتركة
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T> {
+export interface PaginatedResponse<T = any> extends SuccessResponse<T> {
   page: number
   limit: number
   total: number
