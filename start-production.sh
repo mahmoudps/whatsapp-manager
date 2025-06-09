@@ -10,7 +10,9 @@ fi
 # التأكد من وجود المجلدات الضرورية
 mkdir -p logs data backups
 # Ensure proper ownership so the container can write to the database and logs
-chown -R 1001:1001 data logs
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R 1001:1001 data logs
+fi
 
 # إنشاء قاعدة البيانات إذا لم تكن موجودة
 if [ ! -f "data/whatsapp_manager.db" ]; then
