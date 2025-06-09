@@ -89,7 +89,7 @@ export default function LoginTest() {
         success: false,
         message: "خطأ في الاتصال بالخادم",
         details: {
-          error: error.message,
+          error: (error as Error).message,
           timestamp: new Date().toLocaleString("ar-SA"),
         },
       })

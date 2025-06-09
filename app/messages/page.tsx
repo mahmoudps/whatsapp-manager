@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,8 @@ export default function MessagesPage() {
   const { actions } = useApp()
   const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
+  const ws = useRef<WebSocket | null>(null)
+  const reconnectAttempts = useRef(0)
 
   useEffect(() => {
     fetchMessages()
@@ -132,8 +134,9 @@ export default function MessagesPage() {
     connectWebSocket()
     
     return () => {
-      offMessage()
-      offDevice()
+      if (ws.current) {
+        ws.current.close()
+      }
     }
   }, [on, actions])
 
@@ -172,7 +175,7 @@ export default function MessagesPage() {
       if (data.success) {
         setDevices(data.devices || [])
       } else {
-        logger.warn("Failed to fetch devices", { error: data.error })
+        logger.warn("Failed to fetch devices", { error: (data as any).error })
       }
     } catch (err) {
       logger.error("Error fetching devices", err)

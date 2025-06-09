@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const check = searchParams.get("check")
 
-    const health = {
+    const health: any = {
       status: "ok",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),

@@ -27,6 +27,7 @@ import {
   MessageSquare,
   Smartphone,
 } from "lucide-react"
+// @ts-ignore next-themes types may be missing
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/use-auth"
 import { motion, AnimatePresence } from "framer-motion"
