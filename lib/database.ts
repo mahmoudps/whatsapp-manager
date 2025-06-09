@@ -32,6 +32,7 @@ export interface Message {
   scheduledAt?: string
   sentAt?: string
   errorMessage?: string
+  isGroup?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -77,11 +78,17 @@ export interface Contact {
 }
 
 class DatabaseManager {
-  private db: Database.Database | null = null
+  private db: any | null = null
   private initialized = false
 
   constructor() {
     this.init()
+  }
+
+  // Expose the underlying Database instance for advanced queries
+  public get connection(): any {
+    if (!this.db) throw new Error("Database not initialized")
+    return this.db
   }
 
   public async ensureInitialized(): Promise<void> {
