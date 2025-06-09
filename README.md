@@ -12,32 +12,31 @@
 - سكربت CLI (`wa-manager.sh`) للتحكم السريع وتشغيل الحاويات
 
 ## المتطلبات
-- Node.js **18** أو أحدث
+ - Node.js **20** أو أحدث
 - Docker و Docker Compose (للتشغيل داخل الحاويات)
 - Git
 
 ## طريقة التثبيت السريع
-تأكد من استخدام **Node.js 18** أو أحدث. يحتوي المستودع على ملف
+تأكد من استخدام **Node.js 20** أو أحدث. يحتوي المستودع على ملف
 `.nvmrc` يمكن استعماله مع `nvm` لاختيار الإصدار الصحيح.
 ```bash
 # استنساخ المستودع
 git clone <repository-url>
 cd whatsapp-manager
 
-# تأكد من استخدام Node.js إصدار 18 أو أحدث. يحدد الملف `.nvmrc` هذا الإصدار.
+# تأكد من استخدام Node.js إصدار 20 أو أحدث. يحدد الملف `.nvmrc` هذا الإصدار.
 
 # تثبيت الاعتماديات
-npm install
+PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 
 # تشغيل الخادم في وضع التطوير
 npm run dev
 ```
 
-**Note:** Install dependencies with `npm install --legacy-peer-deps` to avoid
-peer-dependency conflicts with Jest packages. The included `.npmrc` already
-sets this option, but make sure to copy the file when building Docker images so
-the flag is honored there. The `wa-manager install full` command now copies
-dotfiles (including `.npmrc`) to `/opt/whatsapp-manager` automatically.
+**Note:** Install dependencies with `PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts` to skip Puppeteer downloads.
+The included `.npmrc` also sets `--legacy-peer-deps` to avoid peer-dependency conflicts with Jest packages.
+Make sure to copy the file when building Docker images so the flag is honored there.
+The `wa-manager install full` command now copies dotfiles (including `.npmrc`) to `/opt/whatsapp-manager` automatically.
 
 ### Production
 

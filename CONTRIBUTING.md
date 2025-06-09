@@ -4,7 +4,7 @@
 والتصحيحات عبر Pull Requests.
 
 ## المتطلبات الأساسية
-- Node.js 18 أو أحدث
+ - Node.js 20 أو أحدث
 - Git
 - معرفة بأساسيات TypeScript و React/Next.js
 
