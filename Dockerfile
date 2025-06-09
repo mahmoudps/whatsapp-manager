@@ -43,13 +43,17 @@ WORKDIR /app
 
 COPY package*.json .npmrc ./
 
-RUN npm ci --omit=dev && npm cache clean --force
+# Install all dependencies including dev packages for the build step
+RUN npm ci && npm cache clean --force
 
 COPY . .
 
 RUN chmod +x start-production.sh
 
 RUN npm run build
+
+# Remove development dependencies after the build to keep the image slim
+RUN npm prune --production && npm cache clean --force
 
 RUN addgroup --gid 1001 nodejs && \
     adduser --system --uid 1001 --gid 1001 whatsapp
