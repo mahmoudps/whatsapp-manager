@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
   } catch (error) {
-    console.error("Error disconnecting device:", error)
+    logger.error("Error disconnecting device:", error)
     return NextResponse.json(
       {
         success: false,

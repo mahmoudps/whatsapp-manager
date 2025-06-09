@@ -1,18 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 GET /api/users - Starting request")
+    logger.info("🔍 GET /api/users - Starting request")
 
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      console.log("❌ Authentication failed:", authResult.message)
+      logger.info("❌ Authentication failed:", authResult.message)
       return NextResponse.json(
         {
           success: false,
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("✅ Authentication successful")
+    logger.info("✅ Authentication successful")
 
     // جلب المستخدمين من قاعدة البيانات
     const admins = await db.getAllAdmins()
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("❌ Error in GET /api/users:", error)
+    logger.error("❌ Error in GET /api/users:", error)
     return NextResponse.json(
       {
         success: false,

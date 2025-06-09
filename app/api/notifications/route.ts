@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -34,12 +35,12 @@ const notifications = [
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 GET /api/notifications - Starting request")
+    logger.info("🔍 GET /api/notifications - Starting request")
 
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      console.log("❌ Authentication failed:", authResult.message)
+      logger.info("❌ Authentication failed:", authResult.message)
       return NextResponse.json(
         {
           success: false,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("✅ Authentication successful")
+    logger.info("✅ Authentication successful")
 
     // معالجة المعلمات
     const url = new URL(request.url)
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("❌ Error in GET /api/notifications:", error)
+    logger.error("❌ Error in GET /api/notifications:", error)
     return NextResponse.json(
       {
         success: false,
@@ -82,12 +83,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🔍 POST /api/notifications - Starting request")
+    logger.info("🔍 POST /api/notifications - Starting request")
 
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      console.log("❌ Authentication failed:", authResult.message)
+      logger.info("❌ Authentication failed:", authResult.message)
       return NextResponse.json(
         {
           success: false,
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("✅ Authentication successful")
+    logger.info("✅ Authentication successful")
 
     // قراءة البيانات
     const body = await request.json()
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("❌ Error in POST /api/notifications:", error)
+    logger.error("❌ Error in POST /api/notifications:", error)
     return NextResponse.json(
       {
         success: false,

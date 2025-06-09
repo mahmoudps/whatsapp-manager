@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("Error sending bulk messages:", error)
+    logger.error("Error sending bulk messages:", error)
     return NextResponse.json(
       {
         success: false,

@@ -2,24 +2,25 @@ import { type NextRequest, NextResponse } from "next/server"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    console.log(`🔍 POST /api/devices/${params.id}/connect - Starting request`)
+    logger.info(`🔍 POST /api/devices/${params.id}/connect - Starting request`)
 
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      console.log("❌ Authentication failed:", authResult.message)
+      logger.info("❌ Authentication failed:", authResult.message)
       return NextResponse.json(authResult, { status: 401 })
     }
 
     const deviceId = Number.parseInt(params.id)
     if (isNaN(deviceId)) {
-      console.log("❌ Invalid device ID:", params.id)
+      logger.info("❌ Invalid device ID:", params.id)
       return NextResponse.json(
         {
           success: false,
@@ -30,12 +31,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
 
-    console.log(`📱 Connecting device ID: ${deviceId}`)
+    logger.info(`📱 Connecting device ID: ${deviceId}`)
 
     // التحقق من وجود الجهاز
     const device = await db.getDeviceById(deviceId)
     if (!device) {
-      console.log("❌ Device not found:", deviceId)
+      logger.info("❌ Device not found:", deviceId)
       return NextResponse.json(
         {
           success: false,
@@ -46,11 +47,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
 
-    console.log("✅ Device found:", device.name)
+    logger.info("✅ Device found:", device.name)
 
     // التحقق من حالة الجهاز
     if (device.status === "connected" || device.status === "connecting") {
-      console.log("⚠️ Device already connected/connecting")
+      logger.info("⚠️ Device already connected/connecting")
       return NextResponse.json(
         {
           success: false,
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const success = await whatsappManager.createClient(deviceId, device.name)
 
     if (success) {
-      console.log("✅ WhatsApp client creation initiated successfully")
+      logger.info("✅ WhatsApp client creation initiated successfully")
       return NextResponse.json({
         success: true,
         message: "تم بدء عملية الاتصال بنجاح",
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         timestamp: new Date().toISOString(),
       })
     } else {
-      console.log("❌ Failed to create WhatsApp client")
+      logger.info("❌ Failed to create WhatsApp client")
       return NextResponse.json(
         {
           success: false,
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
   } catch (error) {
-    console.error(`❌ Error connecting device ${params.id}:`, error)
+    logger.error(`❌ Error connecting device ${params.id}:`, error)
     return NextResponse.json(
       {
         success: false,
