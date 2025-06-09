@@ -29,6 +29,57 @@ export default function MessagesPage() {
   const ws = useRef<WebSocket | null>(null)
   const reconnectAttempts = useRef(0)
 
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const url =
+        deviceFilter === "all"
+          ? "/api/messages"
+          : `/api/messages?deviceId=${deviceFilter}`
+      const response = await fetch(url)
+      const data = await response.json()
+
+      if (data.success) {
+        setMessages(data.data)
+      } else {
+        throw new Error(data.error || "فشل في جلب الرسائل")
+      }
+    } catch (err) {
+      logger.error("Error fetching messages", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: (err as Error).message,
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [deviceFilter, actions])
+
+  const fetchDevices = useCallback(async () => {
+    try {
+      const response = await fetch("/api/devices")
+      const data: { success: boolean; devices?: Device[] } = await response.json()
+
+      if (data.success) {
+        setDevices(data.devices || [])
+      } else {
+        logger.warn("Failed to fetch devices", { error: (data as any).error })
+      }
+    } catch (err) {
+      logger.error("Error fetching devices", err)
+      actions.addNotification({
+        type: "error",
+        title: "خطأ",
+        message: "فشل في جلب بيانات الأجهزة",
+      })
+    }
+  }, [actions])
+
+
+
+
   useEffect(() => {
     fetchMessages()
     fetchDevices()
@@ -139,52 +190,6 @@ export default function MessagesPage() {
     }
   }, [on, actions])
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const url =
-        deviceFilter === "all"
-          ? "/api/messages"
-          : `/api/messages?deviceId=${deviceFilter}`
-      const response = await fetch(url)
-      const data = await response.json()
-
-      if (data.success) {
-        setMessages(data.data)
-      } else {
-        throw new Error(data.error || "فشل في جلب الرسائل")
-      }
-    } catch (err) {
-      logger.error("Error fetching messages", err)
-      actions.addNotification({
-        type: "error",
-        title: "خطأ",
-        message: (err as Error).message,
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [deviceFilter, actions])
-
-  const fetchDevices = useCallback(async () => {
-    try {
-      const response = await fetch("/api/devices")
-      const data: { success: boolean; devices?: Device[] } = await response.json()
-
-      if (data.success) {
-        setDevices(data.devices || [])
-      } else {
-        logger.warn("Failed to fetch devices", { error: (data as any).error })
-      }
-    } catch (err) {
-      logger.error("Error fetching devices", err)
-      actions.addNotification({
-        type: "error",
-        title: "خطأ",
-        message: "فشل في جلب بيانات الأجهزة",
-      })
-    }
-  }, [actions])
 
   const getDeviceName = (deviceId: number) => {
     const device = devices.find((d) => d.id === deviceId)

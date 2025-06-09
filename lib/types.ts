@@ -203,12 +203,11 @@ export interface LoginRequest {
   password: string
 }
 
-export interface LoginResponse extends ApiResponse {
-  data?: {
-    id: number
-    username: string
-    lastLogin?: string
-  }
+export type LoginResponse = ApiResponse<{
+  id: number
+  username: string
+  lastLogin?: string
+}> & {
   token?: string
 }
 
