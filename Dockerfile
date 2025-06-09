@@ -43,7 +43,7 @@ WORKDIR /app
 
 COPY package*.json .npmrc ./
 
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 COPY . .
 
