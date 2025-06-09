@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     logger.info("🔍 POST /api/auth/logout - Starting request")
 
     // حذف ملف تعريف الارتباط
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.delete("auth-token")
 
     return NextResponse.json({
