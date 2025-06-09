@@ -65,6 +65,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
 
     // إعداد Socket.IO
     const io = new Server(server, {
+      path: "/ws/socket.io",
       cors: {
         origin: [FRONTEND_URL, "https://wa-api.developments.world"],
         methods: ["GET", "POST"],
