@@ -31,32 +31,6 @@ export default function DevicesPage() {
   const [activeDevice, setActiveDevice] = useState<{ id: number; name: string } | null>(null)
   const { actions } = useApp()
   const { on } = useWebSocketContext()
-
-  useEffect(() => {
-    fetchDevices()
-  }, [fetchDevices])
-
-  useEffect(() => {
-    const offStatus = on("device_status_changed", (data: any) => {
-      setDevices((prev) =>
-        prev.map((d) => (d.id === data.deviceId ? { ...d, ...data } : d)),
-      )
-    })
-
-    const offQR = on("qr_code_generated", (data: any) => {
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.id === data.deviceId ? { ...d, qrCode: data.qrCode } : d,
-        ),
-      )
-    })
-
-    return () => {
-      offStatus && offStatus()
-      offQR && offQR()
-    }
-  }, [on])
-
   const fetchDevices = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -91,6 +65,30 @@ export default function DevicesPage() {
     }
   }, [actions])
 
+  useEffect(() => {
+    fetchDevices()
+  }, [fetchDevices])
+
+  useEffect(() => {
+    const offStatus = on("device_status_changed", (data: any) => {
+      setDevices((prev) =>
+        prev.map((d) => (d.id === data.deviceId ? { ...d, ...data } : d)),
+      )
+    })
+
+    const offQR = on("qr_code_generated", (data: any) => {
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === data.deviceId ? { ...d, qrCode: data.qrCode } : d,
+        ),
+      )
+    })
+
+    return () => {
+      offStatus && offStatus()
+      offQR && offQR()
+    }
+  }, [on])
   const handleAddDevice = async () => {
     if (!newDeviceName.trim()) {
       actions.addNotification({
