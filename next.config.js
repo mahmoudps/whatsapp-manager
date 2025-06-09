@@ -1,3 +1,4 @@
+const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -21,7 +22,7 @@ const nextConfig = {
     }
 
     // تجاهل ملفات معينة في العميل
-    config.resolve.fallback = {
+  config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       net: false,
@@ -35,6 +36,11 @@ const nextConfig = {
       assert: false,
       os: false,
       path: false,
+    }
+
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname),
     }
 
     return config
