@@ -18,9 +18,11 @@ data/
 ssl/
 
 # Development files and documentation
-scripts/
+scripts/*
+!scripts/init-database.js
 tests/
 *.sh
+!start-production.sh
 *.md
 *.test.*
 *.spec.*
