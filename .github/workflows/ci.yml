@@ -13,6 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: npm ci
+          cache: 'npm'
+      - run: cp .env.test .env
+      - run: npm ci --ignore-scripts
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: '1'
       - run: npm run lint
       - run: npm test
