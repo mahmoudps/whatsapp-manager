@@ -43,7 +43,7 @@ WORKDIR /app
 
 COPY package*.json .npmrc ./
 
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --omit=dev && npm install typescript --no-save && npm cache clean --force
 
 COPY . .
 
