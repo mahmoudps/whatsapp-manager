@@ -5,7 +5,12 @@ import { Tajawal } from "next/font/google"
 import { AppProvider } from "@/lib/app-context"
 import "./globals.css"
 
-const tajawal = Tajawal({ subsets: ["arabic", "latin"], display: "swap" })
+const tajawal = Tajawal({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  weight: ["400", "500", "700"],
+})
+
 
 export default function ClientLayout({
   children,

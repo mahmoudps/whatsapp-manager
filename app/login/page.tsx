@@ -59,6 +59,7 @@ export default function Login() {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="اسم المستخدم"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -74,14 +75,15 @@ export default function Login() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="كلمة المرور"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
-                tabIndex={-1}
+                className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 focus:outline-none"
+                tabIndex={0}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
