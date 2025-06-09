@@ -12,7 +12,8 @@
     "production": "npm run build && npm start",
     "lint": "next lint --dir .",
     "test": "jest",
-    "test:ci": "npm ci && npm test"
+    "test:ci": "npm ci && npm test",
+    "ws": "ts-node lib/websocket-server.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
