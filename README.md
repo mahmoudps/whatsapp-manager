@@ -112,9 +112,9 @@ pm2 logs whatsapp-manager-app       # متابعة السجلات
 ![مثال CLI](docs/images/cli-example.svg)
 
 ## تشغيل الاختبارات
-تتطلب الاختبارات وجود جميع الاعتماديات وملف `.env.test`:
+تتطلب الاختبارات وجود جميع الاعتماديات ونسخة من ملف `.env.test`:
 ```bash
-cp .env.example .env.test
+cp .env.test .env
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
