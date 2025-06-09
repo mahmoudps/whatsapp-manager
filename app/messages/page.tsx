@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
+import { useWebSocketContext } from "@/lib/websocket-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
@@ -21,8 +22,7 @@ export default function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const { actions } = useApp()
-  const ws = useRef<WebSocket | null>(null)
-  const reconnectAttempts = useRef(0)
+  const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
   useEffect(() => {
@@ -37,7 +37,10 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001"
+      let wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001/ws"
+      if (!wsUrl.endsWith("/ws")) {
+        wsUrl = wsUrl.replace(/\/$/, "") + "/ws"
+      }
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)
@@ -125,14 +128,12 @@ export default function MessagesPage() {
     }
 
     connectWebSocket()
-
+    
     return () => {
-      if (ws.current) {
-        ws.current.close()
-        ws.current = null
-      }
+      offMessage()
+      offDevice()
     }
-  }, [actions])
+  }, [on, actions])
 
   const fetchMessages = async () => {
     try {
