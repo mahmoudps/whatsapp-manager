@@ -5,7 +5,11 @@ import { logger } from "./logger";
 import path from "path";
 import fs from "fs";
 import { EventEmitter } from "events";
-import { PUPPETEER_EXECUTABLE_PATH, ENABLE_WEBSOCKET } from "./config";
+import {
+  PUPPETEER_EXECUTABLE_PATH,
+  ENABLE_WEBSOCKET,
+  AUTO_CONNECT_DEVICES,
+} from "./config";
 
 // التأكد من وجود مجلد الجلسات
 const SESSION_DIR = path.join(process.cwd(), "data", "whatsapp_sessions");
@@ -56,11 +60,11 @@ class WhatsAppClientManager extends EventEmitter {
 
   constructor() {
     super();
-    this.init();
+    void this.init();
   }
 
-  private init(): void {
-    this.initializeExistingDevices();
+  private async init(): Promise<void> {
+    await this.initializeExistingDevices();
     this.startMessageProcessor();
     this.startScheduledProcessor();
     this.startHealthCheck();
@@ -121,13 +125,13 @@ class WhatsAppClientManager extends EventEmitter {
   }
 
   // تهيئة الأجهزة الموجودة في قاعدة البيانات
-  private initializeExistingDevices(): void {
+  private async initializeExistingDevices(): Promise<void> {
     try {
       const devices = db.getAllDevices();
       logger.info(`Initializing ${devices.length} existing devices`);
 
       for (const device of devices) {
-        this.cleanupSessions(device.id);
+        await this.cleanupSessions(device.id);
 
         // إعادة تعيين حالة الأجهزة المعلقة
         if (device.status !== "disconnected") {
@@ -137,6 +141,15 @@ class WhatsAppClientManager extends EventEmitter {
             errorMessage: "System restart - please reconnect",
             lastSeen: new Date().toISOString(),
           });
+        }
+
+        if (AUTO_CONNECT_DEVICES) {
+          this.createClient(device.id, device.name).catch((err) =>
+            logger.error(
+              `Auto connect failed for device ${device.id}:`,
+              err,
+            ),
+          );
         }
       }
 
