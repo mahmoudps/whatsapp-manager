@@ -37,7 +37,7 @@ export async function POST() {
       return NextResponse.json({
         success: false,
         message: "اختبار المصادقة فشل",
-        error: loginResult.error,
+        error: loginResult.message,
         timestamp: new Date().toISOString(),
       })
     }
