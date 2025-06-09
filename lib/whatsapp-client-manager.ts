@@ -804,7 +804,7 @@ class WhatsAppClientManager extends EventEmitter {
         throw new Error("Invalid phone number format");
       }
       const formattedNumber = this.formatPhoneNumber(recipient);
-      const loc = new Location(latitude, longitude, description);
+      const loc = new Location(latitude, longitude, { name: description });
       const sentMessage = await whatsappClient.client.sendMessage(
         formattedNumber,
         loc,
