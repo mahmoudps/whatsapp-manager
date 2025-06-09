@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,9 +41,9 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchUserInfo()
     fetchApiToken()
-  }, [])
+  }, [fetchUserInfo])
 
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/me")
       if (response.ok) {
@@ -57,7 +57,7 @@ export default function SettingsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [actions])
 
   const fetchApiToken = async () => {
     try {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,7 +37,7 @@ export default function MessagesPage() {
         ws.current.close()
       }
     }
-  }, [deviceFilter])
+  }, [deviceFilter, fetchMessages, fetchDevices])
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -139,7 +139,7 @@ export default function MessagesPage() {
     }
   }, [on, actions])
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       setIsLoading(true)
       const url =
@@ -164,9 +164,9 @@ export default function MessagesPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [deviceFilter, actions])
 
-  const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
     try {
       const response = await fetch("/api/devices")
       const data: { success: boolean; devices?: Device[] } = await response.json()
@@ -184,7 +184,7 @@ export default function MessagesPage() {
         message: "فشل في جلب بيانات الأجهزة",
       })
     }
-  }
+  }, [actions])
 
   const getDeviceName = (deviceId: number) => {
     const device = devices.find((d) => d.id === deviceId)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Activity, MessageSquare, Smartphone, Users, RefreshCw, AlertCircle } from "lucide-react"
@@ -54,7 +54,7 @@ export default function DashboardPage() {
     return `${minutes} دقيقة`
   }
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setError(null)
       setLoading(true)
@@ -117,7 +117,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const handleRefresh = () => {
     fetchStats()
@@ -125,7 +125,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchStats()
-  }, [])
+  }, [fetchStats])
 
   if (loading) {
     return (
