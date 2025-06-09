@@ -31,6 +31,8 @@ PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 
 # تشغيل الخادم في وضع التطوير
 npm run dev
+# تشغيل خادم WebSocket
+npm run ws
 ```
 
 **Note:** Install dependencies with `PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts` to skip Puppeteer downloads.
