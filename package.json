@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "production": "npm run build && npm start",
-    "lint": "next lint",
+    "lint": "next lint --dir .",
     "test": "jest",
     "test:ci": "npm ci && npm test"
   },
