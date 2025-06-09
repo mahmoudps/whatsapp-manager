@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "WhatsApp Manager with Docker",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "next dev",
@@ -103,6 +103,6 @@
     }
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
