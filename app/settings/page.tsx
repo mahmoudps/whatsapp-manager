@@ -38,11 +38,6 @@ export default function SettingsPage() {
 
   const { actions } = useApp()
 
-  useEffect(() => {
-    fetchUserInfo()
-    fetchApiToken()
-  }, [fetchUserInfo])
-
   const fetchUserInfo = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/me")
@@ -70,6 +65,11 @@ export default function SettingsPage() {
       logger.error(err as Error)
     }
   }
+
+  useEffect(() => {
+    fetchUserInfo()
+    fetchApiToken()
+  }, [fetchUserInfo])
 
   const handleTokenSave = async () => {
     setSavingToken(true)

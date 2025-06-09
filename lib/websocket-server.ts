@@ -139,7 +139,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
 
       const decoded = verifyToken(token)
       if (decoded) {
-        socket.user = decoded
+        ;(socket as any).user = decoded
         logger.info(`✅ Authenticated Socket.IO user: ${(decoded as any).id || (decoded as any).username}`)
       } else {
         logger.warn("Invalid token for Socket.IO connection")
@@ -157,8 +157,8 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
       logger.info(`✅ Socket.IO client connected: ${clientId} (${socket.id})`)
 
       // تسجيل العميل
-      socket.clientId = clientId
-      socket.connectedAt = new Date()
+      ;(socket as any).clientId = clientId
+      ;(socket as any).connectedAt = new Date()
 
       // إرسال معلومات الاتصال
       socket.emit("connected", {
@@ -181,7 +181,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
       socket.on("join_device", (deviceId) => {
         if (deviceId) {
           socket.join(`device_${deviceId}`)
-          socket.deviceId = deviceId
+          ;(socket as any).deviceId = deviceId
           logger.info(`📱 Socket.IO client ${clientId} joined device room: ${deviceId}`)
 
           // إرسال حالة الجهاز الحالية
@@ -285,7 +285,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
       })
     })
 
-    app.post("/broadcast", (req, res) => {
+    ;(app as any).post("/broadcast", (req: express.Request, res: express.Response) => {
       try {
         const { event, data, deviceId } = req.body
 

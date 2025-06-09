@@ -46,10 +46,6 @@ export default function DiagnosticsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [envVars, setEnvVars] = useState<EnvConfig | null>(null)
 
-  useEffect(() => {
-    checkSystemStatus()
-  }, [checkSystemStatus])
-
   const checkSystemStatus = useCallback(async () => {
     setIsRefreshing(true)
 
@@ -67,6 +63,10 @@ export default function DiagnosticsPage() {
 
     setIsRefreshing(false)
   }, [])
+
+  useEffect(() => {
+    checkSystemStatus()
+  }, [checkSystemStatus])
 
   const checkApiStatus = async () => {
     try {

@@ -79,7 +79,7 @@ class WhatsAppClientManager extends EventEmitter {
       // إيقاف العمليات المرتبطة بهذا الجهاز
       const { exec } = require("child_process");
       await new Promise<void>((resolve) => {
-        exec(`pkill -f "device_${deviceId}"`, (error) => {
+        exec(`pkill -f "device_${deviceId}"`, (error: any) => {
           if (
             error &&
             error.message &&
