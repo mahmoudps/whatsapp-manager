@@ -1,4 +1,6 @@
 version: '3.8'
+# WARNING: Replace ADMIN_USERNAME, ADMIN_PASSWORD and JWT_SECRET
+# with strong values before deploying to production.
 
 services:
   whatsapp-manager:
@@ -10,6 +12,7 @@ services:
       - "3000:3000"
       - "${WEBSOCKET_PORT:-3001}:${WEBSOCKET_PORT:-3001}"
     environment:
+#      Replace default credentials before using in production
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/whatsapp_manager.db
       - ADMIN_USERNAME=admin
