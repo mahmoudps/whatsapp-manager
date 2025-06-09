@@ -814,9 +814,11 @@ RESTART_POLICY=unless-stopped
 EOL
 
     echo -e "${GREEN}✅ تم إنشاء ملف .env بنجاح${NC}"
-    echo -e "${YELLOW}🔄 إعادة تشغيل الخدمات لتطبيق التغييرات...${NC}"
+    echo -e "${YELLOW}⏳ جلب أحدث التغييرات من المستودع...${NC}"
+    git pull
+    echo -e "${YELLOW}⏳ إعادة تشغيل الخدمات لتطبيق التغييرات...${NC}"
     docker-compose down
-    docker-compose build --no-cache
+    docker-compose build
     docker-compose up -d
 }
 
