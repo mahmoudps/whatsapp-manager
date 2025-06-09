@@ -14,9 +14,6 @@ import { logger } from "@/lib/logger"
 // When NODE_ENV is set to "production" it will render nothing so it isn't
 // included in the UI.
 export default function LoginTest() {
-  if (process.env.NODE_ENV === "production") {
-    return null
-  }
   const [credentials, setCredentials] = useState({
     username: "admin",
     password: "admin123!@#",
@@ -28,6 +25,10 @@ export default function LoginTest() {
     details?: any
   } | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+
+  if (process.env.NODE_ENV === "production") {
+    return null
+  }
 
   const testLogin = async () => {
     setIsLoading(true)

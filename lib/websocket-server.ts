@@ -446,8 +446,10 @@ export function stopWebSocketServer(): void {
   }
 }
 
-export default {
+const websocketServerApi = {
   initializeWebSocketServer,
   getWebSocketServer,
   stopWebSocketServer,
 }
+
+export default websocketServerApi

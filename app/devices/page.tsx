@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,7 +34,7 @@ export default function DevicesPage() {
 
   useEffect(() => {
     fetchDevices()
-  }, [])
+  }, [fetchDevices])
 
   useEffect(() => {
     const offStatus = on("device_status_changed", (data: any) => {
@@ -57,7 +57,7 @@ export default function DevicesPage() {
     }
   }, [on])
 
-  const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await fetch("/api/devices", {
@@ -89,7 +89,7 @@ export default function DevicesPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [actions])
 
   const handleAddDevice = async () => {
     if (!newDeviceName.trim()) {

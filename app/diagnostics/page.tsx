@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -48,9 +48,9 @@ export default function DiagnosticsPage() {
 
   useEffect(() => {
     checkSystemStatus()
-  }, [])
+  }, [checkSystemStatus])
 
-  const checkSystemStatus = async () => {
+  const checkSystemStatus = useCallback(async () => {
     setIsRefreshing(true)
 
     // جلب متغيرات البيئة من الخادم
@@ -66,7 +66,7 @@ export default function DiagnosticsPage() {
     await checkDatabaseStatus()
 
     setIsRefreshing(false)
-  }
+  }, [])
 
   const checkApiStatus = async () => {
     try {
