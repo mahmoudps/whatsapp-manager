@@ -37,3 +37,6 @@ export const PUPPETEER_EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH
 
 // إعدادات السجلات
 export const LOG_LEVEL = process.env.LOG_LEVEL || "debug"
+
+// مفتاح API للاستخدامات الخارجية
+export const EXTERNAL_API_KEY = process.env.EXTERNAL_API_KEY
