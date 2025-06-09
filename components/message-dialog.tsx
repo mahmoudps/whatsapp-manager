@@ -29,6 +29,8 @@ interface MessageDialogProps {
     recipients?: string[]
     message: string
     isBulk: boolean
+    file?: File | null
+    scheduledAt?: string
   }) => void
 }
 
@@ -39,6 +41,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
   const [isSending, setIsSending] = useState(false)
   const [activeTab, setActiveTab] = useState("single")
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | undefined>(deviceId ?? devices?.[0]?.id)
+  const [file, setFile] = useState<File | null>(null)
+  const [scheduledAt, setScheduledAt] = useState("")
 
   const handleSendMessage = async () => {
     if (activeTab === "single" && (!recipient || !message)) {
@@ -63,6 +67,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           recipient,
           message,
           isBulk: false,
+          file,
+          scheduledAt,
         })
       } else {
         const recipients = bulkRecipients
@@ -74,6 +80,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           recipients,
           message,
           isBulk: true,
+          file,
+          scheduledAt,
         })
       }
 
@@ -81,6 +89,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setRecipient("")
       setBulkRecipients("")
       setMessage("")
+      setFile(null)
+      setScheduledAt("")
       onOpenChange(false)
     } catch (error) {
       console.error("Error sending message:", error)
@@ -160,19 +170,32 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
 
           <div className="space-y-2 mt-4">
             <Label htmlFor="message">نص الرسالة</Label>
-            <Textarea
-              id="message"
-              placeholder="اكتب نص الرسالة هنا..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={5}
-            />
-            <div className="flex justify-between">
-              <p className="text-xs text-gray-500">يمكنك كتابة حتى 1000 حرف</p>
-              <p className="text-xs text-gray-500">{message.length} / 1000</p>
-            </div>
+          <Textarea
+            id="message"
+            placeholder="اكتب نص الرسالة هنا..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={5}
+          />
+          <div className="flex justify-between">
+            <p className="text-xs text-gray-500">يمكنك كتابة حتى 1000 حرف</p>
+            <p className="text-xs text-gray-500">{message.length} / 1000</p>
           </div>
-        </Tabs>
+          <div className="space-y-2 mt-2">
+            <Label htmlFor="file">مرفق (اختياري)</Label>
+            <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          </div>
+          <div className="space-y-2 mt-2">
+            <Label htmlFor="schedule">موعد الإرسال</Label>
+            <Input
+              id="schedule"
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+            />
+          </div>
+        </div>
+      </Tabs>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSending}>
@@ -180,7 +203,11 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           </Button>
           <Button
             onClick={handleSendMessage}
-            disabled={isSending || !message || (activeTab === "single" ? !recipient : !bulkRecipients)}
+            disabled={
+              isSending ||
+              (!file && !message) ||
+              (activeTab === "single" ? !recipient : !bulkRecipients)
+            }
           >
             {isSending ? (
               <>

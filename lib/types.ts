@@ -35,15 +35,16 @@ export interface Message {
   deviceId: number
   recipient: string
   message: string
-  status: "pending" | "sent" | "failed"
-  sentAt: string
+  status: "pending" | "sent" | "failed" | "scheduled"
+  sentAt?: string
+  scheduledAt?: string
   errorMessage?: string
   messageType: MessageType
   mediaUrl?: string
   deliveredAt?: string
 }
 
-export type MessageStatus = "pending" | "sent" | "delivered" | "failed"
+export type MessageStatus = "pending" | "sent" | "delivered" | "failed" | "scheduled"
 export type MessageType = "text" | "image" | "video" | "audio" | "document"
 
 export interface IncomingMessage {

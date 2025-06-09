@@ -1,4 +1,4 @@
-import { Client, LocalAuth } from "whatsapp-web.js";
+import { Client, LocalAuth, MessageMedia, Location } from "whatsapp-web.js";
 import QRCode from "qrcode";
 import { db } from "./database";
 import { logger } from "./logger";
@@ -52,6 +52,7 @@ class WhatsAppClientManager extends EventEmitter {
   private clients: Map<number, WhatsAppClient> = new Map();
   private messageProcessingInterval: NodeJS.Timeout | null = null;
   private healthCheckInterval: NodeJS.Timeout | null = null;
+  private scheduledProcessorInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     super();
@@ -61,6 +62,7 @@ class WhatsAppClientManager extends EventEmitter {
   private init(): void {
     this.initializeExistingDevices();
     this.startMessageProcessor();
+    this.startScheduledProcessor();
     this.startHealthCheck();
   }
 
@@ -696,6 +698,105 @@ class WhatsAppClientManager extends EventEmitter {
     return results;
   }
 
+  async sendMediaMessage(
+    deviceId: number,
+    recipient: string,
+    base64Data: string,
+    mimeType: string,
+    caption = "",
+  ): Promise<boolean> {
+    try {
+      const whatsappClient = this.clients.get(deviceId);
+      if (!whatsappClient || whatsappClient.status !== "connected") {
+        throw new Error(`Device ${deviceId} not connected`);
+      }
+      if (!this.isValidPhoneNumber(recipient)) {
+        throw new Error("Invalid phone number format");
+      }
+      const formattedNumber = this.formatPhoneNumber(recipient);
+      const media = new MessageMedia(mimeType, base64Data);
+      const sentMessage = await whatsappClient.client.sendMessage(
+        formattedNumber,
+        media,
+        { caption },
+      );
+      whatsappClient.lastActivity = new Date();
+      db.createMessage({
+        deviceId,
+        recipient: formattedNumber,
+        message: caption,
+        status: "sent",
+        sentAt: new Date().toISOString(),
+        messageType: mimeType.startsWith("image")
+          ? "image"
+          : mimeType.startsWith("video")
+            ? "video"
+            : mimeType.startsWith("audio")
+              ? "audio"
+              : "document",
+        messageId: sentMessage.id.id,
+      });
+      return true;
+    } catch (error) {
+      logger.error(`Error sending media message from device ${deviceId}:`, error);
+      db.createMessage({
+        deviceId,
+        recipient,
+        message: caption,
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+        messageType: "document",
+      });
+      return false;
+    }
+  }
+
+  async sendLocationMessage(
+    deviceId: number,
+    recipient: string,
+    latitude: number,
+    longitude: number,
+    description = "",
+  ): Promise<boolean> {
+    try {
+      const whatsappClient = this.clients.get(deviceId);
+      if (!whatsappClient || whatsappClient.status !== "connected") {
+        throw new Error(`Device ${deviceId} not connected`);
+      }
+      if (!this.isValidPhoneNumber(recipient)) {
+        throw new Error("Invalid phone number format");
+      }
+      const formattedNumber = this.formatPhoneNumber(recipient);
+      const loc = new Location(latitude, longitude, description);
+      const sentMessage = await whatsappClient.client.sendMessage(
+        formattedNumber,
+        loc,
+      );
+      whatsappClient.lastActivity = new Date();
+      db.createMessage({
+        deviceId,
+        recipient: formattedNumber,
+        message: description,
+        status: "sent",
+        sentAt: new Date().toISOString(),
+        messageType: "text",
+        messageId: sentMessage.id.id,
+      });
+      return true;
+    } catch (error) {
+      logger.error(`Error sending location message from device ${deviceId}:`, error);
+      db.createMessage({
+        deviceId,
+        recipient,
+        message: description,
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+        messageType: "text",
+      });
+      return false;
+    }
+  }
+
   // معالج طوابير الرسائل
   private startMessageProcessor(): void {
     this.messageProcessingInterval = setInterval(async () => {
@@ -725,6 +826,29 @@ class WhatsAppClientManager extends EventEmitter {
         }
       }
     }, 5000);
+  }
+
+  // معالج الرسائل المجدولة
+  private startScheduledProcessor(): void {
+    this.scheduledProcessorInterval = setInterval(async () => {
+      const dueMessages = db.getDueScheduledMessages();
+      for (const msg of dueMessages) {
+        try {
+          const success = await this.sendMessage(msg.deviceId, msg.recipient, msg.message);
+          if (success) {
+            db.updateMessage(msg.id, { status: "sent", sentAt: new Date().toISOString() });
+          } else {
+            db.updateMessage(msg.id, { status: "failed", errorMessage: "Failed to send" });
+          }
+        } catch (error) {
+          logger.error(`Error sending scheduled message ${msg.id}`, error);
+          db.updateMessage(msg.id, {
+            status: "failed",
+            errorMessage: error instanceof Error ? error.message : "Unknown",
+          });
+        }
+      }
+    }, 10000);
   }
 
   // مراقب صحة الاتصالات
