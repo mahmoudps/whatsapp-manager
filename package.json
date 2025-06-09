@@ -11,7 +11,9 @@
     "start": "next start",
     "production": "npm run build && npm start",
     "lint": "next lint --dir .",
+    "lint:fix": "next lint --dir . --fix",
     "test": "jest",
+    "test:watch": "jest --watch",
     "test:ci": "npm ci && npm test",
     "ws": "ts-node lib/websocket-server.ts"
   },
