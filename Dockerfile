@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 WORKDIR /app
 
@@ -51,6 +51,9 @@ COPY . .
 RUN chmod +x start-production.sh
 
 RUN npm run build
+
+# Switch to production mode before pruning dev dependencies
+ENV NODE_ENV=production
 
 # Remove development dependencies after the build to keep the image slim
 RUN npm prune --production && npm cache clean --force
