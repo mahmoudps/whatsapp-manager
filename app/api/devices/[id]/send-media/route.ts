@@ -7,14 +7,18 @@ import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const deviceId = Number.parseInt(params.id)
+    const deviceId = Number.parseInt(id)
     if (isNaN(deviceId)) {
       return NextResponse.json({ success: false, error: "معرف الجهاز غير صالح", timestamp: new Date().toISOString() }, { status: 400 })
     }

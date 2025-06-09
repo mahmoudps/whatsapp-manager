@@ -7,7 +7,11 @@ import { logger } from "@/lib/logger"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
@@ -15,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const deviceId = Number.parseInt(params.id)
+    const deviceId = Number.parseInt(id)
     if (isNaN(deviceId)) {
       return NextResponse.json(
         {

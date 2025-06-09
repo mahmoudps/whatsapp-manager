@@ -8,9 +8,13 @@ import { logger } from "@/lib/logger"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
-    logger.info(`🔍 POST /api/devices/${params.id}/send - Starting request`)
+    logger.info(`🔍 POST /api/devices/${id}/send - Starting request`)
 
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
@@ -19,9 +23,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const deviceId = Number.parseInt(params.id)
+    const deviceId = Number.parseInt(id)
     if (isNaN(deviceId)) {
-      logger.info("❌ Invalid device ID:", params.id)
+      logger.info("❌ Invalid device ID:", id)
       return NextResponse.json(
         {
           success: false,
@@ -107,7 +111,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       )
     }
   } catch (error) {
-    logger.error(`❌ Error sending message from device ${params.id}:`, error)
+    logger.error(`❌ Error sending message from device ${id}:`, error)
     return NextResponse.json(
       {
         success: false,
