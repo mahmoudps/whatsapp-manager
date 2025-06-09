@@ -51,6 +51,11 @@ docker-compose up --build -d
 ```bash
 cp .env.example .env
 ```
+
+### تحذير أمني
+قبل تشغيل التطبيق في بيئة الإنتاج، تأكد من تغيير المتغيرات الافتراضية
+مثل `ADMIN_USERNAME`, `ADMIN_PASSWORD` و`JWT_SECRET` في ملف البيئة أو داخل
+`docker-compose.yml`. استخدام القيم الافتراضية قد يعرّض النظام للاختراق.
 ### شرح المتغيرات
 - `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم.
 - `JWT_SECRET`: مفتاح التوقيع للرموز.
