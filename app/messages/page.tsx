@@ -28,9 +28,7 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchMessages()
     fetchDevices()
-    const interval = setInterval(fetchMessages, 15000)
     return () => {
-      clearInterval(interval)
       if (ws.current) {
         ws.current.close()
       }
@@ -52,17 +50,54 @@ export default function MessagesPage() {
       ws.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          logger.debug("WebSocket message received", { type: data.type })
+          const eventType = data.event || data.type
+          logger.debug("WebSocket message received", { event: eventType })
 
-          if (data.type === "message_update") {
-            fetchMessages()
-          } else if (data.type === "device_update") {
-            fetchDevices()
-            actions.addNotification({
-              type: "success",
-              title: "تحديث الأجهزة",
-              message: "تم تحديث حالة الأجهزة",
-            })
+          switch (eventType) {
+            case "device_status_changed": {
+              const { deviceId, status } = data.data || data
+              if (deviceId && status) {
+                setDevices((prev) =>
+                  prev.map((d) =>
+                    d.id === deviceId ? { ...d, status } : d,
+                  ),
+                )
+                actions.addNotification({
+                  type: "success",
+                  title: "تحديث الأجهزة",
+                  message: `تم تحديث حالة الجهاز ${deviceId}`,
+                })
+              }
+              break
+            }
+            case "message_sent": {
+              const payload = data.data || {}
+              const deviceId = data.deviceId || payload.deviceId
+              if (deviceId) {
+                const newMessage: Message = {
+                  id: Date.now(),
+                  deviceId,
+                  recipient: payload.recipient,
+                  message: payload.message,
+                  status: "sent",
+                  sentAt: payload.timestamp || new Date().toISOString(),
+                  messageType: payload.messageType || "text",
+                }
+                setMessages((prev) => [newMessage, ...prev])
+              }
+              break
+            }
+            case "message_received": {
+              const payload = data.data || {}
+              actions.addNotification({
+                type: "info",
+                title: `رسالة واردة من ${payload.sender}`,
+                message: payload.message,
+              })
+              break
+            }
+            default:
+              break
           }
         } catch (error) {
           logger.error("Error parsing WebSocket message", error)
