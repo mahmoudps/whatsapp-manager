@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
     const users = admins.map((admin) => ({
       id: admin.id,
       username: admin.username,
-      isActive: admin.isActive,
       lastLogin: admin.lastLogin,
       createdAt: admin.createdAt,
     }))

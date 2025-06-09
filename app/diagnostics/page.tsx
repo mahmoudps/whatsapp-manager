@@ -189,7 +189,7 @@ export default function DiagnosticsPage() {
     switch (status) {
       case "online":
         return (
-          <Badge variant="success" className="flex items-center gap-1">
+          <Badge variant={"success" as any} className="flex items-center gap-1">
             <CheckCircle className="h-3 w-3" /> متصل
           </Badge>
         )

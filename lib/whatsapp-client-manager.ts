@@ -2,6 +2,7 @@ import { Client, LocalAuth, MessageMedia, Location } from "whatsapp-web.js";
 import QRCode from "qrcode";
 import { db } from "./database";
 import { logger } from "./logger";
+import type { DeviceStatus } from "./types";
 import path from "path";
 import fs from "fs";
 import { EventEmitter } from "events";
@@ -20,7 +21,7 @@ if (!fs.existsSync(SESSION_DIR)) {
 interface WhatsAppClient {
   id: number;
   client: Client;
-  status: "disconnected" | "connecting" | "qr_ready" | "connected" | "error";
+  status: DeviceStatus;
   qrCode?: string;
   phoneNumber?: string;
   lastActivity: Date;
@@ -921,12 +922,12 @@ class WhatsAppClientManager extends EventEmitter {
   // تحديث حالة الجهاز
   private async updateDeviceStatus(
     deviceId: number,
-    status: string,
+    status: DeviceStatus,
     extras: Record<string, any> = {},
   ): Promise<void> {
     const client = this.clients.get(deviceId);
     if (client) {
-      client.status = status as any;
+      client.status = status;
       db.updateDevice(deviceId, {
         status,
         lastSeen: new Date().toISOString(),
@@ -978,7 +979,7 @@ class WhatsAppClientManager extends EventEmitter {
   }
 
   // الحصول على حالة جهاز
-  getDeviceStatus(deviceId: number): string {
+  getDeviceStatus(deviceId: number): DeviceStatus {
     const client = this.clients.get(deviceId);
     return client ? client.status : "disconnected";
   }

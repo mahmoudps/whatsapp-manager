@@ -386,7 +386,7 @@ export default function DevicesPage() {
             {devices.map((device) => (
               <DeviceCard
                 key={device.id}
-                device={device}
+                device={device as any}
                 onConnect={handleConnect}
                 onDisconnect={handleDisconnect}
                 onDelete={handleDelete}

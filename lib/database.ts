@@ -26,9 +26,10 @@ export interface Message {
   deviceId: number
   recipient: string
   message: string
-  status: "pending" | "sent" | "failed"
+  status: "pending" | "sent" | "failed" | "scheduled"
   messageId?: string
   messageType: string
+  scheduledAt?: string
   sentAt?: string
   errorMessage?: string
   createdAt: string
@@ -456,6 +457,52 @@ class DatabaseManager {
     return contacts
   }
 
+  getContact(id: number): Contact | undefined {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const contact = this.db
+      .prepare(`
+      SELECT id, name, phone_number as phoneNumber,
+             created_at as createdAt, updated_at as updatedAt
+      FROM contacts WHERE id = ?
+    `)
+      .get(id) as Contact | undefined
+
+    return contact
+  }
+
+  updateContact(id: number, data: Partial<Contact>): void {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (data.name) {
+      fields.push("name = ?")
+      values.push(data.name)
+    }
+    if (data.phoneNumber) {
+      fields.push("phone_number = ?")
+      values.push(data.phoneNumber)
+    }
+
+    fields.push("updated_at = CURRENT_TIMESTAMP")
+    values.push(id)
+
+    this.db
+      .prepare(`
+      UPDATE contacts SET ${fields.join(", ")} WHERE id = ?
+    `)
+      .run(...values)
+  }
+
+  deleteContact(id: number): boolean {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const result = this.db.prepare("DELETE FROM contacts WHERE id = ?").run(id)
+    return result.changes > 0
+  }
+
   // Message operations
   createMessage(data: Omit<Message, "id" | "createdAt" | "updatedAt">): Message {
     if (!this.db) throw new Error("Database not initialized")
@@ -769,6 +816,21 @@ class DatabaseManager {
       UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?
     `)
       .run(id)
+  }
+
+  getAllAdmins(): User[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const admins = this.db
+      .prepare(`
+      SELECT id, username, password, role,
+             created_at as createdAt, last_login as lastLogin
+      FROM users WHERE role = 'admin'
+      ORDER BY username
+    `)
+      .all() as User[]
+
+    return admins
   }
 
   // Refresh token operations
