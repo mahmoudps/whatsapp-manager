@@ -76,9 +76,9 @@ wa-manager status   # حالة التشغيل
 استخدم `wa-manager install full` لإعداد Nginx وشهادة SSL تلقائيًا.
 
 ## تشغيل الاختبارات
-تتطلب الاختبارات وجود جميع الاعتماديات وملف `.env.test`:
+تتطلب الاختبارات وجود جميع الاعتماديات ونسخة من ملف `.env.test`:
 ```bash
-cp .env.example .env.test
+cp .env.test .env
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
