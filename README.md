@@ -118,7 +118,7 @@ When running via Docker Compose the WebSocket server is started from within the
 For local development you can launch it manually with:
 
 ```bash
-node websocket-server.js
+npx ts-node ./lib/websocket-server.ts
 ```
 Before running this command make sure the project dependencies are installed:
 
