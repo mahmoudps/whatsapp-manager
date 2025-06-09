@@ -48,6 +48,11 @@ these using the `HTTP_PORT` and `HTTPS_PORT` environment variables when starting
 the stack. This is handy when another web server already occupies the default
 ports.
 
+The WebSocket server listens on port `3001`. The compose file now exposes this
+port so you can connect directly if desired. Set `NEXT_PUBLIC_WEBSOCKET_URL`
+to `ws://localhost:3001` for local setups or `wss://<your-domain>/ws` when using
+Nginx as a reverse proxy.
+
 When using the provided Nginx examples inside Docker, make sure the upstream
 addresses target the `whatsapp-manager` service instead of `localhost`.
 
@@ -135,6 +140,11 @@ For process management you can also use PM2 with the provided
 ```bash
 pm2 start ecosystem.config.js
 ```
+
+The ecosystem file runs the main server and the standalone WebSocket
+process. Make sure `NEXT_PUBLIC_WEBSOCKET_URL` in your `.env` reflects the
+public address (for example `wss://example.com/ws`) so clients can connect
+when running under PM2.
 
 ## CLI installation
 
