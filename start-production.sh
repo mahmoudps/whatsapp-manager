@@ -21,7 +21,7 @@ fi
 # تشغيل WebSocket Server
 if [ "$ENABLE_WEBSOCKET" = "true" ]; then
   echo "📡 تشغيل WebSocket Server..."
-  node ./websocket-server.js &
+  npx ts-node ./lib/websocket-server.ts &
   WS_PID=$!
   echo "WebSocket Server PID: $WS_PID"
   trap 'echo "📡 إيقاف WebSocket Server..."; kill $WS_PID' EXIT

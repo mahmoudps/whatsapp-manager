@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
+import { useWebSocketContext } from "@/lib/websocket-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
@@ -21,8 +22,7 @@ export default function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const { actions } = useApp()
-  const ws = useRef<WebSocket | null>(null)
-  const reconnectAttempts = useRef(0)
+  const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
   useEffect(() => {
@@ -31,9 +31,6 @@ export default function MessagesPage() {
     const interval = setInterval(fetchMessages, 15000)
     return () => {
       clearInterval(interval)
-      if (ws.current) {
-        ws.current.close()
-      }
     }
   }, [])
 
@@ -47,60 +44,20 @@ export default function MessagesPage() {
 
       ws.current = new WebSocket(wsUrl)
 
-      ws.current.onopen = () => {
-        logger.info("WebSocket connected successfully")
-        reconnectAttempts.current = 0 // Reset attempts on successful connection
-      }
-
-      ws.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          logger.debug("WebSocket message received", { type: data.type })
-
-          if (data.type === "message_update") {
-            fetchMessages()
-          } else if (data.type === "device_update") {
-            fetchDevices()
-            actions.addNotification({
-              type: "success",
-              title: "تحديث الأجهزة",
-              message: "تم تحديث حالة الأجهزة",
-            })
-          }
-        } catch (error) {
-          logger.error("Error parsing WebSocket message", error)
-        }
-      }
-
-      ws.current.onclose = (event) => {
-        logger.warn("WebSocket disconnected", { code: event.code, reason: event.reason })
-        if (reconnectAttempts.current < 5) {
-          // Limit reconnection attempts
-          const delay = Math.pow(2, reconnectAttempts.current) * 1000 // Exponential backoff
-          logger.info(`Attempting to reconnect in ${delay / 1000}s`)
-          setTimeout(connectWebSocket, delay)
-          reconnectAttempts.current++
-        } else {
-          logger.error("Max reconnection attempts reached. Please check server and network.")
-        }
-      }
-
-      ws.current.onerror = (error) => {
-        logger.error("WebSocket error", error)
-        // onclose will be called, triggering reconnection logic
-        // ws.current?.close() // No need to close here, onclose handles it
-      }
-    }
-
-    connectWebSocket()
+    const offDevice = on("device_update", () => {
+      fetchDevices()
+      actions.addNotification({
+        type: "success",
+        title: "تحديث الأجهزة",
+        message: "تم تحديث حالة الأجهزة",
+      })
+    })
 
     return () => {
-      if (ws.current) {
-        ws.current.close()
-        ws.current = null
-      }
+      offMessage()
+      offDevice()
     }
-  }, [actions])
+  }, [on, actions])
 
   const fetchMessages = async () => {
     try {
