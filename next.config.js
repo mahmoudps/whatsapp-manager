@@ -2,7 +2,7 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ["whatsapp-web.js", "puppeteer", "fluent-ffmpeg"],
+    serverExternalPackages: ["whatsapp-web.js", "puppeteer", "fluent-ffmpeg"],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
