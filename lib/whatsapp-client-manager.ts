@@ -1,74 +1,91 @@
-import { Client, LocalAuth } from "whatsapp-web.js"
-import QRCode from "qrcode"
-import { db } from "./database"
-import { logger } from "./logger"
-import path from "path"
-import fs from "fs"
-import { EventEmitter } from "events"
-import { PUPPETEER_EXECUTABLE_PATH } from "./config"
+import { Client, LocalAuth } from "whatsapp-web.js";
+import QRCode from "qrcode";
+import { db } from "./database";
+import { logger } from "./logger";
+import path from "path";
+import fs from "fs";
+import { EventEmitter } from "events";
+import { PUPPETEER_EXECUTABLE_PATH, ENABLE_WEBSOCKET } from "./config";
 
 // التأكد من وجود مجلد الجلسات
-const SESSION_DIR = path.join(process.cwd(), "data", "whatsapp_sessions")
+const SESSION_DIR = path.join(process.cwd(), "data", "whatsapp_sessions");
 if (!fs.existsSync(SESSION_DIR)) {
-  fs.mkdirSync(SESSION_DIR, { recursive: true })
+  fs.mkdirSync(SESSION_DIR, { recursive: true });
 }
 
 interface WhatsAppClient {
-  id: number
-  client: Client
-  status: "disconnected" | "connecting" | "qr_ready" | "connected" | "error"
-  qrCode?: string
-  phoneNumber?: string
-  lastActivity: Date
+  id: number;
+  client: Client;
+  status: "disconnected" | "connecting" | "qr_ready" | "connected" | "error";
+  qrCode?: string;
+  phoneNumber?: string;
+  lastActivity: Date;
   messageQueue: Array<{
-    id: string
-    recipient: string
-    message: string
-    retries: number
-  }>
+    id: string;
+    recipient: string;
+    message: string;
+    retries: number;
+  }>;
 }
 
 interface IncomingMessage {
-  deviceId: number
-  sender: string
-  message: string
-  messageId: string
-  messageType: string
-  mediaUrl?: string
-  receivedAt: string
+  deviceId: number;
+  sender: string;
+  message: string;
+  messageId: string;
+  messageType: string;
+  mediaUrl?: string;
+  receivedAt: string;
+}
+
+function wsEmit(method: string, ...args: any[]) {
+  if (ENABLE_WEBSOCKET && (global as any).wsServer?.[method]) {
+    try {
+      (global as any).wsServer[method](...args);
+    } catch (error) {
+      logger.warn(`Failed to call wsServer.${method}:`, error);
+    }
+  }
 }
 
 class WhatsAppClientManager extends EventEmitter {
-  private clients: Map<number, WhatsAppClient> = new Map()
-  private messageProcessingInterval: NodeJS.Timeout | null = null
-  private healthCheckInterval: NodeJS.Timeout | null = null
+  private clients: Map<number, WhatsAppClient> = new Map();
+  private messageProcessingInterval: NodeJS.Timeout | null = null;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    super()
-    this.init()
+    super();
+    this.init();
   }
 
   private init(): void {
-    this.initializeExistingDevices()
-    this.startMessageProcessor()
-    this.startHealthCheck()
+    this.initializeExistingDevices();
+    this.startMessageProcessor();
+    this.startHealthCheck();
   }
 
   // تنظيف الجلسات المعطلة
   private async cleanupSessions(deviceId: number): Promise<void> {
     try {
-      const sessionPath = path.join(SESSION_DIR, `session-device_${deviceId}`)
+      const sessionPath = path.join(SESSION_DIR, `session-device_${deviceId}`);
 
       // إيقاف العمليات المرتبطة بهذا الجهاز
-      const { exec } = require("child_process")
+      const { exec } = require("child_process");
       await new Promise<void>((resolve) => {
         exec(`pkill -f "device_${deviceId}"`, (error) => {
-          if (error && error.message && !error.message.includes("No such process")) {
-            logger.warn(`Warning killing processes for device ${deviceId}:`, error.message)
+          if (
+            error &&
+            error.message &&
+            !error.message.includes("No such process")
+          ) {
+            logger.warn(
+              `Warning killing processes for device ${deviceId}:`,
+              error.message,
+            );
           }
-          resolve()
-        })
-      })
+          resolve();
+        });
+      });
 
       // حذف ملفات القفل
       if (fs.existsSync(sessionPath)) {
@@ -78,37 +95,37 @@ class WhatsAppClientManager extends EventEmitter {
           "SingletonSocket",
           ".lock",
           "chrome_debug.log",
-        ]
+        ];
         for (const lockFile of lockFiles) {
-          const lockPath = path.join(sessionPath, lockFile)
+          const lockPath = path.join(sessionPath, lockFile);
           if (fs.existsSync(lockPath)) {
             try {
-              fs.unlinkSync(lockPath)
-              logger.info(`Removed ${lockFile} for device ${deviceId}`)
+              fs.unlinkSync(lockPath);
+              logger.info(`Removed ${lockFile} for device ${deviceId}`);
             } catch (error) {
-              logger.warn(`Could not remove ${lockFile}:`, error)
+              logger.warn(`Could not remove ${lockFile}:`, error);
             }
           }
         }
       }
 
       // انتظار للتأكد من التنظيف
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      logger.info(`Session cleanup completed for device ${deviceId}`)
+      logger.info(`Session cleanup completed for device ${deviceId}`);
     } catch (error) {
-      logger.error(`Error cleaning up sessions for device ${deviceId}:`, error)
+      logger.error(`Error cleaning up sessions for device ${deviceId}:`, error);
     }
   }
 
   // تهيئة الأجهزة الموجودة في قاعدة البيانات
   private initializeExistingDevices(): void {
     try {
-      const devices = db.getAllDevices()
-      logger.info(`Initializing ${devices.length} existing devices`)
+      const devices = db.getAllDevices();
+      logger.info(`Initializing ${devices.length} existing devices`);
 
       for (const device of devices) {
-        this.cleanupSessions(device.id)
+        this.cleanupSessions(device.id);
 
         // إعادة تعيين حالة الأجهزة المعلقة
         if (device.status !== "disconnected") {
@@ -117,33 +134,38 @@ class WhatsAppClientManager extends EventEmitter {
             qrCode: undefined,
             errorMessage: "System restart - please reconnect",
             lastSeen: new Date().toISOString(),
-          })
+          });
         }
       }
 
-      logger.info("All existing devices initialized and cleaned")
+      logger.info("All existing devices initialized and cleaned");
     } catch (error) {
-      logger.error("Error initializing existing devices:", error)
+      logger.error("Error initializing existing devices:", error);
     }
   }
 
   // إنشاء عميل WhatsApp
   async createClient(deviceId: number, deviceName: string): Promise<boolean> {
     try {
-      logger.info(`Creating WhatsApp client for device ${deviceId}: ${deviceName}`)
+      logger.info(
+        `Creating WhatsApp client for device ${deviceId}: ${deviceName}`,
+      );
 
       // تنظيف الجلسة السابقة
-      await this.cleanupSessions(deviceId)
+      await this.cleanupSessions(deviceId);
 
       // إزالة العميل السابق إن وجد
-      const existingClient = this.clients.get(deviceId)
+      const existingClient = this.clients.get(deviceId);
       if (existingClient) {
         try {
-          await existingClient.client.destroy()
+          await existingClient.client.destroy();
         } catch (error) {
-          logger.warn(`Error destroying existing client for device ${deviceId}:`, error)
+          logger.warn(
+            `Error destroying existing client for device ${deviceId}:`,
+            error,
+          );
         }
-        this.clients.delete(deviceId)
+        this.clients.delete(deviceId);
       }
 
       // تحديث حالة الجهاز
@@ -152,7 +174,7 @@ class WhatsAppClientManager extends EventEmitter {
         qrCode: undefined,
         errorMessage: undefined,
         lastSeen: new Date().toISOString(),
-      })
+      });
 
       // تكوين عميل WhatsApp
       const puppeteerOptions: any = {
@@ -190,10 +212,10 @@ class WhatsAppClientManager extends EventEmitter {
           `--user-data-dir=${path.join(SESSION_DIR, `session-device_${deviceId}`)}`,
         ],
         timeout: 60000,
-      }
+      };
 
       if (PUPPETEER_EXECUTABLE_PATH) {
-        puppeteerOptions.executablePath = PUPPETEER_EXECUTABLE_PATH
+        puppeteerOptions.executablePath = PUPPETEER_EXECUTABLE_PATH;
       }
 
       const client = new Client({
@@ -204,9 +226,10 @@ class WhatsAppClientManager extends EventEmitter {
         puppeteer: puppeteerOptions,
         webVersionCache: {
           type: "remote",
-          remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
+          remotePath:
+            "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
         },
-      })
+      });
 
       const whatsappClient: WhatsAppClient = {
         id: deviceId,
@@ -214,14 +237,14 @@ class WhatsAppClientManager extends EventEmitter {
         status: "connecting",
         lastActivity: new Date(),
         messageQueue: [],
-      }
+      };
 
-      this.clients.set(deviceId, whatsappClient)
+      this.clients.set(deviceId, whatsappClient);
 
       // معالج QR Code
       client.on("qr", async (qr) => {
         try {
-          logger.info(`QR Code generated for device ${deviceId}`)
+          logger.info(`QR Code generated for device ${deviceId}`);
           const qrCodeDataURL = await QRCode.toDataURL(qr, {
             width: 300,
             margin: 2,
@@ -230,40 +253,44 @@ class WhatsAppClientManager extends EventEmitter {
               light: "#FFFFFF",
             },
             errorCorrectionLevel: "M",
-          })
+          });
 
-          whatsappClient.qrCode = qrCodeDataURL
-          whatsappClient.status = "qr_ready"
-          whatsappClient.lastActivity = new Date()
+          whatsappClient.qrCode = qrCodeDataURL;
+          whatsappClient.status = "qr_ready";
+          whatsappClient.lastActivity = new Date();
 
           db.updateDevice(deviceId, {
             status: "qr_ready",
             qrCode: qrCodeDataURL,
             errorMessage: undefined,
             lastSeen: new Date().toISOString(),
-          })
+          });
 
           db.createAnalyticsEvent({
             eventType: "qr_ready",
             deviceId,
-          })
+          });
 
-          this.emit("qr", { deviceId, qrCode: qrCodeDataURL })
-          logger.info(`QR code ready for device ${deviceId}`)
+          this.emit("qr", { deviceId, qrCode: qrCodeDataURL });
+          wsEmit("sendQRCode", deviceId, qrCodeDataURL);
+          logger.info(`QR code ready for device ${deviceId}`);
         } catch (error) {
-          logger.error(`Error generating QR code for device ${deviceId}`, error)
+          logger.error(
+            `Error generating QR code for device ${deviceId}`,
+            error,
+          );
         }
-      })
+      });
 
       // معالج الاتصال الناجح
       client.on("ready", async () => {
         try {
-          logger.info(`WhatsApp client ready for device ${deviceId}`)
+          logger.info(`WhatsApp client ready for device ${deviceId}`);
 
-          const info = client.info
-          whatsappClient.status = "connected"
-          whatsappClient.phoneNumber = info.wid.user
-          whatsappClient.lastActivity = new Date()
+          const info = client.info;
+          whatsappClient.status = "connected";
+          whatsappClient.phoneNumber = info.wid.user;
+          whatsappClient.lastActivity = new Date();
 
           db.updateDevice(deviceId, {
             status: "connected",
@@ -272,12 +299,12 @@ class WhatsAppClientManager extends EventEmitter {
             qrCode: undefined,
             errorMessage: undefined,
             connectionAttempts: 0,
-          })
+          });
 
           db.createAnalyticsEvent({
             eventType: "device_connected",
             deviceId,
-          })
+          });
 
           this.emit("connected", {
             deviceId,
@@ -287,24 +314,33 @@ class WhatsAppClientManager extends EventEmitter {
               pushname: info.pushname,
               wid: info.wid,
             },
-          })
+          });
+          wsEmit("updateDeviceStatus", deviceId, {
+            status: "connected",
+            phoneNumber: info.wid.user,
+          });
 
-          logger.info(`Device ${deviceId} connected successfully with phone: ${info.wid.user}`)
+          logger.info(
+            `Device ${deviceId} connected successfully with phone: ${info.wid.user}`,
+          );
         } catch (error) {
-          logger.error(`Error handling ready event for device ${deviceId}:`, error)
+          logger.error(
+            `Error handling ready event for device ${deviceId}:`,
+            error,
+          );
         }
-      })
+      });
 
       // معالج الرسائل الواردة
       client.on("message", async (message) => {
         try {
           if (!message.fromMe) {
-            whatsappClient.lastActivity = new Date()
+            whatsappClient.lastActivity = new Date();
 
             logger.debug(`New message received on device ${deviceId}`, {
               from: message.from,
               type: message.type,
-            })
+            });
 
             const incomingMessage: IncomingMessage = {
               deviceId,
@@ -314,180 +350,226 @@ class WhatsAppClientManager extends EventEmitter {
               messageType: message.type,
               mediaUrl: message.hasMedia ? "has_media" : undefined,
               receivedAt: new Date().toISOString(),
-            }
+            };
 
             // حفظ في قاعدة البيانات
-            db.createIncomingMessage(incomingMessage)
+            db.createIncomingMessage(incomingMessage);
 
             db.createAnalyticsEvent({
               eventType: "message_received",
               deviceId,
               messageId: message.id.id,
-            })
+            });
 
             // إرسال عبر WebSocket
-            this.emit("message", { deviceId, message: incomingMessage })
+            this.emit("message", { deviceId, message: incomingMessage });
+            wsEmit("notifyMessage", deviceId, incomingMessage);
 
             // معالجة الوسائط إذا وجدت
             if (message.hasMedia) {
               try {
-                const media = await message.downloadMedia()
+                const media = await message.downloadMedia();
                 if (media && media.data) {
-                  const mediaDir = path.join(process.cwd(), "data", "media")
+                  const mediaDir = path.join(process.cwd(), "data", "media");
                   if (!fs.existsSync(mediaDir)) {
-                    fs.mkdirSync(mediaDir, { recursive: true })
+                    fs.mkdirSync(mediaDir, { recursive: true });
                   }
 
                   // التحقق من نوع الملف المسموح
-                  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "video/mp4", "audio/mpeg"]
+                  const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/gif",
+                    "video/mp4",
+                    "audio/mpeg",
+                  ];
                   if (allowedTypes.includes(media.mimetype)) {
-                    const fileName = `${message.id.id}_${Date.now()}.${media.mimetype.split("/")[1]}`
-                    const filePath = path.join(mediaDir, fileName)
+                    const fileName = `${message.id.id}_${Date.now()}.${media.mimetype.split("/")[1]}`;
+                    const filePath = path.join(mediaDir, fileName);
 
-                    fs.writeFileSync(filePath, media.data, "base64")
+                    fs.writeFileSync(filePath, media.data, "base64");
 
-                    logger.info(`Media saved successfully`, { fileName, type: media.mimetype })
+                    logger.info(`Media saved successfully`, {
+                      fileName,
+                      type: media.mimetype,
+                    });
                   } else {
-                    logger.warn(`Unsupported media type: ${media.mimetype}`)
+                    logger.warn(`Unsupported media type: ${media.mimetype}`);
                   }
                 }
               } catch (mediaError) {
-                logger.error(`Error processing media for message ${message.id.id}`, mediaError)
+                logger.error(
+                  `Error processing media for message ${message.id.id}`,
+                  mediaError,
+                );
               }
             }
           }
         } catch (error) {
-          logger.error(`Error handling incoming message for device ${deviceId}`, error)
+          logger.error(
+            `Error handling incoming message for device ${deviceId}`,
+            error,
+          );
         }
-      })
+      });
 
       // معالج قطع الاتصال
       client.on("disconnected", async (reason) => {
         try {
-          logger.warn(`WhatsApp client disconnected for device ${deviceId}: ${reason}`)
+          logger.warn(
+            `WhatsApp client disconnected for device ${deviceId}: ${reason}`,
+          );
 
-          whatsappClient.status = "disconnected"
+          whatsappClient.status = "disconnected";
 
           db.updateDevice(deviceId, {
             status: "disconnected",
             lastSeen: new Date().toISOString(),
             errorMessage: `Disconnected: ${reason}`,
-          })
+          });
 
           db.createAnalyticsEvent({
             eventType: "device_disconnected",
             deviceId,
-          })
+          });
 
-          this.emit("disconnected", { deviceId, reason })
+          this.emit("disconnected", { deviceId, reason });
+          wsEmit("updateDeviceStatus", deviceId, { status: "disconnected" });
 
           // تنظيف العميل من الذاكرة
-          this.clients.delete(deviceId)
-          await this.cleanupSessions(deviceId)
+          this.clients.delete(deviceId);
+          await this.cleanupSessions(deviceId);
 
-          logger.info(`Device ${deviceId} disconnected and cleaned up`)
+          logger.info(`Device ${deviceId} disconnected and cleaned up`);
         } catch (error) {
-          logger.error(`Error handling disconnect for device ${deviceId}:`, error)
+          logger.error(
+            `Error handling disconnect for device ${deviceId}:`,
+            error,
+          );
         }
-      })
+      });
 
       // معالج فشل المصادقة
       client.on("auth_failure", async (message) => {
         try {
-          logger.error(`Authentication failed for device ${deviceId}: ${message}`)
+          logger.error(
+            `Authentication failed for device ${deviceId}: ${message}`,
+          );
 
-          whatsappClient.status = "error"
+          whatsappClient.status = "error";
 
           db.updateDevice(deviceId, {
             status: "error",
             errorMessage: `Auth failure: ${message}`,
             lastSeen: new Date().toISOString(),
-          })
+          });
 
           db.createAnalyticsEvent({
             eventType: "auth_failure",
             deviceId,
-          })
+          });
 
-          this.emit("error", { deviceId, error: message })
-          await this.cleanupSessions(deviceId)
+          this.emit("error", { deviceId, error: message });
+          wsEmit("updateDeviceStatus", deviceId, { status: "error" });
+          await this.cleanupSessions(deviceId);
         } catch (error) {
-          logger.error(`Error handling auth failure for device ${deviceId}:`, error)
+          logger.error(
+            `Error handling auth failure for device ${deviceId}:`,
+            error,
+          );
         }
-      })
+      });
 
       // معالج الأخطاء العامة
       client.on("error", async (error) => {
         try {
-          logger.error(`Client error for device ${deviceId}:`, error)
+          logger.error(`Client error for device ${deviceId}:`, error);
 
-          whatsappClient.status = "error"
+          whatsappClient.status = "error";
 
           db.updateDevice(deviceId, {
             status: "error",
             errorMessage: error.message || "Unknown client error",
             lastSeen: new Date().toISOString(),
-          })
+          });
 
           db.createAnalyticsEvent({
             eventType: "device_error",
             deviceId,
-          })
+          });
 
-          this.emit("error", { deviceId, error: error.message })
+          this.emit("error", { deviceId, error: error.message });
+          wsEmit("updateDeviceStatus", deviceId, { status: "error" });
         } catch (err) {
-          logger.error(`Error handling client error for device ${deviceId}:`, err)
+          logger.error(
+            `Error handling client error for device ${deviceId}:`,
+            err,
+          );
         }
-      })
+      });
 
       // بدء تهيئة العميل
-      logger.info(`Initializing WhatsApp client for device ${deviceId}`)
-      await client.initialize()
+      logger.info(`Initializing WhatsApp client for device ${deviceId}`);
+      await client.initialize();
 
-      return true
+      return true;
     } catch (error) {
-      logger.error(`Error creating WhatsApp client for device ${deviceId}:`, error)
+      logger.error(
+        `Error creating WhatsApp client for device ${deviceId}:`,
+        error,
+      );
 
       db.updateDevice(deviceId, {
         status: "error",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         lastSeen: new Date().toISOString(),
-      })
+      });
 
       db.createAnalyticsEvent({
         eventType: "client_init_error",
         deviceId,
-      })
-      this.clients.delete(deviceId)
+      });
+      this.clients.delete(deviceId);
 
-      await this.cleanupSessions(deviceId)
-      return false
+      await this.cleanupSessions(deviceId);
+      return false;
     }
   }
 
   // إرسال رسالة
-  async sendMessage(deviceId: number, recipient: string, message: string): Promise<boolean> {
+  async sendMessage(
+    deviceId: number,
+    recipient: string,
+    message: string,
+  ): Promise<boolean> {
     try {
-      const whatsappClient = this.clients.get(deviceId)
+      const whatsappClient = this.clients.get(deviceId);
 
       if (!whatsappClient || whatsappClient.status !== "connected") {
-        throw new Error(`Device ${deviceId} not connected. Status: ${whatsappClient?.status || "not found"}`)
+        throw new Error(
+          `Device ${deviceId} not connected. Status: ${whatsappClient?.status || "not found"}`,
+        );
       }
 
       // التحقق من صحة رقم الهاتف
       if (!this.isValidPhoneNumber(recipient)) {
-        throw new Error("Invalid phone number format")
+        throw new Error("Invalid phone number format");
       }
 
       // تنسيق رقم الهاتف
-      const formattedNumber = this.formatPhoneNumber(recipient)
+      const formattedNumber = this.formatPhoneNumber(recipient);
 
-      logger.info(`Sending message from device ${deviceId} to ${formattedNumber}`)
+      logger.info(
+        `Sending message from device ${deviceId} to ${formattedNumber}`,
+      );
 
       // إرسال الرسالة
-      const sentMessage = await whatsappClient.client.sendMessage(formattedNumber, message)
+      const sentMessage = await whatsappClient.client.sendMessage(
+        formattedNumber,
+        message,
+      );
 
-      whatsappClient.lastActivity = new Date()
+      whatsappClient.lastActivity = new Date();
 
       // حفظ الرسالة في قاعدة البيانات
       db.createMessage({
@@ -498,15 +580,17 @@ class WhatsAppClientManager extends EventEmitter {
         sentAt: new Date().toISOString(),
         messageType: "text",
         messageId: sentMessage.id.id,
-      })
+      });
 
       db.createAnalyticsEvent({
         eventType: "message_sent",
         deviceId,
         messageId: sentMessage.id.id,
-      })
+      });
 
-      logger.info(`Message sent successfully from device ${deviceId} to ${formattedNumber}`)
+      logger.info(
+        `Message sent successfully from device ${deviceId} to ${formattedNumber}`,
+      );
 
       this.emit("message_sent", {
         deviceId,
@@ -514,11 +598,17 @@ class WhatsAppClientManager extends EventEmitter {
         message,
         messageId: sentMessage.id.id,
         timestamp: new Date().toISOString(),
-      })
+      });
+      wsEmit("broadcastToDevice", deviceId, "message_sent", {
+        recipient: formattedNumber,
+        message,
+        messageId: sentMessage.id.id,
+        timestamp: new Date().toISOString(),
+      });
 
-      return true
+      return true;
     } catch (error) {
-      logger.error(`Error sending message from device ${deviceId}:`, error)
+      logger.error(`Error sending message from device ${deviceId}:`, error);
 
       // حفظ الرسالة الفاشلة
       db.createMessage({
@@ -528,12 +618,12 @@ class WhatsAppClientManager extends EventEmitter {
         status: "failed",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         messageType: "text",
-      })
+      });
 
       db.createAnalyticsEvent({
         eventType: "message_failed",
         deviceId,
-      })
+      });
 
       this.emit("message_failed", {
         deviceId,
@@ -541,9 +631,15 @@ class WhatsAppClientManager extends EventEmitter {
         message,
         error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
-      })
+      });
+      wsEmit("broadcastToDevice", deviceId, "message_failed", {
+        recipient,
+        message,
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
+      });
 
-      return false
+      return false;
     }
   }
 
@@ -554,44 +650,50 @@ class WhatsAppClientManager extends EventEmitter {
     message: string,
     delayBetweenMessages = 3000,
   ): Promise<Array<{ recipient: string; success: boolean; error?: string }>> {
-    const results = []
-    const whatsappClient = this.clients.get(deviceId)
+    const results = [];
+    const whatsappClient = this.clients.get(deviceId);
 
     if (!whatsappClient || whatsappClient.status !== "connected") {
-      throw new Error(`Device ${deviceId} not connected`)
+      throw new Error(`Device ${deviceId} not connected`);
     }
 
-    logger.info(`Starting bulk message send for device ${deviceId} to ${recipients.length} recipients`)
+    logger.info(
+      `Starting bulk message send for device ${deviceId} to ${recipients.length} recipients`,
+    );
 
     for (let i = 0; i < recipients.length; i++) {
-      const recipient = recipients[i]
+      const recipient = recipients[i];
 
       try {
-        const success = await this.sendMessage(deviceId, recipient, message)
+        const success = await this.sendMessage(deviceId, recipient, message);
         results.push({
           recipient,
           success,
           error: success ? undefined : "Failed to send",
-        })
+        });
 
         // تأخير بين الرسائل لتجنب الحظر
         if (i < recipients.length - 1 && delayBetweenMessages > 0) {
-          logger.info(`Waiting ${delayBetweenMessages}ms before sending next message`)
-          await new Promise((resolve) => setTimeout(resolve, delayBetweenMessages))
+          logger.info(
+            `Waiting ${delayBetweenMessages}ms before sending next message`,
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, delayBetweenMessages),
+          );
         }
       } catch (error) {
         results.push({
           recipient,
           success: false,
           error: error instanceof Error ? error.message : "Unknown error",
-        })
+        });
       }
     }
 
     logger.info(
       `Bulk message send completed for device ${deviceId}. Success: ${results.filter((r) => r.success).length}/${recipients.length}`,
-    )
-    return results
+    );
+    return results;
   }
 
   // معالج طوابير الرسائل
@@ -599,154 +701,167 @@ class WhatsAppClientManager extends EventEmitter {
     this.messageProcessingInterval = setInterval(async () => {
       for (const [deviceId, client] of this.clients) {
         if (client.status === "connected" && client.messageQueue.length > 0) {
-          const message = client.messageQueue.shift()
+          const message = client.messageQueue.shift();
           if (message) {
             try {
-              await this.sendMessage(deviceId, message.recipient, message.message)
+              await this.sendMessage(
+                deviceId,
+                message.recipient,
+                message.message,
+              );
             } catch (error) {
-              logger.error(`Error processing queued message for device ${deviceId}:`, error)
+              logger.error(
+                `Error processing queued message for device ${deviceId}:`,
+                error,
+              );
 
               // إعادة إضافة الرسالة إلى الطابور إذا لم تتجاوز عدد المحاولات
               if (message.retries < 3) {
-                message.retries++
-                client.messageQueue.push(message)
+                message.retries++;
+                client.messageQueue.push(message);
               }
             }
           }
         }
       }
-    }, 5000)
+    }, 5000);
   }
 
   // مراقب صحة الاتصالات
   private startHealthCheck(): void {
     this.healthCheckInterval = setInterval(async () => {
-      const now = new Date()
+      const now = new Date();
 
       for (const [deviceId, client] of this.clients) {
         // فحص النشاط الأخير
-        const inactiveTime = now.getTime() - client.lastActivity.getTime()
-        const fiveMinutes = 5 * 60 * 1000
+        const inactiveTime = now.getTime() - client.lastActivity.getTime();
+        const fiveMinutes = 5 * 60 * 1000;
 
         if (client.status === "connected" && inactiveTime > fiveMinutes) {
           try {
             // اختبار الاتصال عبر إرسال ping
-            const state = await client.client.getState()
+            const state = await client.client.getState();
             if (state !== "CONNECTED") {
-              logger.warn(`Device ${deviceId} state changed to ${state}, updating status`)
-              await this.updateDeviceStatus(deviceId, "disconnected")
+              logger.warn(
+                `Device ${deviceId} state changed to ${state}, updating status`,
+              );
+              await this.updateDeviceStatus(deviceId, "disconnected");
             } else {
-              client.lastActivity = now
+              client.lastActivity = now;
             }
           } catch (error: any) {
-            logger.warn(`Health check failed for device ${deviceId}:`, error)
-            await this.updateDeviceStatus(deviceId, "error")
+            logger.warn(`Health check failed for device ${deviceId}:`, error);
+            await this.updateDeviceStatus(deviceId, "error");
           }
         }
       }
-    }, 60000)
+    }, 60000);
   }
 
   // تحديث حالة الجهاز
-  private async updateDeviceStatus(deviceId: number, status: string): Promise<void> {
-    const client = this.clients.get(deviceId)
+  private async updateDeviceStatus(
+    deviceId: number,
+    status: string,
+  ): Promise<void> {
+    const client = this.clients.get(deviceId);
     if (client) {
-      client.status = status as any
+      client.status = status as any;
       db.updateDevice(deviceId, {
         status,
         lastSeen: new Date().toISOString(),
-      })
+      });
       db.createAnalyticsEvent({
         eventType: "status_changed",
         deviceId,
         details: { status },
-      })
-      this.emit("status_changed", { deviceId, status })
+      });
+      this.emit("status_changed", { deviceId, status });
+      wsEmit("updateDeviceStatus", deviceId, { status });
     }
   }
 
   // قطع اتصال جهاز
   async disconnectDevice(deviceId: number): Promise<boolean> {
     try {
-      logger.info(`Disconnecting device ${deviceId}`)
+      logger.info(`Disconnecting device ${deviceId}`);
 
-      const whatsappClient = this.clients.get(deviceId)
+      const whatsappClient = this.clients.get(deviceId);
 
       if (whatsappClient) {
-        await whatsappClient.client.destroy()
-        this.clients.delete(deviceId)
+        await whatsappClient.client.destroy();
+        this.clients.delete(deviceId);
       }
 
       db.updateDevice(deviceId, {
         status: "disconnected",
         lastSeen: new Date().toISOString(),
-      })
+      });
 
       db.createAnalyticsEvent({
         eventType: "device_manual_disconnect",
         deviceId,
-      })
+      });
 
-      await this.cleanupSessions(deviceId)
+      await this.cleanupSessions(deviceId);
 
-      logger.info(`Device ${deviceId} disconnected successfully`)
-      return true
+      logger.info(`Device ${deviceId} disconnected successfully`);
+      return true;
     } catch (error) {
-      logger.error(`Error disconnecting device ${deviceId}:`, error)
-      return false
+      logger.error(`Error disconnecting device ${deviceId}:`, error);
+      return false;
     }
   }
 
   // الحصول على حالة جهاز
   getDeviceStatus(deviceId: number): string {
-    const client = this.clients.get(deviceId)
-    return client ? client.status : "disconnected"
+    const client = this.clients.get(deviceId);
+    return client ? client.status : "disconnected";
   }
 
   // الحصول على QR Code
   getDeviceQR(deviceId: number): string | undefined {
-    const client = this.clients.get(deviceId)
-    return client?.qrCode
+    const client = this.clients.get(deviceId);
+    return client?.qrCode;
   }
 
   // التحقق من اتصال الجهاز
   isClientReady(deviceId: number): boolean {
-    const client = this.clients.get(deviceId)
-    return client?.status === "connected"
+    const client = this.clients.get(deviceId);
+    return client?.status === "connected";
   }
 
   // تنسيق رقم الهاتف
   private formatPhoneNumber(phoneNumber: string): string {
     // إزالة جميع الرموز غير الرقمية
-    let cleaned = phoneNumber.replace(/\D/g, "")
+    let cleaned = phoneNumber.replace(/\D/g, "");
 
     // معالجة الأرقام الدولية
     if (phoneNumber.startsWith("+")) {
-      cleaned = phoneNumber.substring(1).replace(/\D/g, "")
+      cleaned = phoneNumber.substring(1).replace(/\D/g, "");
     }
 
     // معالجة الأرقام التي تبدأ بـ 00
     if (cleaned.startsWith("00")) {
-      cleaned = cleaned.substring(2)
+      cleaned = cleaned.substring(2);
     }
 
     // معالجة الأرقام السعودية المحلية
     if (cleaned.startsWith("0") && cleaned.length === 10) {
-      cleaned = "966" + cleaned.substring(1)
+      cleaned = "966" + cleaned.substring(1);
     }
 
     // التحقق من طول الرقم
     if (cleaned.length < 10 || cleaned.length > 15) {
-      throw new Error("Invalid phone number length")
+      throw new Error("Invalid phone number length");
     }
 
-    return cleaned + "@c.us"
+    return cleaned + "@c.us";
   }
 
   // التحقق من صحة رقم الهاتف
   private isValidPhoneNumber(phone: string): boolean {
-    const phoneRegex = /^[+]?[0-9\-\s()]{8,15}$/
-    return phoneRegex.test(phone.trim())
+    const phoneRegex = /^[+]?[0-9\-\s()]{8,15}$/;
+    return phoneRegex.test(phone.trim());
   }
 
   // إحصائيات النظام
@@ -759,56 +874,58 @@ class WhatsAppClientManager extends EventEmitter {
       error: 0,
       disconnected: 0,
       totalMessageQueue: 0,
-    }
+    };
 
     this.clients.forEach((client) => {
       if (client.status in stats) {
-        stats[client.status as keyof typeof stats]++
+        stats[client.status as keyof typeof stats]++;
       }
-      stats.totalMessageQueue += client.messageQueue.length
-    })
+      stats.totalMessageQueue += client.messageQueue.length;
+    });
 
-    return stats
+    return stats;
   }
 
   // تنظيف شامل للنظام
   async cleanup(): Promise<void> {
     try {
-      logger.info("Starting comprehensive system cleanup...")
+      logger.info("Starting comprehensive system cleanup...");
 
       // إيقاف المراقبين
       if (this.messageProcessingInterval) {
-        clearInterval(this.messageProcessingInterval)
+        clearInterval(this.messageProcessingInterval);
       }
       if (this.healthCheckInterval) {
-        clearInterval(this.healthCheckInterval)
+        clearInterval(this.healthCheckInterval);
       }
 
       // إيقاف جميع العملاء
-      const disconnectPromises = Array.from(this.clients.keys()).map((deviceId) => this.disconnectDevice(deviceId))
+      const disconnectPromises = Array.from(this.clients.keys()).map(
+        (deviceId) => this.disconnectDevice(deviceId),
+      );
 
-      await Promise.allSettled(disconnectPromises)
+      await Promise.allSettled(disconnectPromises);
 
-      this.clients.clear()
+      this.clients.clear();
 
       // تنظيف العمليات المعلقة
-      const { exec } = require("child_process")
-      exec('pkill -f "chrome.*whatsapp"', () => {})
-      exec('pkill -f "chromium.*whatsapp"', () => {})
+      const { exec } = require("child_process");
+      exec('pkill -f "chrome.*whatsapp"', () => {});
+      exec('pkill -f "chromium.*whatsapp"', () => {});
 
-      logger.info("System cleanup completed successfully")
+      logger.info("System cleanup completed successfully");
     } catch (error) {
-      logger.error("Error during system cleanup:", error)
+      logger.error("Error during system cleanup:", error);
     }
   }
 }
 
 // إنشاء مثيل واحد من المدير
-export const whatsappManager = new WhatsAppClientManager()
+export const whatsappManager = new WhatsAppClientManager();
 
 // تنظيف عند إغلاق التطبيق
-process.on("SIGTERM", () => whatsappManager.cleanup())
-process.on("SIGINT", () => whatsappManager.cleanup())
-process.on("SIGUSR2", () => whatsappManager.cleanup())
+process.on("SIGTERM", () => whatsappManager.cleanup());
+process.on("SIGINT", () => whatsappManager.cleanup());
+process.on("SIGUSR2", () => whatsappManager.cleanup());
 
-export default whatsappManager
+export default whatsappManager;
