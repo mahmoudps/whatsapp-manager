@@ -2,6 +2,13 @@
 
 echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
+# تحميل المتغيرات من الملف .env إن وجد
+if [ -f .env ]; then
+  set -o allexport
+  . ./.env
+  set +o allexport
+fi
+
 if [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
   echo "❌ ADMIN_USERNAME, ADMIN_PASSWORD, and JWT_SECRET must be set"
   exit 1

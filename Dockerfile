@@ -48,7 +48,10 @@ RUN npm ci && npm cache clean --force
 
 COPY . .
 
-RUN chmod +x start-production.sh
+RUN chmod +x start-production.sh scripts/generate-env.js
+
+# توليد ملف البيئة تلقائياً عند البناء
+RUN node scripts/generate-env.js
 
 RUN npm run build
 
