@@ -36,7 +36,8 @@ export interface Message {
   recipient: string
   message: string
   status: "pending" | "sent" | "failed" | "scheduled"
-  sentAt?: string
+  isGroup?: boolean
+  sentAt: string
   scheduledAt?: string
   errorMessage?: string
   messageType: MessageType

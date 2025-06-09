@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
@@ -21,6 +22,7 @@ export default function MessagesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [deviceFilter, setDeviceFilter] = useState<number | "all">("all")
   const { actions } = useApp()
   const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
@@ -33,7 +35,7 @@ export default function MessagesPage() {
         ws.current.close()
       }
     }
-  }, [])
+  }, [deviceFilter])
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -138,7 +140,11 @@ export default function MessagesPage() {
   const fetchMessages = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("/api/messages")
+      const url =
+        deviceFilter === "all"
+          ? "/api/messages"
+          : `/api/messages?deviceId=${deviceFilter}`
+      const response = await fetch(url)
       const data = await response.json()
 
       if (data.success) {
@@ -395,7 +401,20 @@ export default function MessagesPage() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
+                  <Select value={deviceFilter.toString()} onValueChange={(val) => setDeviceFilter(val === "all" ? "all" : Number(val))}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="جميع الأجهزة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الأجهزة</SelectItem>
+                      {devices.map((d) => (
+                        <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex gap-2 flex-wrap">
                   {[
                     { key: "all", label: "الكل", count: stats.total },
                     { key: "sent", label: "مرسلة", count: stats.sent },
@@ -419,6 +438,7 @@ export default function MessagesPage() {
                       </Button>
                     </motion.div>
                   ))}
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-api-key") ||
       new URL(request.url).searchParams.get("apiKey");
 
-    if (!EXTERNAL_API_KEY || apiKey !== EXTERNAL_API_KEY) {
+    await db.ensureInitialized();
+    const storedKey = db.getSetting("external_api_key") || EXTERNAL_API_KEY;
+
+    if (!storedKey || apiKey !== storedKey) {
       return NextResponse.json(
         { success: false, error: "غير مصرح" },
         { status: 401 },
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await db.ensureInitialized();
+
 
     const messageData = ValidationSchemas.message({
       to: recipient,
