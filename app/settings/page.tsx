@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { User, Lock, Save, Loader2, Eye, EyeOff, Shield, Database, Server, Info, Key } from "lucide-react"
 import { useApp } from "@/lib/app-context"
 import { MainLayout } from "@/components/layout/main-layout"
+import { logger } from "@/lib/logger"
 
 interface UserType {
   id: number
@@ -66,7 +67,7 @@ export default function SettingsPage() {
         setApiToken(data.value || "")
       }
     } catch (err) {
-      console.error(err)
+      logger.error(err as Error)
     }
   }
 
