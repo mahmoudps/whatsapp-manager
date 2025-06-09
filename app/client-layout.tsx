@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-import { Inter } from "next/font/google"
+import { Tajawal } from "next/font/google"
 import { AppProvider } from "@/lib/app-context"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const tajawal = Tajawal({ subsets: ["arabic", "latin"], display: "swap" })
 
 export default function ClientLayout({
   children,
@@ -17,7 +17,7 @@ export default function ClientLayout({
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={inter.className}>
+      <body className={tajawal.className}>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>
