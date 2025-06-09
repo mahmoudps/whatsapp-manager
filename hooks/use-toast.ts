@@ -9,7 +9,48 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const DEFAULT_TOAST_REMOVE_DELAY = 5000
+let toastRemoveDelay = DEFAULT_TOAST_REMOVE_DELAY
+
+interface ToastConfig {
+  removeDelay: number
+  setRemoveDelay: (delay: number) => void
+}
+
+const ToastConfigContext = React.createContext<ToastConfig>({
+  removeDelay: DEFAULT_TOAST_REMOVE_DELAY,
+  setRemoveDelay: () => {},
+})
+
+export function ToastConfigProvider({
+  children,
+  removeDelay = DEFAULT_TOAST_REMOVE_DELAY,
+}: React.PropsWithChildren<{ removeDelay?: number }>) {
+  const setRemoveDelay = React.useCallback((delay: number) => {
+    toastRemoveDelay = delay
+  }, [])
+
+  React.useEffect(() => {
+    setRemoveDelay(removeDelay)
+  }, [removeDelay, setRemoveDelay])
+
+  const value = React.useMemo(
+    () => ({ removeDelay, setRemoveDelay }),
+    [removeDelay, setRemoveDelay]
+  )
+
+  return (
+    <ToastConfigContext.Provider value={value}>
+      {children}
+    </ToastConfigContext.Provider>
+  )
+}
+
+export const useToastConfig = () => React.useContext(ToastConfigContext)
+
+export const setToastRemoveDelay = (delay: number) => {
+  toastRemoveDelay = delay
+}
 
 type ToasterToast = ToastProps & {
   id: string
@@ -69,7 +110,7 @@ const addToRemoveQueue = (toastId: string) => {
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
-  }, TOAST_REMOVE_DELAY)
+  }, toastRemoveDelay)
 
   toastTimeouts.set(toastId, timeout)
 }
@@ -191,4 +232,10 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+export {
+  useToast,
+  toast,
+  ToastConfigProvider,
+  useToastConfig,
+  setToastRemoveDelay,
+}
