@@ -190,6 +190,10 @@ class WhatsAppClientManager extends EventEmitter {
         errorMessage: undefined,
         lastSeen: new Date().toISOString(),
       });
+      wsEmit("updateDeviceStatus", deviceId, {
+        status: "connecting",
+        errorMessage: undefined,
+      });
 
       // تكوين عميل WhatsApp
       const puppeteerOptions: any = {
@@ -333,6 +337,7 @@ class WhatsAppClientManager extends EventEmitter {
           wsEmit("updateDeviceStatus", deviceId, {
             status: "connected",
             phoneNumber: info.wid.user,
+            errorMessage: undefined,
           });
 
           logger.info(
@@ -449,7 +454,10 @@ class WhatsAppClientManager extends EventEmitter {
           });
 
           this.emit("disconnected", { deviceId, reason });
-          wsEmit("updateDeviceStatus", deviceId, { status: "disconnected" });
+          wsEmit("updateDeviceStatus", deviceId, {
+            status: "disconnected",
+            errorMessage: `Disconnected: ${reason}`,
+          });
 
           // تنظيف العميل من الذاكرة
           this.clients.delete(deviceId);
@@ -485,7 +493,10 @@ class WhatsAppClientManager extends EventEmitter {
           });
 
           this.emit("error", { deviceId, error: message });
-          wsEmit("updateDeviceStatus", deviceId, { status: "error" });
+          wsEmit("updateDeviceStatus", deviceId, {
+            status: "error",
+            errorMessage: `Auth failure: ${message}`,
+          });
           await this.cleanupSessions(deviceId);
         } catch (error) {
           logger.error(
@@ -514,7 +525,10 @@ class WhatsAppClientManager extends EventEmitter {
           });
 
           this.emit("error", { deviceId, error: error.message });
-          wsEmit("updateDeviceStatus", deviceId, { status: "error" });
+          wsEmit("updateDeviceStatus", deviceId, {
+            status: "error",
+            errorMessage: error.message || "Unknown client error",
+          });
         } catch (err) {
           logger.error(
             `Error handling client error for device ${deviceId}:`,
@@ -538,6 +552,10 @@ class WhatsAppClientManager extends EventEmitter {
         status: "error",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
         lastSeen: new Date().toISOString(),
+      });
+      wsEmit("updateDeviceStatus", deviceId, {
+        status: "error",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
       });
 
       db.createAnalyticsEvent({
@@ -904,6 +922,7 @@ class WhatsAppClientManager extends EventEmitter {
   private async updateDeviceStatus(
     deviceId: number,
     status: string,
+    extras: Record<string, any> = {},
   ): Promise<void> {
     const client = this.clients.get(deviceId);
     if (client) {
@@ -911,14 +930,15 @@ class WhatsAppClientManager extends EventEmitter {
       db.updateDevice(deviceId, {
         status,
         lastSeen: new Date().toISOString(),
+        ...extras,
       });
       db.createAnalyticsEvent({
         eventType: "status_changed",
         deviceId,
         details: { status },
       });
-      this.emit("status_changed", { deviceId, status });
-      wsEmit("updateDeviceStatus", deviceId, { status });
+      this.emit("status_changed", { deviceId, status, ...extras });
+      wsEmit("updateDeviceStatus", deviceId, { status, ...extras });
     }
   }
 
@@ -937,6 +957,9 @@ class WhatsAppClientManager extends EventEmitter {
       db.updateDevice(deviceId, {
         status: "disconnected",
         lastSeen: new Date().toISOString(),
+      });
+      wsEmit("updateDeviceStatus", deviceId, {
+        status: "disconnected",
       });
 
       db.createAnalyticsEvent({

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +27,22 @@ export function DeviceCard({
   isLoading = false,
 }: DeviceCardProps) {
   const [showQR, setShowQR] = useState(false)
+  const [showError, setShowError] = useState(!!device.errorMessage)
+
+  useEffect(() => {
+    if (device.errorMessage) {
+      setShowError(true)
+    } else {
+      setShowError(false)
+    }
+  }, [device.errorMessage])
+
+  useEffect(() => {
+    if (device.status === "connected" && showError) {
+      const t = setTimeout(() => setShowError(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [device.status, showError])
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -151,7 +167,7 @@ export function DeviceCard({
           </div>
 
           {/* رسالة الخطأ */}
-          {device.errorMessage && (
+          {showError && device.errorMessage && (
             <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
               <strong>خطأ:</strong> {device.errorMessage}
             </div>

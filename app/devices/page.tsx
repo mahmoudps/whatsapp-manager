@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Smartphone, Plus, Loader2, RefreshCw } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DeviceCard } from "@/components/device-card"
 import { MessageDialog } from "@/components/message-dialog"
 import { MainLayout } from "@/components/layout/main-layout"
@@ -312,11 +313,18 @@ export default function DevicesPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex items-center space-x-2">
-            <RefreshCw className="h-6 w-6 animate-spin" />
-            <span>جاري تحميل الأجهزة...</span>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="animate-pulse space-y-4">
+              <CardHeader>
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Skeleton className="h-3 w-1/3" />
+                <Skeleton className="h-24" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </MainLayout>
     )
