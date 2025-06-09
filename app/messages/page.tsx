@@ -238,27 +238,56 @@ export default function MessagesPage() {
 
   const stats = getMessageStats()
 
+  const fileToBase64 = async (file: File) => {
+    const reader = new FileReader()
+    return await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve((reader.result as string).split(',')[1])
+      reader.onerror = () => reject(new Error('failed'))
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleSendMessage = async (data: {
     deviceId: number
     recipient?: string
     recipients?: string[]
     message: string
     isBulk: boolean
+    file?: File | null
+    scheduledAt?: string
   }) => {
     try {
-      const url = data.isBulk
+      let url = data.isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
+
+      if (data.file) {
+        url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.scheduledAt) {
+        url = `/api/devices/${data.deviceId}/schedule`
+      }
+
+      let payload
+      if (data.file) {
+        payload = {
+          recipient: data.recipient,
+          data: await fileToBase64(data.file),
+          mimeType: data.file.type,
+          caption: data.message,
+        }
+      } else if (data.scheduledAt) {
+        payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
+      } else if (data.isBulk) {
+        payload = { recipients: data.recipients, message: data.message }
+      } else {
+        payload = { recipient: data.recipient, message: data.message }
+      }
 
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(
-          data.isBulk
-            ? { recipients: data.recipients, message: data.message }
-            : { recipient: data.recipient, message: data.message },
-        ),
+        body: JSON.stringify(payload),
       })
 
       const resp = await res.json()
