@@ -191,7 +191,7 @@ install_full() {
     mkdir -p $DEFAULT_PATH/ssl
     
     # نسخ الملفات
-    cp -r "$SCRIPT_DIR"/* "$DEFAULT_PATH/"
+    cp -a "$SCRIPT_DIR"/. "$DEFAULT_PATH/"
     
     # إنشاء ملف .env
     cat > $DEFAULT_PATH/.env << EOL
