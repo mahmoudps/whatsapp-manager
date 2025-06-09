@@ -1,9 +1,8 @@
 const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverExternalPackages: ["whatsapp-web.js", "puppeteer", "fluent-ffmpeg"],
-  },
+  serverExternalPackages: ["whatsapp-web.js", "puppeteer", "fluent-ffmpeg"],
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       // إضافة externals للمكتبات التي تعمل فقط على الخادم
