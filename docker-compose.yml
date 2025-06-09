@@ -15,9 +15,9 @@ services:
 #      Replace default credentials before using in production
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/whatsapp_manager.db
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=admin123
-      - JWT_SECRET=whatsapp-manager-secret-key-2024
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
       - MAX_AUTH_ATTEMPTS=${MAX_AUTH_ATTEMPTS:-5}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
       - ENABLE_WEBSOCKET=${ENABLE_WEBSOCKET:-true}
