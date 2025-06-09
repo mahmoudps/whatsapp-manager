@@ -1,6 +1,13 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
 
 interface Notification {
   id: string
@@ -29,24 +36,41 @@ const AppContext = createContext<AppContextType>({
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const addNotification = (notification: Omit<Notification, "id">) => {
     const id = Date.now().toString()
     setNotifications((prev) => [...prev, { ...notification, id }])
 
     // إزالة الإشعار بعد 3 ثوان
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== id))
+      timeoutsRef.current.delete(id)
     }, 3000)
+    timeoutsRef.current.set(id, timeoutId)
   }
 
   const removeNotification = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id))
+    const timeout = timeoutsRef.current.get(id)
+    if (timeout) {
+      clearTimeout(timeout)
+      timeoutsRef.current.delete(id)
+    }
   }
 
   const clearNotifications = () => {
     setNotifications([])
+    timeoutsRef.current.forEach((t) => clearTimeout(t))
+    timeoutsRef.current.clear()
   }
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((t) => clearTimeout(t))
+      timeoutsRef.current.clear()
+    }
+  }, [])
 
   return (
     <AppContext.Provider
