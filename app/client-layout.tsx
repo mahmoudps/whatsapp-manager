@@ -3,6 +3,7 @@
 import type React from "react"
 import { Tajawal } from "next/font/google"
 import { AppProvider } from "@/lib/app-context"
+import { WebSocketProvider } from "@/lib/websocket-context"
 import "./globals.css"
 
 const tajawal = Tajawal({
@@ -23,7 +24,9 @@ export default function ClientLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={tajawal.className}>
-        <AppProvider>{children}</AppProvider>
+        <WebSocketProvider>
+          <AppProvider>{children}</AppProvider>
+        </WebSocketProvider>
       </body>
     </html>
   )
