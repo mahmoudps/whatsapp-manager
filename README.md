@@ -178,6 +178,23 @@ npm run test:ci
 ```
 which installs dependencies using `npm ci` before running Jest.
 
+## External API
+
+Set `EXTERNAL_API_KEY` in your `.env` file to enable programmatic access from
+other projects. Use the `/api/external/send-message` endpoint to send WhatsApp
+messages.
+
+Example request:
+
+```bash
+curl -X POST http://localhost:3000/api/external/send-message \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: your-key' \
+  -d '{"deviceId":1,"recipient":"+123456789","message":"Hello"}'
+```
+
+The endpoint returns a JSON object indicating success or failure.
+
 ## Development login test
 
 The repository includes a small component `components/login-test.tsx` for
