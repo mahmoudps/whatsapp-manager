@@ -37,11 +37,11 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-ENV NODE_ENV=development
 
 WORKDIR /app
 
 COPY package*.json .npmrc ./
+ENV NODE_ENV=development
 
 # Install all dependencies including dev packages for the build step
 RUN npm ci && npm cache clean --force
