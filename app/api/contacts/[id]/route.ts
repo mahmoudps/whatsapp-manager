@@ -6,14 +6,18 @@ import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const contactId = Number.parseInt(params.id)
+    const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {
       return NextResponse.json(
         { success: false, error: "معرف غير صالح", timestamp: new Date().toISOString() },
@@ -43,14 +47,18 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const contactId = Number.parseInt(params.id)
+    const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {
       return NextResponse.json(
         { success: false, error: "معرف غير صالح", timestamp: new Date().toISOString() },
@@ -83,14 +91,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
 
-    const contactId = Number.parseInt(params.id)
+    const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {
       return NextResponse.json(
         { success: false, error: "معرف غير صالح", timestamp: new Date().toISOString() },
