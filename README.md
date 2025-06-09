@@ -22,6 +22,8 @@
 git clone <repository-url>
 cd whatsapp-manager
 
+# تأكد من استخدام Node.js إصدار 18 أو أحدث. يحدد الملف `.nvmrc` هذا الإصدار.
+
 # تثبيت الاعتماديات
 npm install
 
