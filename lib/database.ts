@@ -90,6 +90,11 @@ class DatabaseManager {
     }
   }
 
+  public prepare(query: string) {
+    if (!this.db) throw new Error("Database not initialized")
+    return this.db.prepare(query)
+  }
+
   private init(): void {
     try {
       // التأكد من وجود مجلد البيانات
