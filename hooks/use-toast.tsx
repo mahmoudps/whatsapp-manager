@@ -22,7 +22,7 @@ const ToastConfigContext = React.createContext<ToastConfig>({
   setRemoveDelay: () => {},
 })
 
-export function ToastConfigProvider({
+export function ToastConfigContextProvider({
   children,
   removeDelay = DEFAULT_TOAST_REMOVE_DELAY,
 }: React.PropsWithChildren<{ removeDelay?: number }>) {
