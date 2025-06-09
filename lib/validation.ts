@@ -18,6 +18,19 @@ const messageSchema = z.object({
   type: z.enum(["text", "image", "document"]).optional().default("text"),
 })
 
+const mediaMessageSchema = z.object({
+  recipient: z.string().min(10, "رقم المستقبل مطلوب"),
+  data: z.string(),
+  mimeType: z.string(),
+  caption: z.string().optional().default(""),
+})
+
+const scheduledMessageSchema = z.object({
+  recipient: z.string().min(10, "رقم المستقبل مطلوب"),
+  message: z.string().min(1, "الرسالة مطلوبة"),
+  sendAt: z.string(),
+})
+
 // Bulk message validation schema
 const bulkMessageSchema = z.object({
   recipients: z.array(z.string()).min(1, "قائمة المستقبلين مطلوبة"),
@@ -59,6 +72,24 @@ export const ValidationSchemas = {
     }
   },
 
+  mediaMessage: (data: any) => {
+    try {
+      return mediaMessageSchema.parse(data)
+    } catch (error) {
+      console.error("Media message validation error:", error)
+      return null
+    }
+  },
+
+  scheduledMessage: (data: any) => {
+    try {
+      return scheduledMessageSchema.parse(data)
+    } catch (error) {
+      console.error("Scheduled message validation error:", error)
+      return null
+    }
+  },
+
   bulkMessage: (data: any) => {
     try {
       return bulkMessageSchema.parse(data)
@@ -79,4 +110,12 @@ export const ValidationSchemas = {
 }
 
 // Export individual schemas for direct use
-export { contactSchema, deviceSchema, messageSchema, bulkMessageSchema, userSchema }
+export {
+  contactSchema,
+  deviceSchema,
+  messageSchema,
+  bulkMessageSchema,
+  userSchema,
+  mediaMessageSchema,
+  scheduledMessageSchema,
+}

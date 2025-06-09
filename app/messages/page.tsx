@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
+import { useWebSocketContext } from "@/lib/websocket-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
@@ -23,16 +24,13 @@ export default function MessagesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [deviceFilter, setDeviceFilter] = useState<number | "all">("all")
   const { actions } = useApp()
-  const ws = useRef<WebSocket | null>(null)
-  const reconnectAttempts = useRef(0)
+  const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
   useEffect(() => {
     fetchMessages()
     fetchDevices()
-    const interval = setInterval(fetchMessages, 15000)
     return () => {
-      clearInterval(interval)
       if (ws.current) {
         ws.current.close()
       }
@@ -41,7 +39,10 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001"
+      let wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001/ws"
+      if (!wsUrl.endsWith("/ws")) {
+        wsUrl = wsUrl.replace(/\/$/, "") + "/ws"
+      }
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)
@@ -54,17 +55,54 @@ export default function MessagesPage() {
       ws.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          logger.debug("WebSocket message received", { type: data.type })
+          const eventType = data.event || data.type
+          logger.debug("WebSocket message received", { event: eventType })
 
-          if (data.type === "message_update") {
-            fetchMessages()
-          } else if (data.type === "device_update") {
-            fetchDevices()
-            actions.addNotification({
-              type: "success",
-              title: "تحديث الأجهزة",
-              message: "تم تحديث حالة الأجهزة",
-            })
+          switch (eventType) {
+            case "device_status_changed": {
+              const { deviceId, status } = data.data || data
+              if (deviceId && status) {
+                setDevices((prev) =>
+                  prev.map((d) =>
+                    d.id === deviceId ? { ...d, status } : d,
+                  ),
+                )
+                actions.addNotification({
+                  type: "success",
+                  title: "تحديث الأجهزة",
+                  message: `تم تحديث حالة الجهاز ${deviceId}`,
+                })
+              }
+              break
+            }
+            case "message_sent": {
+              const payload = data.data || {}
+              const deviceId = data.deviceId || payload.deviceId
+              if (deviceId) {
+                const newMessage: Message = {
+                  id: Date.now(),
+                  deviceId,
+                  recipient: payload.recipient,
+                  message: payload.message,
+                  status: "sent",
+                  sentAt: payload.timestamp || new Date().toISOString(),
+                  messageType: payload.messageType || "text",
+                }
+                setMessages((prev) => [newMessage, ...prev])
+              }
+              break
+            }
+            case "message_received": {
+              const payload = data.data || {}
+              actions.addNotification({
+                type: "info",
+                title: `رسالة واردة من ${payload.sender}`,
+                message: payload.message,
+              })
+              break
+            }
+            default:
+              break
           }
         } catch (error) {
           logger.error("Error parsing WebSocket message", error)
@@ -92,14 +130,12 @@ export default function MessagesPage() {
     }
 
     connectWebSocket()
-
+    
     return () => {
-      if (ws.current) {
-        ws.current.close()
-        ws.current = null
-      }
+      offMessage()
+      offDevice()
     }
-  }, [actions])
+  }, [on, actions])
 
   const fetchMessages = async () => {
     try {
@@ -208,27 +244,56 @@ export default function MessagesPage() {
 
   const stats = getMessageStats()
 
+  const fileToBase64 = async (file: File) => {
+    const reader = new FileReader()
+    return await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve((reader.result as string).split(',')[1])
+      reader.onerror = () => reject(new Error('failed'))
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleSendMessage = async (data: {
     deviceId: number
     recipient?: string
     recipients?: string[]
     message: string
     isBulk: boolean
+    file?: File | null
+    scheduledAt?: string
   }) => {
     try {
-      const url = data.isBulk
+      let url = data.isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
+
+      if (data.file) {
+        url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.scheduledAt) {
+        url = `/api/devices/${data.deviceId}/schedule`
+      }
+
+      let payload
+      if (data.file) {
+        payload = {
+          recipient: data.recipient,
+          data: await fileToBase64(data.file),
+          mimeType: data.file.type,
+          caption: data.message,
+        }
+      } else if (data.scheduledAt) {
+        payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
+      } else if (data.isBulk) {
+        payload = { recipients: data.recipients, message: data.message }
+      } else {
+        payload = { recipient: data.recipient, message: data.message }
+      }
 
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(
-          data.isBulk
-            ? { recipients: data.recipients, message: data.message }
-            : { recipient: data.recipient, message: data.message },
-        ),
+        body: JSON.stringify(payload),
       })
 
       const resp = await res.json()

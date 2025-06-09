@@ -19,11 +19,13 @@ interface WebSocketState {
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const {
-    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:3001",
+    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:3001/ws",
     token,
     deviceId,
     autoConnect = true,
   } = options
+
+  const fullUrl = url.endsWith("/ws") ? url : url.replace(/\/$/, "") + "/ws"
 
   const [state, setState] = useState<WebSocketState>({
     connected: false,
@@ -43,7 +45,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     setState((prev) => ({ ...prev, connecting: true, error: null }))
 
     try {
-      const socket = io(url, {
+      const socket = io(fullUrl, {
         auth: token ? { token } : undefined,
         transports: ["websocket", "polling"],
         timeout: 20000,
@@ -107,7 +109,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         error: error instanceof Error ? error.message : "Connection failed",
       }))
     }
-  }, [url, token, deviceId])
+  }, [fullUrl, token, deviceId])
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {

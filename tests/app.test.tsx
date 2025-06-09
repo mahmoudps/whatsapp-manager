@@ -27,7 +27,7 @@ describe('API Routes', () => {
   });
 
   it('websocket connection works', async () => {
-    const socket = new WebSocket('ws://localhost:3001');
+    const socket = new WebSocket('ws://localhost:3001/ws');
     await new Promise((resolve) => {
       socket.onopen = resolve;
     });

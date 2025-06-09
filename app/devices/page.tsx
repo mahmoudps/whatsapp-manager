@@ -9,6 +9,7 @@ import { DeviceCard } from "@/components/device-card"
 import { MessageDialog } from "@/components/message-dialog"
 import { MainLayout } from "@/components/layout/main-layout"
 import { useApp } from "@/lib/app-context"
+import { useWebSocketContext } from "@/lib/websocket-provider"
 
 interface Device {
   id: number
@@ -27,10 +28,32 @@ export default function DevicesPage() {
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
   const [activeDevice, setActiveDevice] = useState<{ id: number; name: string } | null>(null)
   const { actions } = useApp()
+  const { on } = useWebSocketContext()
 
   useEffect(() => {
     fetchDevices()
   }, [])
+
+  useEffect(() => {
+    const offStatus = on("device_status_changed", (data: any) => {
+      setDevices((prev) =>
+        prev.map((d) => (d.id === data.deviceId ? { ...d, ...data } : d)),
+      )
+    })
+
+    const offQR = on("qr_code_generated", (data: any) => {
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === data.deviceId ? { ...d, qrCode: data.qrCode } : d,
+        ),
+      )
+    })
+
+    return () => {
+      offStatus && offStatus()
+      offQR && offQR()
+    }
+  }, [on])
 
   const fetchDevices = async () => {
     try {
@@ -100,7 +123,11 @@ export default function DevicesPage() {
           message: "تم إضافة الجهاز بنجاح",
         })
         setNewDeviceName("")
-        await fetchDevices()
+        if (data.device) {
+          setDevices((prev) => [...prev, data.device])
+        } else {
+          await fetchDevices()
+        }
       } else {
         throw new Error(data.error || "فشل إضافة الجهاز")
       }
@@ -131,7 +158,11 @@ export default function DevicesPage() {
         title: "نجح",
         message: data.message || "تم بدء الاتصال بالجهاز",
       })
-      fetchDevices()
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === deviceId ? { ...d, status: "connecting" } : d,
+        ),
+      )
     } catch (err) {
       console.error("Error connecting device:", err)
       actions.addNotification({
@@ -157,7 +188,11 @@ export default function DevicesPage() {
         title: "نجح",
         message: data.message || "تم قطع الاتصال",
       })
-      fetchDevices()
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === deviceId ? { ...d, status: "disconnected" } : d,
+        ),
+      )
     } catch (err) {
       console.error("Error disconnecting device:", err)
       actions.addNotification({
@@ -183,7 +218,7 @@ export default function DevicesPage() {
         title: "نجح",
         message: data.message || "تم حذف الجهاز",
       })
-      fetchDevices()
+      setDevices((prev) => prev.filter((d) => d.id !== deviceId))
     } catch (err) {
       console.error("Error deleting device:", err)
       actions.addNotification({
@@ -202,27 +237,56 @@ export default function DevicesPage() {
     }
   }
 
+  const fileToBase64 = async (file: File) => {
+    const reader = new FileReader()
+    return await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve((reader.result as string).split(',')[1])
+      reader.onerror = () => reject(new Error('failed'))
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleSendMessage = async (data: {
     deviceId: number
     recipient?: string
     recipients?: string[]
     message: string
     isBulk: boolean
+    file?: File | null
+    scheduledAt?: string
   }) => {
     try {
-      const url = data.isBulk
+      let url = data.isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
+
+      if (data.file) {
+        url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.scheduledAt) {
+        url = `/api/devices/${data.deviceId}/schedule`
+      }
+
+      let payload
+      if (data.file) {
+        payload = {
+          recipient: data.recipient,
+          data: await fileToBase64(data.file),
+          mimeType: data.file.type,
+          caption: data.message,
+        }
+      } else if (data.scheduledAt) {
+        payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
+      } else if (data.isBulk) {
+        payload = { recipients: data.recipients, message: data.message }
+      } else {
+        payload = { recipient: data.recipient, message: data.message }
+      }
 
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(
-          data.isBulk
-            ? { recipients: data.recipients, message: data.message }
-            : { recipient: data.recipient, message: data.message },
-        ),
+        body: JSON.stringify(payload),
       })
 
       const resp = await res.json()

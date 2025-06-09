@@ -192,6 +192,7 @@ class DatabaseManager {
         message_id TEXT,
         message_type TEXT DEFAULT 'text',
         is_group INTEGER DEFAULT 0,
+        scheduled_at TEXT,
         sent_at TEXT,
         error_message TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -199,6 +200,15 @@ class DatabaseManager {
         FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
       )
     `)
+
+    // إضافة عمود scheduled_at إذا لم يكن موجودًا
+    const columns = this.db
+      .prepare('PRAGMA table_info(messages)')
+      .all() as any[]
+    const hasScheduled = columns.some((c) => c.name === 'scheduled_at')
+    if (!hasScheduled) {
+      this.db.exec('ALTER TABLE messages ADD COLUMN scheduled_at TEXT')
+    }
 
     // جدول الرسائل الواردة
     this.db.exec(`
@@ -452,7 +462,7 @@ class DatabaseManager {
 
     const result = this.db
       .prepare(`
-      INSERT INTO messages (device_id, recipient, message, status, message_id, message_type, sent_at, error_message, is_group)
+      INSERT INTO messages (device_id, recipient, message, status, message_id, message_type, scheduled_at, sent_at, error_message, is_group)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
       .run(
@@ -462,6 +472,7 @@ class DatabaseManager {
         data.status,
         data.messageId || null,
         data.messageType,
+        data.scheduledAt || null,
         data.sentAt || null,
         data.errorMessage || null,
         data.isGroup ? 1 : 0,
@@ -472,7 +483,7 @@ class DatabaseManager {
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
              is_group as isGroup,
-             sent_at as sentAt, error_message as errorMessage,
+             scheduled_at as scheduledAt, sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
       FROM messages WHERE id = ?
     `)
@@ -489,7 +500,7 @@ class DatabaseManager {
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
              is_group as isGroup,
-             sent_at as sentAt, error_message as errorMessage,
+             scheduled_at as scheduledAt, sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
       FROM messages
       ORDER BY created_at DESC
@@ -508,7 +519,7 @@ class DatabaseManager {
       SELECT id, device_id as deviceId, recipient, message, status,
              message_id as messageId, message_type as messageType,
              is_group as isGroup,
-             sent_at as sentAt, error_message as errorMessage,
+             scheduled_at as scheduledAt, sent_at as sentAt, error_message as errorMessage,
              created_at as createdAt, updated_at as updatedAt
       FROM messages
       WHERE device_id = ?
@@ -582,6 +593,10 @@ class DatabaseManager {
       fields.push("sent_at = ?")
       values.push(data.sentAt)
     }
+    if (data.scheduledAt) {
+      fields.push("scheduled_at = ?")
+      values.push(data.scheduledAt)
+    }
     if (data.errorMessage !== undefined) {
       fields.push("error_message = ?")
       values.push(data.errorMessage)
@@ -595,6 +610,24 @@ class DatabaseManager {
       UPDATE messages SET ${fields.join(", ")} WHERE id = ?
     `)
       .run(...values)
+  }
+
+  getDueScheduledMessages(): Message[] {
+    if (!this.db) throw new Error("Database not initialized")
+
+    const now = new Date().toISOString()
+    const messages = this.db
+      .prepare(`
+      SELECT id, device_id as deviceId, recipient, message, status,
+             message_id as messageId, message_type as messageType,
+             scheduled_at as scheduledAt, sent_at as sentAt, error_message as errorMessage,
+             created_at as createdAt, updated_at as updatedAt
+      FROM messages
+      WHERE status = 'scheduled' AND scheduled_at <= ?
+    `)
+      .all(now) as Message[]
+
+    return messages
   }
 
   // Incoming message operations
