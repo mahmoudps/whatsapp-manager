@@ -37,7 +37,8 @@ http://localhost:3000 أو http://localhost:3001
 wa-manager start
 \`\`\`
 
-To regenerate the environment configuration later run:
+To regenerate the environment configuration later run. This command
+rebuilds the Docker image so any changes to `.env` and your code take effect:
 \`\`\`bash
 wa-manager rebuild
 \`\`\`

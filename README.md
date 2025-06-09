@@ -97,6 +97,8 @@ Additional options such as `PORT`, `HOST`, and WebSocket settings can also be se
 - `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
   `ws://localhost:3001/ws` or `wss://example.com/ws`
 - `FRONTEND_URL` – allowed frontend origin for WebSocket connections
+- `RESTART_POLICY` – Docker restart policy (default: `unless-stopped`).
+  Use `no` to disable auto-start after a server reboot.
 
 To allow cross-origin requests, set `CORS_ORIGIN` to a comma-separated list of allowed origins (e.g. `https://example.com,http://localhost:3000`).
 If left unset, only same-origin requests are permitted.

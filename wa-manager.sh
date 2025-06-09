@@ -810,11 +810,13 @@ LOG_LEVEL=debug
 NEXT_PUBLIC_DOMAIN_NAME=${DOMAIN_NAME}
 NEXT_PUBLIC_WHATSAPP_API_URL=https://${DOMAIN_NAME}/api
 FRONTEND_URL=https://${DOMAIN_NAME}
+RESTART_POLICY=unless-stopped
 EOL
 
     echo -e "${GREEN}✅ تم إنشاء ملف .env بنجاح${NC}"
     echo -e "${YELLOW}🔄 إعادة تشغيل الخدمات لتطبيق التغييرات...${NC}"
     docker-compose down
+    docker-compose build --no-cache
     docker-compose up -d
 }
 
