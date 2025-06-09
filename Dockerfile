@@ -41,7 +41,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json .npmrc ./
 
 RUN npm install --omit=dev && npm cache clean --force
 
