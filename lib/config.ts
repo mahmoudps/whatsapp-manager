@@ -31,6 +31,9 @@ export const DATABASE_PATH = process.env.DATABASE_PATH || "./data/whatsapp_manag
 export const ENABLE_WEBSOCKET = process.env.ENABLE_WEBSOCKET === "true"
 export const WEBSOCKET_PORT = Number.parseInt(process.env.WEBSOCKET_PORT || "3001")
 
+// إعدادات الاتصال التلقائي بالأجهزة عند بدء التشغيل
+export const AUTO_CONNECT_DEVICES = process.env.AUTO_CONNECT_DEVICES === "true"
+
 // إعدادات WhatsApp
 export const WHATSAPP_SERVER_PORT = Number.parseInt(process.env.WHATSAPP_SERVER_PORT || "3002")
 export const PUPPETEER_EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH
