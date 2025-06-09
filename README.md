@@ -164,10 +164,13 @@ For production with SSL certificates run `wa-manager install full`. If you simpl
 ## Running tests
 
 Install dependencies and run the test suite. The tests rely on dev
-dependencies such as **Jest**, so be sure to install everything first:
+dependencies such as **Jest**, so be sure to install everything first.
+Create a `.env.test` file based on the provided `.env.example` and adjust the
+required variables (for example `JWT_SECRET` and the admin credentials):
 
 ```bash
-npm install
+cp .env.example .env.test
+PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
 
