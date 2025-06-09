@@ -23,7 +23,6 @@ scripts/*
 tests/
 *.sh
 !start-production.sh
-*.md
 *.test.*
 *.spec.*
 
