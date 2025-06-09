@@ -48,6 +48,9 @@ these using the `HTTP_PORT` and `HTTPS_PORT` environment variables when starting
 the stack. This is handy when another web server already occupies the default
 ports.
 
+When using the provided Nginx examples inside Docker, make sure the upstream
+addresses target the `whatsapp-manager` service instead of `localhost`.
+
 ```bash
 HTTP_PORT=8080 HTTPS_PORT=8443 docker-compose up -d
 ```
@@ -119,6 +122,12 @@ npm install # or `pnpm install`
 ```
 Docker builds run this step for you during `docker-compose up`, but if you start
 the WebSocket server manually you need to install the packages yourself.
+
+Make sure to install dependencies first:
+
+```bash
+npm install
+```
 
 For process management you can also use PM2 with the provided
 `ecosystem.config.js`:
