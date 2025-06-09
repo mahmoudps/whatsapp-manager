@@ -35,9 +35,14 @@ export default function MessagesPage() {
   }, [])
 
   useEffect(() => {
-    const offMessage = on("message_update", () => {
-      fetchMessages()
-    })
+    const connectWebSocket = () => {
+      let wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:3001/ws"
+      if (!wsUrl.endsWith("/ws")) {
+        wsUrl = wsUrl.replace(/\/$/, "") + "/ws"
+      }
+      logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
+
+      ws.current = new WebSocket(wsUrl)
 
     const offDevice = on("device_update", () => {
       fetchDevices()

@@ -50,7 +50,7 @@ ports.
 
 The WebSocket server listens on port `3001`. The compose file now exposes this
 port so you can connect directly if desired. Set `NEXT_PUBLIC_WEBSOCKET_URL`
-to `ws://localhost:3001` for local setups or `wss://<your-domain>/ws` when using
+to `ws://localhost:3001/ws` for local setups or `wss://<your-domain>/ws` when using
 Nginx as a reverse proxy.
 
 When using the provided Nginx examples inside Docker, make sure the upstream
@@ -95,7 +95,7 @@ Additional options such as `PORT`, `HOST`, and WebSocket settings can also be se
 - `ENABLE_WEBSOCKET` (default: `false`)
 - `WEBSOCKET_PORT` – port for the WebSocket server (default: `3001`)
 - `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
-  `ws://localhost:3001` or `wss://example.com/ws`
+  `ws://localhost:3001/ws` or `wss://example.com/ws`
 - `FRONTEND_URL` – allowed frontend origin for WebSocket connections
 
 To allow cross-origin requests, set `CORS_ORIGIN` to a comma-separated list of allowed origins (e.g. `https://example.com,http://localhost:3000`).
@@ -111,7 +111,7 @@ To broadcast real-time events you can enable the optional WebSocket server. Set
 
 - `WEBSOCKET_PORT` – port for the WebSocket server (default: `3001`)
 - `NEXT_PUBLIC_WEBSOCKET_URL` – URL clients should use to connect, e.g.
-  `ws://localhost:3001` or `wss://example.com/ws`
+  `ws://localhost:3001/ws` or `wss://example.com/ws`
 
 When running via Docker Compose the WebSocket server is started from within the
 `whatsapp-manager` container whenever `ENABLE_WEBSOCKET=true`.
