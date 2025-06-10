@@ -14,7 +14,9 @@ data/
 *.db
 
 # Environment and SSL files
-.env*
+.env
+.env.*
+!.env.example
 ssl/
 
 # Development files and documentation
