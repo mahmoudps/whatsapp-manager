@@ -112,8 +112,8 @@ class DatabaseManager {
 
       logger.info("Initializing database...")
 
-      // فتح اتصال قاعدة البيانات
-      this.db = new Database(DB_PATH)
+      // فتح اتصال قاعدة البيانات مع مهلة لمنع مشاكل قفل الملف
+      this.db = new Database(DB_PATH, { timeout: 5000 })
 
       // تمكين WAL mode للأداء الأفضل
       this.db.exec("PRAGMA journal_mode=WAL;")
@@ -284,15 +284,15 @@ class DatabaseManager {
       const username = ADMIN_USERNAME
       const password = ADMIN_PASSWORD
 
-      // التحقق من وجود المدير
-      const existingUser = this.db.prepare("SELECT id FROM users WHERE username = ?").get(username)
-
-      if (!existingUser) {
-        const hashedPassword = bcrypt.hashSync(password, 12)
-        this.db
-          .prepare(`INSERT INTO users (username, password, role) VALUES (?, ?, ?)`)
-          .run(username, hashedPassword, "admin")
-        logger.info(`Default admin user created: ${username}`)
+      const hashedPassword = bcrypt.hashSync(password, 12)
+      this.db
+        .prepare(`INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)`)
+        .run(username, hashedPassword, "admin")
+      const existingUser = this.db
+        .prepare("SELECT id FROM users WHERE username = ?")
+        .get(username)
+      if (existingUser) {
+        logger.info(`Default admin user ensured: ${username}`)
       }
     } catch (error) {
       logger.error("Error creating default admin:", error)
