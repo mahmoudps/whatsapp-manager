@@ -17,6 +17,9 @@ export async function GET(
       return NextResponse.json(authResult, { status: 401 })
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {
       return NextResponse.json(
@@ -57,6 +60,9 @@ export async function PUT(
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
+
+    // Ensure database is initialized
+    await db.ensureInitialized()
 
     const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {
@@ -101,6 +107,9 @@ export async function DELETE(
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
+
+    // Ensure database is initialized
+    await db.ensureInitialized()
 
     const contactId = Number.parseInt(id)
     if (isNaN(contactId)) {

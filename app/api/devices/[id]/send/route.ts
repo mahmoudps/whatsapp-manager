@@ -36,6 +36,9 @@ export async function POST(
       )
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     // قراءة البيانات
     const body = await request.json()
     logger.info("📝 Request body:", body)

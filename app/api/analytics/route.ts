@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Ensure the database is initialized before querying
+    await db.ensureInitialized()
+
     const url = new URL(request.url)
     const limit = Number.parseInt(url.searchParams.get("limit") || "50")
     const offset = Number.parseInt(url.searchParams.get("offset") || "0")

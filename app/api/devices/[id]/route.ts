@@ -31,6 +31,9 @@ export async function GET(
       )
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     // الحصول على معلومات الجهاز
     const device = await db.getDeviceById(deviceId)
     if (!device) {
@@ -100,6 +103,9 @@ export async function PUT(
         { status: 400 },
       )
     }
+
+    // Ensure database is initialized
+    await db.ensureInitialized()
 
     // التحقق من وجود الجهاز
     const existingDevice = await db.getDeviceById(deviceId)
@@ -173,6 +179,9 @@ export async function DELETE(
         { status: 400 },
       )
     }
+
+    // Ensure database is initialized
+    await db.ensureInitialized()
 
     // التحقق من وجود الجهاز
     const device = await db.getDeviceById(deviceId)

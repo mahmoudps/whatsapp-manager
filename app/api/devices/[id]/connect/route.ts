@@ -35,6 +35,9 @@ export async function POST(
       )
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     logger.info(`📱 Connecting device ID: ${deviceId}`)
 
     // التحقق من وجود الجهاز
