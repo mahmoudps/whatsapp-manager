@@ -25,8 +25,8 @@ function ensureEnv() {
       logger.info('📄 .env غير موجود. سيتم إنشاؤه من .env.example')
       fs.copyFileSync(examplePath, envPath)
     } else {
-      logger.error('❌ لم يتم العثور على .env.example ولا يمكن إنشاء .env')
-      process.exit(1)
+      logger.warn('.env.example not found. Creating minimal .env')
+      fs.writeFileSync(envPath, '')
     }
   }
 
