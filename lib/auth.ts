@@ -60,7 +60,8 @@ export async function verifyAuth(request: NextRequest) {
     }
 
     logger.info("Token verified successfully for user:", decoded.userId)
-    return { success: true, user: decoded }
+    const { userId, username, role } = decoded
+    return { success: true, user: { userId, username, role } }
   } catch (error) {
     logger.error("Auth verification failed:", error)
     return { success: false, message: "Authentication failed" }
@@ -323,5 +324,34 @@ export class AuthService {
       logger.error("Change password error:", error)
       return { success: false, error: "خطأ في الخادم" }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Compatibility wrappers for legacy tests
+// ---------------------------------------------------------------------------
+
+export async function validateLogin(credentials: { username: string; password: string }) {
+  const user = await validateUserCredentials(credentials.username, credentials.password)
+  if (!user) return null
+  return { id: user.id, username: user.username }
+}
+
+export function generateAuthToken(user: { id: number; username: string }) {
+  return jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  })
+}
+
+export async function authenticateUser(username: string, password: string) {
+  const user = await validateUserCredentials(username, password)
+  if (!user) return { success: false }
+
+  const tokens = await generateTokens(user)
+  return {
+    success: true,
+    user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
   }
 }

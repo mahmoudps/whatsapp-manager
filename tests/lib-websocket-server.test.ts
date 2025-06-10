@@ -3,7 +3,7 @@ import { beforeEach, expect, jest, test } from '@jest/globals';
 jest.mock('http', () => ({ createServer: jest.fn(() => ({ listen: jest.fn(), close: jest.fn() })) }));
 
 jest.mock('express', () => {
-  const app = { use: jest.fn() };
+  const app = { use: jest.fn(), get: jest.fn(), post: jest.fn() };
   const express = jest.fn(() => app);
   express.json = jest.fn(() => 'jsonMiddleware');
   return express;
