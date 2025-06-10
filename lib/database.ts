@@ -2,7 +2,7 @@ import Database from "better-sqlite3"
 import { logger } from "./logger"
 import path from "path"
 import fs from "fs"
-import bcrypt from "bcryptjs"
+import bcrypt from "bcrypt"
 import { ADMIN_USERNAME, ADMIN_PASSWORD } from "./config"
 
 const DB_PATH = process.env.DATABASE_PATH || "./data/whatsapp_manager.db"

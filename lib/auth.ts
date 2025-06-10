@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
+import bcrypt from "bcrypt"
 import { logger } from "./logger"
 import { db } from "./database"
 import { JWT_SECRET, JWT_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "./config"
