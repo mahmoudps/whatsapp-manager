@@ -8,9 +8,11 @@
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
-// Register ts-node to allow requiring TypeScript files
-require('ts-node/register')
-const { logger } = require('../lib/logger.ts')
+
+function log(type, message) {
+  const timestamp = new Date().toISOString()
+  console[type](`[${timestamp}] ${message}`)
+}
 
 const envPath = path.join(process.cwd(), '.env')
 const examplePath = path.join(process.cwd(), '.env.example')
@@ -22,10 +24,10 @@ function generateSecret(len = 64) {
 function ensureEnv() {
   if (!fs.existsSync(envPath)) {
     if (fs.existsSync(examplePath)) {
-      logger.info('📄 .env غير موجود. سيتم إنشاؤه من .env.example')
+      log('log', '📄 .env غير موجود. سيتم إنشاؤه من .env.example')
       fs.copyFileSync(examplePath, envPath)
     } else {
-      logger.warn('.env.example not found. Creating minimal .env')
+      log('warn', '.env.example not found. Creating minimal .env')
       fs.writeFileSync(envPath, '')
     }
   }
@@ -40,7 +42,7 @@ function ensureEnv() {
       env += `\nJWT_SECRET=${secret}\n`
     }
     fs.writeFileSync(envPath, env)
-    logger.info('🔑 تم إنشاء JWT_SECRET جديد في .env')
+    log('log', '🔑 تم إنشاء JWT_SECRET جديد في .env')
   }
 }
 
