@@ -72,6 +72,8 @@ cp .env.example .env
 - `JWT_EXPIRES_IN` و`REFRESH_TOKEN_EXPIRES_IN`: مدة صلاحية التوكنات.
 - `PORT` و`HOST`: إعدادات الخادم الرئيسي.
 - `DATABASE_PATH`: مسار قاعدة البيانات (الافتراضي `./data/whatsapp_manager.db`).
+  أثناء بناء صورة Docker يتم تعيين المتغير إلى مسار مؤقت داخل `/tmp`
+  لتجنب تعارضات SQLite، ويُعاد إلى المسار الافتراضي عند التشغيل.
 - `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
 - `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة ويجب أن ينتهي بالمسار `/ws/socket.io`.
 - `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
