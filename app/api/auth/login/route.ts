@@ -2,7 +2,7 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { type NextRequest, NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { db } from "@/lib/database"
 import { logger } from "@/lib/logger"
