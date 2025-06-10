@@ -284,14 +284,19 @@ class DatabaseManager {
       const username = ADMIN_USERNAME
       const password = ADMIN_PASSWORD
 
-      const hashedPassword = bcrypt.hashSync(password, 12)
-      this.db
-        .prepare(`INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)`)
-        .run(username, hashedPassword, "admin")
       const existingUser = this.db
         .prepare("SELECT id FROM users WHERE username = ?")
         .get(username)
-      if (existingUser) {
+
+      if (!existingUser) {
+        const hashedPassword = bcrypt.hashSync(password, 12)
+        this.db
+          .prepare(
+            `INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)`,
+          )
+          .run(username, hashedPassword, "admin")
+        logger.info(`Default admin user created: ${username}`)
+      } else {
         logger.info(`Default admin user ensured: ${username}`)
       }
     } catch (error) {
