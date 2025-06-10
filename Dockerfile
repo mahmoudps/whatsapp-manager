@@ -42,6 +42,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json .npmrc ./
 ENV NODE_ENV=development
+# Use a temporary database during build to avoid SQLite locking errors
+ENV DATABASE_PATH=/tmp/whatsapp_manager_build.db
 
 # Install all dependencies including dev packages for the build step
 RUN npm ci && npm cache clean --force
@@ -57,6 +59,8 @@ RUN npm run build
 
 # Switch to production mode before pruning dev dependencies
 ENV NODE_ENV=production
+# Use the real database location at runtime
+ENV DATABASE_PATH=/app/data/whatsapp_manager.db
 
 # Remove development dependencies after the build to keep the image slim
 RUN npm prune --production && npm cache clean --force
