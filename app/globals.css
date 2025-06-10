@@ -212,7 +212,11 @@ body {
 
 /* تحسينات البطاقات */
 .card-hover {
-  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
+  @apply transition-all duration-200;
+}
+
+.card-hover:hover {
+  @apply shadow-[var(--shadow-lg)] translate-y-[-0.25rem];
 }
 
 .card-glow {
@@ -221,57 +225,65 @@ body {
 
 /* تحسينات الأزرار */
 .btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90 focus-ring;
+  @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
 }
 
 .btn-success {
-  @apply bg-success text-success-foreground hover:bg-success/90 focus-ring;
+  @apply bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
 }
 
 .btn-warning {
-  @apply bg-warning text-warning-foreground hover:bg-warning/90 focus-ring;
+  @apply bg-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] hover:bg-[hsl(var(--warning)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
 }
 
 .btn-error {
-  @apply bg-error text-error-foreground hover:bg-error/90 focus-ring;
+  @apply bg-[hsl(var(--error))] text-[hsl(var(--error-foreground))] hover:bg-[hsl(var(--error)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
 }
 
 /* تحسينات الحالة */
 .status-online {
-  @apply bg-green-500 text-white;
+  background-color: hsl(var(--success));
+  color: white;
 }
 
 .status-offline {
-  @apply bg-gray-500 text-white;
+  background-color: rgb(107 114 128); /* tailwind gray-500 */
+  color: white;
 }
 
 .status-connecting {
-  @apply bg-blue-500 text-white animate-pulse;
+  background-color: rgb(59 130 246); /* tailwind blue-500 */
+  color: white;
+  animation: pulse 2s infinite;
 }
 
 .status-error {
-  @apply bg-red-500 text-white;
+  background-color: hsl(var(--error));
+  color: white;
 }
 
-/* تحسينات الشبكة */
-.grid-auto-fit {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.grid-auto-fill {
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-}
-
-/* تحسينات الاستجابة */
-@media (max-width: 640px) {
-  .mobile-padding {
-    @apply px-4;
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 
-  .mobile-text {
-    @apply text-sm;
+  .grid-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
+
+  @media (max-width: 640px) {
+    .mobile-padding {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .mobile-text {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+
 }
+
 
 /* تحسينات الطباعة */
 @media print {
