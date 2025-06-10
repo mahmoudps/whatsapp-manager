@@ -14,12 +14,15 @@ data/
 *.db
 
 # Environment and SSL files
-.env*
+.env
+.env.*
+!.env.example
 ssl/
 
 # Development files and documentation
 scripts/*
 !scripts/init-database.js
+!scripts/generate-env.js
 tests/
 *.sh
 !start-production.sh
