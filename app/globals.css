@@ -129,6 +129,7 @@ body {
 }
 
 /* تحسينات التركيز */
+
 @layer utilities {
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
