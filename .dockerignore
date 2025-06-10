@@ -20,6 +20,7 @@ ssl/
 # Development files and documentation
 scripts/*
 !scripts/init-database.js
+!scripts/generate-env.js
 tests/
 *.sh
 !start-production.sh
