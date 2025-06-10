@@ -31,6 +31,9 @@ export async function POST(
       )
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     // التحقق من وجود الجهاز
     const device = await db.getDeviceById(deviceId)
     if (!device) {

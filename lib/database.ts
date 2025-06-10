@@ -82,7 +82,7 @@ class DatabaseManager {
   private initialized = false
 
   constructor() {
-    this.init()
+    // Initialization is deferred until ensureInitialized is called
   }
 
   // Expose the underlying Database instance for advanced queries
