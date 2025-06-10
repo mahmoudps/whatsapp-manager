@@ -13,6 +13,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(authResult, { status: 401 })
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     const contacts = await db.listContacts()
     return NextResponse.json({
       success: true,
@@ -39,6 +42,9 @@ export async function POST(request: NextRequest) {
     if (!authResult.success) {
       return NextResponse.json(authResult, { status: 401 })
     }
+
+    // Ensure database is initialized
+    await db.ensureInitialized()
 
     const body = await request.json()
     const contactData = ValidationSchemas.contact(body)

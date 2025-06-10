@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
 
     logger.info("✅ Authentication successful")
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     // جلب المستخدمين من قاعدة البيانات
     const admins = await db.getAllAdmins()
 

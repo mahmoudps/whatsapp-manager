@@ -23,6 +23,9 @@ export async function POST(
       return NextResponse.json({ success: false, error: "معرف الجهاز غير صالح", timestamp: new Date().toISOString() }, { status: 400 })
     }
 
+    // Ensure database is initialized
+    await db.ensureInitialized()
+
     const body = await request.json()
     const data = ValidationSchemas.scheduledMessage(body)
 
