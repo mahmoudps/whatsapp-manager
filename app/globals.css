@@ -16,92 +16,13 @@ html {
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", "Cairo", "Tajawal", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Cairo",
+    "Tajawal", sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* متغيرات CSS محسنة للسمات */
-:root {
-  /* الألوان الأساسية */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-
-  /* ألوان العلامة التجارية */
-  --primary: 142 76% 36%;
-  --primary-foreground: 355.7 100% 97.3%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-
-  /* ألوان الحالة */
-  --success: 142 76% 36%;
-  --success-foreground: 355.7 100% 97.3%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 48 96% 89%;
-  --error: 0 84.2% 60.2%;
-  --error-foreground: 210 40% 98%;
-
-  /* ألوان مساعدة */
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-
-  /* حدود وإدخال */
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 142 76% 36%;
-
-  /* نصف القطر */
-  --radius: 0.75rem;
-
-  /* الظلال */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
-
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-
-  --primary: 142 70% 45%;
-  --primary-foreground: 144.9 80.4% 10%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-
-  --success: 142 70% 45%;
-  --success-foreground: 144.9 80.4% 10%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 48 96% 89%;
-  --error: 0 62.8% 30.6%;
-  --error-foreground: 210 40% 98%;
-
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 142 70% 45%;
 }
 
 /* دعم RTL محسن */
@@ -120,7 +41,9 @@ body {
 /* تحسينات الخطوط العربية */
 .arabic-text {
   font-family: "Cairo", "Tajawal", "Amiri", "Noto Sans Arabic", sans-serif;
-  font-feature-settings: "liga" 1, "calt" 1;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
 }
 
 /* تحسينات الانتقالات */
@@ -134,134 +57,138 @@ body {
     @apply focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
   }
 
-/* تحسينات التمرير */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted)) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground));
-}
-
-/* تحسينات الرسوم المتحركة */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  /* تحسينات التمرير */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
 
-@keyframes pulse-success {
-  0%,
-  100% {
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
+  }
+
+  /* تحسينات الرسوم المتحركة */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse-success {
+    0%,
+    100% {
+      background-color: hsl(var(--success));
+    }
+    50% {
+      background-color: hsl(var(--success) / 0.8);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  .animate-pulse-success {
+    animation: pulse-success 2s infinite;
+  }
+
+  /* تحسينات الطباعة */
+  .text-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--primary) / 0.8)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* تحسينات البطاقات */
+  .card-hover {
+    @apply transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    @apply shadow-[var(--shadow-lg)] translate-y-[-0.25rem];
+  }
+
+  .card-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.1);
+  }
+
+  /* تحسينات الأزرار */
+  .btn-primary {
+    @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
+  }
+
+  .btn-success {
+    @apply bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
+  }
+
+  .btn-warning {
+    @apply bg-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] hover:bg-[hsl(var(--warning)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
+  }
+
+  .btn-error {
+    @apply bg-[hsl(var(--error))] text-[hsl(var(--error-foreground))] hover:bg-[hsl(var(--error)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
+  }
+
+  /* تحسينات الحالة */
+  .status-online {
     background-color: hsl(var(--success));
+    color: white;
   }
-  50% {
-    background-color: hsl(var(--success) / 0.8);
+
+  .status-offline {
+    background-color: rgb(107 114 128); /* tailwind gray-500 */
+    color: white;
   }
-}
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
+  .status-connecting {
+    background-color: rgb(59 130 246); /* tailwind blue-500 */
+    color: white;
+    animation: pulse 2s infinite;
+  }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
-}
-
-.animate-pulse-success {
-  animation: pulse-success 2s infinite;
-}
-
-/* تحسينات الطباعة */
-.text-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* تحسينات البطاقات */
-.card-hover {
-  @apply transition-all duration-200;
-}
-
-.card-hover:hover {
-  @apply shadow-[var(--shadow-lg)] translate-y-[-0.25rem];
-}
-
-.card-glow {
-  box-shadow: 0 0 20px hsl(var(--primary) / 0.1);
-}
-
-/* تحسينات الأزرار */
-.btn-primary {
-  @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
-}
-
-.btn-success {
-  @apply bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
-}
-
-.btn-warning {
-  @apply bg-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] hover:bg-[hsl(var(--warning)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
-}
-
-.btn-error {
-  @apply bg-[hsl(var(--error))] text-[hsl(var(--error-foreground))] hover:bg-[hsl(var(--error)/0.9)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2;
-}
-
-/* تحسينات الحالة */
-.status-online {
-  background-color: hsl(var(--success));
-  color: white;
-}
-
-.status-offline {
-  background-color: rgb(107 114 128); /* tailwind gray-500 */
-  color: white;
-}
-
-.status-connecting {
-  background-color: rgb(59 130 246); /* tailwind blue-500 */
-  color: white;
-  animation: pulse 2s infinite;
-}
-
-.status-error {
-  background-color: hsl(var(--error));
-  color: white;
-}
+  .status-error {
+    background-color: hsl(var(--error));
+    color: white;
+  }
 
   .grid-auto-fit {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -282,9 +209,7 @@ body {
       line-height: 1.25rem;
     }
   }
-
 }
-
 
 /* تحسينات الطباعة */
 @media print {
@@ -308,28 +233,4 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* تحسينات التباين العالي */
-@media (prefers-contrast: high) {
-  :root {
-    --border: 0 0% 20%;
-    --ring: 0 0% 20%;
-  }
-
-  .dark {
-    --border: 0 0% 80%;
-    --ring: 0 0% 80%;
-  }
-}
-
-/* تحسينات تقليل الحركة */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }
