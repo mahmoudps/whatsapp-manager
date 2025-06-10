@@ -1,6 +1,6 @@
 import { Client, LocalAuth, MessageMedia, Location } from "whatsapp-web.js";
 import QRCode from "qrcode";
-import { db } from "./database";
+import { db, initializeDatabase } from "./database";
 import { logger } from "./logger";
 import type { DeviceStatus } from "./types";
 import path from "path";
@@ -65,6 +65,7 @@ class WhatsAppClientManager extends EventEmitter {
   }
 
   private async init(): Promise<void> {
+    await initializeDatabase();
     await this.initializeExistingDevices();
     this.startMessageProcessor();
     this.startScheduledProcessor();
