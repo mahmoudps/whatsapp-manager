@@ -46,6 +46,13 @@ check_files() {
     return 0
 }
 
+# ضبط صلاحيات مجلدي البيانات والسجلات
+fix_permissions() {
+    if ! chown -R 1001:1001 data logs 2>/dev/null; then
+        echo -e "${YELLOW}⚠️ تعذر تعديل صلاحيات المجلدات data و logs. قد يؤدي هذا إلى أخطاء في قاعدة البيانات.${NC}"
+    fi
+}
+
 # عرض المساعدة
 show_help() {
     echo -e "${BLUE}=== WhatsApp Manager CLI ===${NC}"
@@ -192,6 +199,8 @@ install_full() {
     
     # نسخ الملفات
     cp -a "$SCRIPT_DIR"/. "$DEFAULT_PATH/"
+    cd "$DEFAULT_PATH"
+    fix_permissions
     
     # إنشاء ملف .env
     cat > $DEFAULT_PATH/.env << EOL
@@ -412,6 +421,7 @@ EOL
     # تأكد من نظافة عملية البناء السابقة
     rm -rf .next node_modules/.cache
     docker-compose down || true
+    fix_permissions
     docker-compose build --no-cache
     if docker-compose up -d; then
         echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
@@ -481,8 +491,7 @@ start_system() {
 
     # إنشاء المجلدات
     mkdir -p data logs
-    # ضبط الصلاحيات للسماح للحاوية بالكتابة على الملفات
-    chown -R 1001:1001 data logs
+    fix_permissions
     
     # تشغيل Docker Compose
     docker-compose up -d
