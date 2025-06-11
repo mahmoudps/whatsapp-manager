@@ -43,14 +43,14 @@ module.exports = {
     },
     {
       name: "whatsapp-manager-websocket",
-      script: "lib/websocket-server.ts",
+      script: "dist/websocket-server.js",
       cwd: process.cwd(),
       instances: 1,
       exec_mode: "fork",
       watch: false,
       max_memory_restart: "512M",
       interpreter: "node",
-      node_args: "-r ts-node/register",
+      node_args: "",
       env: {
         NODE_ENV: "production",
         WEBSOCKET_PORT: 3001,
