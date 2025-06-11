@@ -304,7 +304,7 @@ export class AuthService {
 
   static async verifyToken(token: string) {
     const decoded = verifyToken(token)
-    if (!decoded) return null
+    if (!decoded.valid || decoded.userId === undefined) return null
 
     const user = await getUserById(decoded.userId)
     return user
@@ -320,7 +320,7 @@ export class AuthService {
     if (!isValid) return null
 
     const decoded = verifyToken(refreshToken)
-    if (!decoded) return null
+    if (!decoded.valid || decoded.userId === undefined) return null
 
     const user = await getUserById(decoded.userId)
     if (!user) return null
