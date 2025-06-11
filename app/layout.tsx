@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Tajawal } from "next/font/google"
+import { Tajawal, Inter } from "next/font/google"
 import ClientLayout from "./client-layout"
 
 export const metadata: Metadata = {
@@ -23,6 +23,12 @@ const tajawal = Tajawal({
   weight: ["400", "500", "700"],
 })
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "700"],
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={tajawal.className}>
+      <body className={`${tajawal.className} ${inter.className}`}> 
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

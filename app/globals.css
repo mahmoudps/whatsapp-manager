@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Refreshed global styles for better UX */
+
 /* إعادة تعيين عامة محسنة */
 * {
   box-sizing: border-box;
@@ -16,8 +18,8 @@ html {
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Cairo",
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Cairo",
     "Tajawal", sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
