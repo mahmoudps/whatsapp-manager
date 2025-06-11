@@ -40,25 +40,28 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Copy package manifests first for better Docker layer caching
 COPY package.json package-lock.json .npmrc ./
+
+# Install dependencies with development packages enabled
 ENV NODE_ENV=development
 # Use a temporary database during build to avoid SQLite locking errors
 ENV DATABASE_PATH=/tmp/whatsapp_manager_build.db
-
-# Install all dependencies including dev packages for the build step
 RUN npm ci && npm cache clean --force
 
+# Copy the rest of the application source
 COPY . .
 
+# Ensure helper scripts are executable
 RUN chmod +x start-production.sh scripts/generate-env.js
 
 # توليد ملف البيئة تلقائياً عند البناء
 RUN node scripts/generate-env.js
 
+# Use production mode when building the Next.js application
+ENV NODE_ENV=production
 RUN npm run build
 
-# Switch to production mode before pruning dev dependencies
-ENV NODE_ENV=production
 # Use the real database location at runtime
 ENV DATABASE_PATH=/app/data/whatsapp_manager.db
 
