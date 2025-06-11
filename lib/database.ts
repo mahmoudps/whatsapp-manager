@@ -291,9 +291,7 @@ class DatabaseManager {
       if (!existingUser) {
         const hashedPassword = bcrypt.hashSync(password, 12)
         this.db
-          .prepare(
-            `INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)`,
-          )
+          .prepare(`INSERT INTO users (username, password, role) VALUES (?, ?, ?)`)
           .run(username, hashedPassword, "admin")
         logger.info(`Default admin user created: ${username}`)
       } else {
