@@ -2,12 +2,13 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
+import { getDefaultWebSocketUrl } from "@/lib/utils"
 
 export async function GET() {
   try {
     const isWebSocketEnabled = process.env.ENABLE_WEBSOCKET === "true"
     const websocketPort = process.env.WEBSOCKET_PORT || "3001"
-    const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || `wss://wa-api.developments.world`
+    const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || getDefaultWebSocketUrl()
 
     if (!isWebSocketEnabled) {
       return NextResponse.json({

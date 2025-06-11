@@ -11,7 +11,7 @@ import { JWT_SECRET } from "./config"
 // إعدادات البيئة
 const PORT = process.env.WEBSOCKET_PORT || 3001
 const NODE_ENV = process.env.NODE_ENV || "development"
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://wa-api.developments.world"
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 
 interface WebSocketServerInstance {
   server: any
@@ -54,7 +54,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
     app.use(compression())
     app.use(
       cors({
-        origin: [FRONTEND_URL, "https://wa-api.developments.world"],
+        origin: [FRONTEND_URL, "http://localhost:3000"],
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -67,7 +67,7 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
     const io = new Server(server, {
       path: "/socket.io",
       cors: {
-        origin: [FRONTEND_URL, "https://wa-api.developments.world"],
+        origin: [FRONTEND_URL, "http://localhost:3000"],
         methods: ["GET", "POST"],
         credentials: true,
       },
