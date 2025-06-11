@@ -50,6 +50,10 @@ npx puppeteer browsers install chrome
 
 Alternatively set `PUPPETEER_EXECUTABLE_PATH` to point to an existing Chrome binary.
 
+If Chrome fails to start with a message about `chrome_crashpad_handler`,
+ensure the browser is up to date and try launching with the `--disable-crash-reporter`
+flag (already included by default in the application configuration).
+
 ### Production
 
 For a production build you can use Docker:
