@@ -208,6 +208,7 @@ install_full() {
 PORT=3000
 HOST=0.0.0.0
 NODE_ENV=production
+DOMAIN_NAME=${DOMAIN_NAME}
 
 # إعدادات قاعدة البيانات
 DATABASE_PATH=/app/data/whatsapp_manager.db
@@ -795,6 +796,7 @@ rebuild_env() {
 PORT=3000
 HOST=0.0.0.0
 NODE_ENV=production
+DOMAIN_NAME=${DOMAIN_NAME}
 
 # إعدادات قاعدة البيانات
 DATABASE_PATH=/app/data/whatsapp_manager.db
