@@ -15,7 +15,9 @@ describe('Home Page', () => {
 
   it('displays welcome message', () => {
     render(<Home />);
-    expect(screen.getByText(/نظام إدارة شامل لرسائل واتساب/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/منصة متكاملة لإدارة الأجهزة والرسائل/i)
+    ).toBeInTheDocument();
   });
 });
 

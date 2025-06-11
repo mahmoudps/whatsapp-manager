@@ -17,7 +17,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "npm ci && npm test",
-    "ws": "ts-node lib/websocket-server.ts"
+    "ws": "ts-node lib/websocket-server.ts",
+    "build:ws": "tsc -p tsconfig.ws.json",
+    "ws:prod": "node dist/websocket-server.js"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

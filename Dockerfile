@@ -61,6 +61,7 @@ RUN node scripts/generate-env.js
 # Use production mode when building the Next.js application
 ENV NODE_ENV=production
 RUN npm run build
+RUN npm run build:ws
 
 # Use the real database location at runtime
 ENV DATABASE_PATH=/app/data/whatsapp_manager.db
