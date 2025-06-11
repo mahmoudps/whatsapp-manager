@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const verification = verifyToken(token)
-    if (!verification) {
+    if (!verification.valid || verification.userId === undefined) {
       return NextResponse.json({ success: false, message: "رمز غير صالح" }, { status: 401 })
     }
 
