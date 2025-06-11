@@ -525,7 +525,7 @@ class DatabaseManager {
     const result = this.db
       .prepare(`
       INSERT INTO messages (device_id, recipient, message, status, message_id, message_type, scheduled_at, sent_at, error_message, is_group)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
       .run(
         data.deviceId,
@@ -757,10 +757,10 @@ class DatabaseManager {
   }
 
   // Analytics operations
-  createAnalyticsEvent(data: Omit<AnalyticsEvent, "id" | "createdAt">): void {
+  createAnalyticsEvent(data: Omit<AnalyticsEvent, "id" | "createdAt">): AnalyticsEvent {
     if (!this.db) throw new Error("Database not initialized")
 
-    this.db
+    const result = this.db
       .prepare(`
       INSERT INTO analytics (event_type, device_id, message_id, data)
       VALUES (?, ?, ?, ?)
@@ -771,6 +771,23 @@ class DatabaseManager {
         data.messageId || null,
         data.details ? JSON.stringify(data.details) : null,
       )
+
+    const row = this.db
+      .prepare(
+        `SELECT id, event_type as eventType, device_id as deviceId,
+                message_id as messageId, data, created_at as createdAt
+         FROM analytics WHERE id = ?`
+      )
+      .get(result.lastInsertRowid) as any
+
+    return {
+      id: row.id,
+      eventType: row.eventType,
+      deviceId: row.deviceId ?? undefined,
+      messageId: row.messageId ?? undefined,
+      data: row.data,
+      createdAt: row.createdAt,
+    }
   }
 
   getAnalyticsEvents(limit = 50, offset = 0): AnalyticsEvent[] {
