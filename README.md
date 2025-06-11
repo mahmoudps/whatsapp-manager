@@ -40,6 +40,16 @@ The included `.npmrc` also sets `--legacy-peer-deps` to avoid peer-dependency co
 Make sure to copy the file when building Docker images so the flag is honored there.
 The `wa-manager install full` command now copies dotfiles (including `.npmrc`) to `/opt/whatsapp-manager` automatically.
 
+### Installing Chrome for Puppeteer
+
+If you skipped the bundled browser download using `PUPPETEER_SKIP_DOWNLOAD=1` you must install a compatible Chrome/Chromium before connecting devices:
+
+```bash
+npx puppeteer browsers install chrome
+```
+
+Alternatively set `PUPPETEER_EXECUTABLE_PATH` to point to an existing Chrome binary.
+
 ### Production
 
 For a production build you can use Docker:
