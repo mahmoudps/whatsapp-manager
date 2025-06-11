@@ -85,7 +85,7 @@ cp .env.example .env
   أثناء بناء صورة Docker يتم تعيين المتغير إلى مسار مؤقت داخل `/tmp`
   لتجنب تعارضات SQLite، ويُعاد إلى المسار الافتراضي عند التشغيل.
 - `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
-- `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة ويجب أن ينتهي بالمسار `/ws/socket.io`.
+- `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة ويجب أن ينتهي بالمسار `/ws/socket.io`. بدءًا من الإصدار الحالي يمكن أيضًا استخدام المسار الافتراضي `/socket.io` للمتوافقية مع بعض العملاء.
 - `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
 - `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
 

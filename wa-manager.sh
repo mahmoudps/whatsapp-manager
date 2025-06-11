@@ -325,8 +325,21 @@ http {
             proxy_set_header X-Forwarded-Proto \$scheme;
         }
         
-        location /ws {
-            proxy_pass http://whatsapp-manager:3001;
+        # WebSocket endpoint (preferred path)
+        location /ws/socket.io/ {
+            proxy_pass http://whatsapp-manager:3001/socket.io/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_read_timeout 86400;
+        }
+
+        # Fallback for clients using the default Socket.IO path
+        location /socket.io/ {
+            proxy_pass http://whatsapp-manager:3001/socket.io/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection "Upgrade";
