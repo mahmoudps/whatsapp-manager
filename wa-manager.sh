@@ -23,6 +23,15 @@ CURRENT_PATH="$SCRIPT_DIR"
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# تحديد أمر Docker Compose المتاح
+if command -v docker-compose >/dev/null 2>&1; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+elif docker compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE_CMD="docker compose"
+else
+    DOCKER_COMPOSE_CMD="docker-compose"
+fi
+
 # التحقق من تشغيل السكريبت بصلاحيات الجذر
 require_root() {
     if [[ $EUID -ne 0 ]]; then
@@ -116,7 +125,7 @@ install_docker() {
     fi
     
     # التحقق من وجود Docker Compose
-    if command -v docker-compose &> /dev/null; then
+    if command -v docker-compose &> /dev/null || docker compose version >/dev/null 2>&1; then
         echo -e "${GREEN}✅ Docker Compose مثبت بالفعل${NC}"
     else
         echo -e "${YELLOW}⏳ تثبيت Docker Compose...${NC}"
@@ -434,10 +443,10 @@ EOL
 
     # تأكد من نظافة عملية البناء السابقة
     rm -rf .next node_modules/.cache
-    docker-compose down || true
+    $DOCKER_COMPOSE_CMD down || true
     fix_permissions
-    docker-compose build --no-cache
-    if docker-compose up -d; then
+    $DOCKER_COMPOSE_CMD build --no-cache
+    if $DOCKER_COMPOSE_CMD up -d; then
         echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
         echo -e "${BLUE}🌐 يمكنك الوصول للنظام عبر: https://${DOMAIN_NAME}${NC}"
         echo -e "${YELLOW}👤 المستخدم: admin${NC}"
@@ -476,7 +485,7 @@ start_system() {
     fi
 
     # فحص وجود Docker Compose
-    if ! command -v docker-compose &> /dev/null; then
+    if ! command -v docker-compose &> /dev/null && ! docker compose version >/dev/null 2>&1; then
         echo -e "${RED}❌ Docker Compose غير مثبت!${NC}"
         echo -e "${YELLOW}🔧 شغل: wa-manager install docker${NC}"
         return 1
@@ -508,11 +517,11 @@ start_system() {
     fix_permissions
     
     # تشغيل Docker Compose
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD up -d
     
     # التحقق من الحالة
     sleep 5
-    if docker-compose ps | grep -q "Up"; then
+    if $DOCKER_COMPOSE_CMD ps | grep -q "Up"; then
         echo -e "${GREEN}✅ تم تشغيل النظام بنجاح${NC}"
         
         # عرض عنوان الوصول
@@ -541,7 +550,7 @@ stop_system() {
     fi
     
     # إيقاف Docker Compose
-    docker-compose down
+    $DOCKER_COMPOSE_CMD down
     
     echo -e "${GREEN}✅ تم إيقاف النظام بنجاح${NC}"
 }
@@ -568,7 +577,7 @@ show_status() {
     
     # عرض حالة الحاويات
     echo -e "${YELLOW}🐳 حالة الحاويات:${NC}"
-    docker-compose ps
+    $DOCKER_COMPOSE_CMD ps
     
     echo ""
     echo -e "${YELLOW}💾 استخدام الموارد:${NC}"
@@ -604,7 +613,7 @@ show_logs() {
     fi
     
     # عرض السجلات
-    docker-compose logs -f --tail=50
+    $DOCKER_COMPOSE_CMD logs -f --tail=50
 }
 
 # تنظيف الملفات المؤقتة
@@ -618,11 +627,11 @@ clean_system() {
     
     # تحديد ملف البيئة لاستخدامه مع Docker Compose لتفادي التحذيرات
     if [ -f ".env" ]; then
-        docker-compose --env-file .env down
+        $DOCKER_COMPOSE_CMD --env-file .env down
     elif [ -f ".env.example" ]; then
-        docker-compose --env-file .env.example down
+        $DOCKER_COMPOSE_CMD --env-file .env.example down
     else
-        docker-compose down
+        $DOCKER_COMPOSE_CMD down
     fi
     
     # حذف الصور غير المستخدمة
@@ -708,7 +717,7 @@ uninstall_system() {
         cd $DEFAULT_PATH
         
         # إيقاف النظام
-        docker-compose down -v
+        $DOCKER_COMPOSE_CMD down -v
         
         # حذف الصور
         docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
@@ -776,7 +785,7 @@ restore_database() {
     fi
     
     # إيقاف النظام
-    docker-compose down
+    $DOCKER_COMPOSE_CMD down
     
     # نسخ احتياطي للملف الحالي
     cp data/whatsapp_manager.db data/whatsapp_manager.db.bak
@@ -785,7 +794,7 @@ restore_database() {
     cp backups/$BACKUP_FILE data/whatsapp_manager.db
     
     # تشغيل النظام
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD up -d
     
     echo -e "${GREEN}✅ تم استعادة قاعدة البيانات بنجاح${NC}"
     echo -e "${YELLOW}⚠️ تم إنشاء نسخة احتياطية للملف الحالي: data/whatsapp_manager.db.bak${NC}"
@@ -851,9 +860,9 @@ EOL
     echo -e "${YELLOW}⏳ جلب أحدث التغييرات من المستودع...${NC}"
     git pull
     echo -e "${YELLOW}⏳ إعادة تشغيل الخدمات لتطبيق التغييرات...${NC}"
-    docker-compose down
-    docker-compose build
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD down
+    $DOCKER_COMPOSE_CMD build
+    $DOCKER_COMPOSE_CMD up -d
 }
 
 # تحديث النظام
@@ -877,11 +886,11 @@ update_system() {
     
     # إعادة بناء الصور
     echo -e "${YELLOW}⏳ إعادة بناء الصور...${NC}"
-    docker-compose build --no-cache
+    $DOCKER_COMPOSE_CMD build --no-cache
     
     # إعادة تشغيل النظام
     echo -e "${YELLOW}⏳ إعادة تشغيل النظام...${NC}"
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD up -d
     
     echo -e "${GREEN}✅ تم تحديث النظام بنجاح${NC}"
     echo -e "${YELLOW}⚠️ تم إنشاء نسخة احتياطية للملفات الهامة: .env.bak, docker-compose.yml.bak${NC}"
