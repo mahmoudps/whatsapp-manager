@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { io, type Socket } from "socket.io-client"
 import { logger } from "./logger"
+import { getDefaultWebSocketUrl } from "./utils"
 
 interface UseWebSocketOptions {
   url?: string
@@ -20,9 +21,7 @@ interface WebSocketState {
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const {
-    url =
-      process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-      "wss://wa-api.developments.world/socket.io",
+    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || getDefaultWebSocketUrl(),
     token,
     deviceId,
     autoConnect = true,

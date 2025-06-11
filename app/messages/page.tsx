@@ -13,7 +13,7 @@ import { useWebSocketContext } from "@/lib/websocket-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, getDefaultWebSocketUrl } from "@/lib/utils"
 import { logger } from "@/lib/logger"
 
 export default function MessagesPage() {
@@ -92,9 +92,8 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      let wsUrl =
-        process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-        "wss://wa-api.developments.world/socket.io"
+      const wsUrl =
+        process.env.NEXT_PUBLIC_WEBSOCKET_URL || getDefaultWebSocketUrl()
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)
