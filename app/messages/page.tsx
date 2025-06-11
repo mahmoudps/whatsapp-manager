@@ -94,7 +94,7 @@ export default function MessagesPage() {
     const connectWebSocket = () => {
       let wsUrl =
         process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-        "ws://localhost:3001/ws/socket.io"
+        "wss://wa-api.developments.world/ws/socket.io"
       logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
 
       ws.current = new WebSocket(wsUrl)
