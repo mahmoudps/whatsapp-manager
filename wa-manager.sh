@@ -589,8 +589,14 @@ clean_system() {
         cd $DEFAULT_PATH
     fi
     
-    # إيقاف النظام
-    docker-compose down
+    # تحديد ملف البيئة لاستخدامه مع Docker Compose لتفادي التحذيرات
+    if [ -f ".env" ]; then
+        docker-compose --env-file .env down
+    elif [ -f ".env.example" ]; then
+        docker-compose --env-file .env.example down
+    else
+        docker-compose down
+    fi
     
     # حذف الصور غير المستخدمة
     docker image prune -af
