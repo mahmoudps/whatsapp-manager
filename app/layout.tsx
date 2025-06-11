@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   generator: "Next.js",
   keywords: ["WhatsApp", "Manager", "Business", "Communication"],
   authors: [{ name: "WhatsApp Manager Team" }],
+  icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
 }
 
 export const viewport = {
@@ -29,9 +30,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-      </head>
       <body className={tajawal.className}>
         <ClientLayout>{children}</ClientLayout>
       </body>
