@@ -405,10 +405,14 @@ EOL
     
     # تثبيت wa-manager في النظام
     install_system_command
-    
+
     # تشغيل النظام
     cd $DEFAULT_PATH
 
+    # تأكد من نظافة عملية البناء السابقة
+    rm -rf .next node_modules/.cache
+    docker-compose down || true
+    docker-compose build --no-cache
     if docker-compose up -d; then
         echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
         echo -e "${BLUE}🌐 يمكنك الوصول للنظام عبر: https://${DOMAIN_NAME}${NC}"
