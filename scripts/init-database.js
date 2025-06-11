@@ -8,7 +8,8 @@ require('ts-node').register({
 const { logger } = require('../lib/logger.ts');
 
 // Load environment variables from .env so configuration is available
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 (async () => {
   try {
