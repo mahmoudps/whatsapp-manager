@@ -27,7 +27,7 @@ module.exports = {
         WEBSOCKET_PORT: process.env.WEBSOCKET_PORT || "3001",
         NEXT_PUBLIC_WEBSOCKET_URL:
           process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-          `wss://wa-api.developments.world/ws/socket.io`,
+          `wss://wa-api.developments.world/socket.io`,
       },
       error_file: "logs/app-error.log",
       out_file: "logs/app-out.log",

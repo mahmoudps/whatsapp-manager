@@ -22,7 +22,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const {
     url =
       process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-      "wss://wa-api.developments.world/ws/socket.io",
+      "wss://wa-api.developments.world/socket.io",
     token,
     deviceId,
     autoConnect = true,
