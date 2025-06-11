@@ -218,6 +218,8 @@ class WhatsAppClientManager extends EventEmitter {
           "--disable-back-forward-cache",
           "--disable-ipc-flooding-protection",
           "--disable-extensions",
+          "--disable-crash-reporter",
+          "--disable-crashpad",
           "--disable-default-apps",
           "--disable-sync",
           "--metrics-recording-only",
