@@ -77,12 +77,15 @@ export async function POST(request: NextRequest) {
 
     logger.info(`✅ Device created: ${device.name}`)
 
-    return NextResponse.json({
-      success: true,
-      device,
-      message: "تم إنشاء الجهاز بنجاح",
-      timestamp: new Date().toISOString(),
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        device,
+        message: "تم إنشاء الجهاز بنجاح",
+        timestamp: new Date().toISOString(),
+      },
+      { status: 201 },
+    )
   } catch (error) {
     logger.error("❌ Error in POST /api/devices:", error)
     return NextResponse.json(
