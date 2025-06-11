@@ -38,7 +38,7 @@ fi
 
 # تشغيل Next.js
 echo "🌐 تشغيل Next.js..."
-npm run production
+npm start
 
 # إيقاف WebSocket Server عند الخروج
 if [ "$ENABLE_WEBSOCKET" = "true" ]; then
