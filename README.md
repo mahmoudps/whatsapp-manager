@@ -92,6 +92,8 @@ cp .env.example .env
 - `NEXT_PUBLIC_WEBSOCKET_URL`: عنوان الاتصال من الواجهة ويجب أن ينتهي بالمسار `/ws/socket.io`. بدءًا من الإصدار الحالي يمكن أيضًا استخدام المسار الافتراضي `/socket.io` للمتوافقية مع بعض العملاء.
 - `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
 - `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
+- `WHATSAPP_SERVER_PORT`: المنفذ الداخلي لعميل WhatsApp (الافتراضي 3002).
+- `PUPPETEER_EXECUTABLE_PATH`: مسار ملف Chrome/Chromium المستخدم من Puppeteer.
 
 بقية المتغيرات موثقة داخل الملف `.env.example` ويمكن تعديلها حسب الحاجة.
 
