@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 
-// Register ts-node to allow requiring TypeScript files
-require('ts-node/register');
+// Register ts-node to transpile TypeScript files on the fly using CommonJS
+require('ts-node').register({
+  transpileOnly: true,
+  compilerOptions: { module: 'commonjs', moduleResolution: 'node' }
+});
 const { logger } = require('../lib/logger.ts');
+
+// Load environment variables from .env so configuration is available
+require('dotenv').config();
 
 (async () => {
   try {
