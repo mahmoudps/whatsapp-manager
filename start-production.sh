@@ -1,14 +1,16 @@
 #!/bin/bash
 set -e
 
+cd "$(dirname "$0")"
+
 set -e
 
 echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
 # تحميل متغيرات البيئة من الملف .env إن وجد
-set -a
-[ -f .env ] && source .env
-set +a
+if [ -f ".env" ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
 
 if [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
   echo "❌ ADMIN_USERNAME, ADMIN_PASSWORD, and JWT_SECRET must be set"
