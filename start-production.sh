@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
