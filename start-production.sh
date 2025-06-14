@@ -54,6 +54,11 @@ fi
 if [ ! -f "data/whatsapp_manager.db" ]; then
   echo "🗄️ إنشاء قاعدة البيانات..."
   node scripts/init-database.js
+  status=$?
+  if [ $status -ne 0 ]; then
+    echo "❌ فشل إنشاء قاعدة البيانات"
+    exit $status
+  fi
 fi
 
 # تشغيل WebSocket Server
