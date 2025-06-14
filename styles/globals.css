@@ -107,7 +107,12 @@
     border-color: hsl(var(--border));
   }
   body {
-    background-color: hsl(var(--background));
+    @apply transition-colors min-h-screen;
+    background-image: linear-gradient(
+      to bottom right,
+      hsl(var(--background)),
+      hsl(var(--muted))
+    );
     color: hsl(var(--foreground));
   }
 }

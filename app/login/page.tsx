@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -43,8 +44,12 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+    <main className="min-h-screen bg-gradient-to-br from-sky-50 via-emerald-50 to-indigo-100 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full bg-white rounded-lg shadow-lg p-8"
+      >
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">تسجيل الدخول</h1>
 
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
@@ -98,7 +103,7 @@ export default function Login() {
             {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
           </button>
         </form>
-      </div>
+      </motion.div>
     </main>
   )
 }
