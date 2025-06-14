@@ -62,6 +62,21 @@ fix_permissions() {
     fi
 }
 
+# التأكد من توفر OpenSSL
+ensure_openssl() {
+    if ! command -v openssl >/dev/null 2>&1; then
+        if [[ $EUID -ne 0 ]]; then
+            echo -e "${RED}❌ OpenSSL غير مثبت. الرجاء تثبيته أو تشغيل السكريبت بصلاحيات الجذر لتثبيته تلقائياً.${NC}"
+            exit 1
+        fi
+        echo -e "${YELLOW}⏳ تثبيت OpenSSL...${NC}"
+        apt-get update && apt-get install -y openssl && echo -e "${GREEN}✅ تم تثبيت OpenSSL بنجاح${NC}" || {
+            echo -e "${RED}❌ فشل تثبيت OpenSSL${NC}"
+            exit 1
+        }
+    fi
+}
+
 # عرض المساعدة
 show_help() {
     echo -e "${BLUE}=== WhatsApp Manager CLI ===${NC}"
@@ -182,6 +197,7 @@ install_pm2() {
 # تثبيت كامل مع SSL
 install_full() {
     require_root
+    ensure_openssl
     echo -e "${BLUE}🚀 تثبيت كامل لـ WhatsApp Manager...${NC}"
     
     # طلب معلومات الدومين
@@ -803,6 +819,8 @@ restore_database() {
 # إعادة تهيئة ملف .env
 rebuild_env() {
     echo -e "${BLUE}🔄 إعادة تهيئة ملف .env...${NC}"
+
+    ensure_openssl
 
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
