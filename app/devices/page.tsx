@@ -264,13 +264,13 @@ export default function DevicesPage() {
 
       if ('isMedia' in data && data.isMedia) {
         url = `/api/devices/${data.deviceId}/send-media`
-      } else if (data.isContact) {
+      } else if ("isContact" in data && data.isContact) {
         url = `/api/devices/${data.deviceId}/send-contact`
-      } else if (data.file) {
+      } else if ("file" in data && data.file) {
         url = `/api/devices/${data.deviceId}/send-media`
-      } else if (data.isLocation) {
+      } else if ("isLocation" in data && data.isLocation) {
         url = `/api/devices/${data.deviceId}/send-location`
-      } else if (data.scheduledAt) {
+      } else if ("scheduledAt" in data && data.scheduledAt) {
         url = `/api/devices/${data.deviceId}/schedule`
       }
 
@@ -281,7 +281,7 @@ export default function DevicesPage() {
           credentials: 'include',
           body: data.formData,
         })
-      } else if (data.file) {
+        } else if ("file" in data && data.file) {
         const fd = new FormData()
         fd.append('recipient', data.recipient || '')
         fd.append('caption', data.message)
@@ -293,21 +293,21 @@ export default function DevicesPage() {
         })
       } else {
         let payload
-        if (data.isContact) {
+        if ("isContact" in data && data.isContact) {
           payload = { recipient: data.recipient, vcard: data.vcard }
-        } else if (data.isLocation) {
+          } else if ("isLocation" in data && data.isLocation) {
           payload = {
             recipient: data.recipient,
             latitude: data.latitude,
             longitude: data.longitude,
             description: data.message,
           }
-        } else if (data.scheduledAt) {
-          payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
+        } else if ("scheduledAt" in data && data.scheduledAt) {
+          payload = { recipient: 'recipient' in data ? data.recipient : '', message: 'message' in data ? data.message : '', sendAt: data.scheduledAt }
         } else if (isBulk) {
-          payload = { recipients: data.recipients, message: data.message }
+          payload = { recipients: ('recipients' in data ? data.recipients : []), message: 'message' in data ? data.message : '' }
         } else {
-          payload = { recipient: data.recipient, message: data.message }
+          payload = { recipient: 'recipient' in data ? data.recipient : '', message: 'message' in data ? data.message : '' }
         }
 
         res = await fetch(url, {
