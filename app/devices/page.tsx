@@ -12,6 +12,7 @@ import { MainLayout } from "@/components/layout/main-layout"
 import { useApp } from "@/lib/app-context"
 import { useWebSocketContext } from "@/lib/websocket-provider"
 import { logger } from "@/lib/logger"
+import { useToast } from "@/hooks/use-toast"
 
 interface Device {
   id: number
@@ -30,6 +31,7 @@ export default function DevicesPage() {
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
   const [activeDevice, setActiveDevice] = useState<{ id: number; name: string } | null>(null)
   const { actions } = useApp()
+  const { toast } = useToast()
   const { on } = useWebSocketContext()
   const fetchDevices = useCallback(async () => {
     try {
@@ -153,10 +155,9 @@ export default function DevicesPage() {
       if (!res.ok || !data.success) {
         throw new Error(data.error || "فشل الاتصال بالجهاز")
       }
-      actions.addNotification({
-        type: "success",
+      toast({
         title: "نجح",
-        message: data.message || "تم بدء الاتصال بالجهاز",
+        description: data.message || "تم بدء الاتصال بالجهاز",
       })
       setDevices((prev) =>
         prev.map((d) =>
@@ -165,10 +166,10 @@ export default function DevicesPage() {
       )
     } catch (err) {
       logger.error("Error connecting device:", err as Error)
-      actions.addNotification({
-        type: "error",
+      toast({
+        variant: "destructive",
         title: "خطأ",
-        message: "فشل الاتصال بالجهاز",
+        description: "فشل الاتصال بالجهاز",
       })
     }
   }
@@ -183,10 +184,9 @@ export default function DevicesPage() {
       if (!res.ok || !data.success) {
         throw new Error(data.error || "فشل قطع الاتصال")
       }
-      actions.addNotification({
-        type: "success",
+      toast({
         title: "نجح",
-        message: data.message || "تم قطع الاتصال",
+        description: data.message || "تم قطع الاتصال",
       })
       setDevices((prev) =>
         prev.map((d) =>
@@ -195,10 +195,10 @@ export default function DevicesPage() {
       )
     } catch (err) {
       logger.error("Error disconnecting device:", err as Error)
-      actions.addNotification({
-        type: "error",
+      toast({
+        variant: "destructive",
         title: "خطأ",
-        message: "فشل في قطع الاتصال",
+        description: "فشل في قطع الاتصال",
       })
     }
   }
@@ -294,17 +294,16 @@ export default function DevicesPage() {
         throw new Error(resp.error || "فشل إرسال الرسالة")
       }
 
-      actions.addNotification({
-        type: "success",
+      toast({
         title: "نجح",
-        message: resp.message || "تم إرسال الرسالة",
+        description: resp.message || "تم إرسال الرسالة",
       })
     } catch (err) {
       logger.error("Error sending message:", err as Error)
-      actions.addNotification({
-        type: "error",
+      toast({
+        variant: "destructive",
         title: "خطأ",
-        message: "فشل في إرسال الرسالة",
+        description: "فشل في إرسال الرسالة",
       })
     }
   }

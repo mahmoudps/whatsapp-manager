@@ -22,6 +22,7 @@ import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { logger } from "@/lib/logger"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -31,6 +32,7 @@ export default function MessagesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [deviceFilter, setDeviceFilter] = useState<number | "all">("all")
   const { actions } = useApp()
+  const { toast } = useToast()
   const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
@@ -252,17 +254,16 @@ export default function MessagesPage() {
         throw new Error(resp.error || "فشل إرسال الرسالة")
       }
 
-      actions.addNotification({
-        type: "success",
+      toast({
         title: "نجح",
-        message: resp.message || "تم إرسال الرسالة",
+        description: resp.message || "تم إرسال الرسالة",
       })
     } catch (err) {
       logger.error("Error sending message:", err as Error)
-      actions.addNotification({
-        type: "error",
+      toast({
+        variant: "destructive",
         title: "خطأ",
-        message: "فشل في إرسال الرسالة",
+        description: "فشل في إرسال الرسالة",
       })
     }
   }
