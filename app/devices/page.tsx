@@ -254,20 +254,26 @@ export default function DevicesPage() {
     isBulk: boolean
     file?: File | null
     scheduledAt?: string
+    vcard?: string
+    isContact?: boolean
   }) => {
     try {
       let url = data.isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
 
-      if (data.file) {
+      if (data.isContact) {
+        url = `/api/devices/${data.deviceId}/send-contact`
+      } else if (data.file) {
         url = `/api/devices/${data.deviceId}/send-media`
       } else if (data.scheduledAt) {
         url = `/api/devices/${data.deviceId}/schedule`
       }
 
       let payload
-      if (data.file) {
+      if (data.isContact) {
+        payload = { recipient: data.recipient, vcard: data.vcard }
+      } else if (data.file) {
         payload = {
           recipient: data.recipient,
           data: await fileToBase64(data.file),
