@@ -10,6 +10,8 @@ if [ -f .env ]; then
       continue
     fi
     # قم بتصدير المتغير فقط إذا لم يكن محددًا مسبقًا
+    # إزالة أي محارف CR قد تتسبب بعدم تطابق القيم
+    value="${value//$'\r'/}"
     if [ -z "${!key+x}" ]; then
       export "$key"="${value}"
     fi
