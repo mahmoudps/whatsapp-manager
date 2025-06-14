@@ -14,7 +14,9 @@ data/
 *.db
 
 # Environment and SSL files
-.env
+#.env is now included so build-time variables like NEXT_PUBLIC_WEBSOCKET_URL
+# are respected when creating the Docker image. Other env files remain ignored.
+!.env
 .env.*
 !.env.example
 ssl/
