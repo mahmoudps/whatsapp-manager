@@ -63,6 +63,10 @@ fi
 
 # تشغيل WebSocket Server
 if [ "$ENABLE_WEBSOCKET" = "true" ]; then
+  if [ ! -f ./dist/websocket-server.js ]; then
+    echo "❌ dist/websocket-server.js غير موجود. تأكد من تشغيل 'npm run build:ws' أثناء بناء الصورة" >&2
+    exit 1
+  fi
   echo "📡 تشغيل WebSocket Server..."
   node ./dist/websocket-server.js &
   WS_PID=$!
