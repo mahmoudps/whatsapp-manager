@@ -197,35 +197,32 @@ export default function MessagesPage() {
 
   const stats = getMessageStats()
 
-  const fileToBase64 = async (file: File) => {
-    const reader = new FileReader()
-    return await new Promise<string>((resolve, reject) => {
-      reader.onload = () => resolve((reader.result as string).split(',')[1])
-      reader.onerror = () => reject(new Error('failed'))
-      reader.readAsDataURL(file)
-    })
-  }
-
-  const handleSendMessage = async (data: {
-    deviceId: number
-    recipient?: string
-    recipients?: string[]
-    message: string
-    isBulk: boolean
-    file?: File | null
-    scheduledAt?: string
-    vcard?: string
-    isContact?: boolean
-    latitude?: number
-    longitude?: number
-    isLocation?: boolean
-  }) => {
+  const handleSendMessage = async (
+    data:
+      | {
+          deviceId: number
+          recipient?: string
+          recipients?: string[]
+          message: string
+          isBulk: boolean
+          file?: File | null
+          scheduledAt?: string
+          vcard?: string
+          isContact?: boolean
+          latitude?: number
+          longitude?: number
+          isLocation?: boolean
+        }
+      | { deviceId: number; formData: FormData; isMedia: true },
+  ) => {
     try {
       let url = data.isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
 
-      if (data.isContact) {
+      if ('isMedia' in data && data.isMedia) {
+        url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.isContact) {
         url = `/api/devices/${data.deviceId}/send-contact`
       } else if (data.file) {
         url = `/api/devices/${data.deviceId}/send-media`
@@ -235,37 +232,49 @@ export default function MessagesPage() {
         url = `/api/devices/${data.deviceId}/schedule`
       }
 
-      let payload
-      if (data.isContact) {
-        payload = { recipient: data.recipient, vcard: data.vcard }
+      let res: Response
+      if ('isMedia' in data && data.isMedia) {
+        res = await fetch(url, {
+          method: 'POST',
+          credentials: 'include',
+          body: data.formData,
+        })
       } else if (data.file) {
-        payload = {
-          recipient: data.recipient,
-          data: await fileToBase64(data.file),
-          mimeType: data.file.type,
-          caption: data.message,
-        }
-      } else if (data.isLocation) {
-        payload = {
-          recipient: data.recipient,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          description: data.message,
-        }
-      } else if (data.scheduledAt) {
-        payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
-      } else if (data.isBulk) {
-        payload = { recipients: data.recipients, message: data.message }
+        const fd = new FormData()
+        fd.append('recipient', data.recipient || '')
+        fd.append('caption', data.message)
+        fd.append('file', data.file)
+        res = await fetch(url, {
+          method: 'POST',
+          credentials: 'include',
+          body: fd,
+        })
       } else {
-        payload = { recipient: data.recipient, message: data.message }
-      }
+        let payload
+        if (data.isContact) {
+          payload = { recipient: data.recipient, vcard: data.vcard }
+        } else if (data.isLocation) {
+          payload = {
+            recipient: data.recipient,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            description: data.message,
+          }
+        } else if (data.scheduledAt) {
+          payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
+        } else if (data.isBulk) {
+          payload = { recipients: data.recipients, message: data.message }
+        } else {
+          payload = { recipient: data.recipient, message: data.message }
+        }
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      })
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        })
+      }
 
       const resp = await res.json()
       if (!res.ok || !resp.success) {

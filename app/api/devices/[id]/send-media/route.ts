@@ -6,6 +6,8 @@ import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
+import fs from "fs/promises"
+import path from "path"
 
 export async function POST(
   request: NextRequest,
@@ -26,8 +28,30 @@ export async function POST(
     // Ensure database is initialized
     await db.ensureInitialized()
 
-    const body = await request.json()
-    const data = ValidationSchemas.mediaMessage(body)
+    const form = await request.formData()
+    const file = form.get("file") as File | null
+    const recipient = form.get("recipient") as string | null
+    const caption = (form.get("caption") as string | null) || ""
+
+    if (!file || !recipient) {
+      return NextResponse.json({ success: false, error: "بيانات غير صالحة", timestamp: new Date().toISOString() }, { status: 400 })
+    }
+
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    const mimeType = file.type
+
+    const uploadsDir = path.join(process.cwd(), "uploads")
+    await fs.mkdir(uploadsDir, { recursive: true })
+    const filePath = path.join(uploadsDir, `${Date.now()}-${file.name}`)
+    await fs.writeFile(filePath, buffer)
+
+    const data = ValidationSchemas.mediaMessage({
+      recipient,
+      data: buffer.toString("base64"),
+      mimeType,
+      caption,
+    })
 
     if (!data) {
       return NextResponse.json({ success: false, error: "بيانات غير صالحة", timestamp: new Date().toISOString() }, { status: 400 })
