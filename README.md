@@ -64,8 +64,8 @@ For a production build you can use Docker:
 docker-compose up --build -d
 ```
 يُنشئ ملف `docker-compose.yml` حاوية للتطبيق وأخرى لـ Nginx. يتم تشغيل
-السكربت `start-production.sh` داخل الحاوية لتهيئة البيئة وتشغيل WebSocket عند
-تفعيل `ENABLE_WEBSOCKET=true`.
+السكربت `start-production.sh` داخل الحاوية لتهيئة البيئة وتشغيل WebSocket
+بشكل افتراضي. يمكن تعطيله بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
 
 ## إعداد ملف البيئة
 انسخ الملف المثال وعدّل القيم بما يناسبك:
