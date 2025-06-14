@@ -12,5 +12,9 @@
     "noEmit": false,
     "declaration": false
   },
-  "include": ["lib/websocket-server.ts"]
+  "include": [
+    "lib/websocket-server.ts",
+    "lib/logger.ts",
+    "lib/config.ts"
+  ]
 }
