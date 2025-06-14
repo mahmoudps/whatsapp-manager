@@ -113,10 +113,10 @@ export function Sidebar({ onClose }: SidebarProps) {
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="flex h-full w-72 flex-col bg-white/80 backdrop-blur-xl border-l border-gray-200/50 dark:bg-gray-900/80 dark:border-gray-700/50 shadow-2xl"
+      className="flex h-full w-64 sm:w-72 md:w-80 flex-col bg-white/80 backdrop-blur-xl border-l border-gray-200/50 dark:bg-gray-900/80 dark:border-gray-700/50 shadow-2xl"
     >
       {/* Header */}
-      <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200/50 dark:border-gray-700/50">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <Zap className="h-4 w-4 text-white" />
@@ -136,7 +136,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="flex-1 space-y-2 p-4 sm:p-6">
         <div className="space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href
@@ -246,7 +246,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-3">
             إجراءات سريعة
           </h3>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {quickActions.map((action) => {
               const Icon = action.icon
               return (
@@ -268,7 +268,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-4">
+      <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-4 sm:p-6">
         <div className="flex items-center gap-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-3">
           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
             <Shield className="h-4 w-4 text-white" />
