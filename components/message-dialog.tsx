@@ -19,26 +19,34 @@ import {
 import type { Device } from "@/lib/types"
 import type { Contact as StoredContact } from "@/lib/database"
 
+interface BaseMessageData {
+  deviceId: number
+  recipient?: string
+  recipients?: string[]
+  message: string
+  isBulk: boolean
+  file?: File | null
+  scheduledAt?: string
+  vcard?: string
+  isContact?: boolean
+  latitude?: number
+  longitude?: number
+  isLocation?: boolean
+}
+
+interface MediaMessageData {
+  deviceId: number
+  formData: FormData
+  isMedia: true
+}
+
 interface MessageDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   deviceId?: number
   deviceName?: string
   devices?: Device[]
-  onSendMessage: (data: {
-    deviceId: number
-    recipient?: string
-    recipients?: string[]
-    message: string
-    isBulk: boolean
-    file?: File | null
-    scheduledAt?: string
-    vcard?: string
-    isContact?: boolean
-    latitude?: number
-    longitude?: number
-    isLocation?: boolean
-  }) => void
+  onSendMessage: (data: BaseMessageData | MediaMessageData) => void
 }
 
 export function MessageDialog({
@@ -96,14 +104,21 @@ export function MessageDialog({
       if (!targetDeviceId) throw new Error("deviceId is required")
 
       if (activeTab === "single") {
-        await onSendMessage({
-          deviceId: targetDeviceId,
-          recipient,
-          message,
-          isBulk: false,
-          file,
-          scheduledAt,
-        })
+        if (file) {
+          const fd = new FormData()
+          fd.append("recipient", recipient)
+          fd.append("caption", message)
+          fd.append("file", file)
+          await onSendMessage({ deviceId: targetDeviceId, formData: fd, isMedia: true })
+        } else {
+          await onSendMessage({
+            deviceId: targetDeviceId,
+            recipient,
+            message,
+            isBulk: false,
+            scheduledAt,
+          })
+        }
       } else if (activeTab === "bulk") {
         const recipients = bulkRecipients
           .split("\n")
@@ -139,14 +154,21 @@ export function MessageDialog({
       } else if (activeTab === "contacts") {
         const contact = contacts.find((c) => c.id === selectedContactId)
         if (!contact) throw new Error("contact not found")
-        await onSendMessage({
-          deviceId: targetDeviceId,
-          recipient: contact.phoneNumber,
-          message,
-          isBulk: false,
-          file,
-          scheduledAt,
-        })
+        if (file) {
+          const fd = new FormData()
+          fd.append("recipient", contact.phoneNumber)
+          fd.append("caption", message)
+          fd.append("file", file)
+          await onSendMessage({ deviceId: targetDeviceId, formData: fd, isMedia: true })
+        } else {
+          await onSendMessage({
+            deviceId: targetDeviceId,
+            recipient: contact.phoneNumber,
+            message,
+            isBulk: false,
+            scheduledAt,
+          })
+        }
       }
 
       setRecipient("")
