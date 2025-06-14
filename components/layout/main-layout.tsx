@@ -6,7 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button, Card } from "@/ui"
-import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X, LogOut, User } from "lucide-react"
+import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X, LogOut, User, Contact } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Notifications } from "@/components/notifications"
 import { logger } from "@/lib/logger"
@@ -20,6 +20,7 @@ const navigation = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "devices", href: "/devices", icon: Smartphone },
   { key: "messages", href: "/messages", icon: MessageSquare },
+  { key: "contacts", href: "/contacts", icon: Contact },
   { key: "diagnostics", href: "/diagnostics", icon: Activity },
   { key: "settings", href: "/settings", icon: Settings },
 ]
@@ -71,7 +72,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         {/* Sidebar */}
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+            "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 md:w-80 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
             sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
@@ -117,7 +118,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
         {/* Main content */}
         <main className="flex-1 lg:ml-0">
-          <div className="p-6">{children}</div>
+          <div className="p-4 sm:p-6 md:p-8">{children}</div>
         </main>
       </div>
 
