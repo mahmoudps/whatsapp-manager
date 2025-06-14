@@ -254,6 +254,9 @@ export default function DevicesPage() {
     isBulk: boolean
     file?: File | null
     scheduledAt?: string
+    latitude?: number
+    longitude?: number
+    isLocation?: boolean
   }) => {
     try {
       let url = data.isBulk
@@ -262,6 +265,8 @@ export default function DevicesPage() {
 
       if (data.file) {
         url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.isLocation) {
+        url = `/api/devices/${data.deviceId}/send-location`
       } else if (data.scheduledAt) {
         url = `/api/devices/${data.deviceId}/schedule`
       }
@@ -273,6 +278,13 @@ export default function DevicesPage() {
           data: await fileToBase64(data.file),
           mimeType: data.file.type,
           caption: data.message,
+        }
+      } else if (data.isLocation) {
+        payload = {
+          recipient: data.recipient,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          description: data.message,
         }
       } else if (data.scheduledAt) {
         payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }

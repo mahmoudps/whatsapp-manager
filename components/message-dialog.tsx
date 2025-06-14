@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
-import { Loader2, Send, Users, MessageSquare, Contact } from "lucide-react"
+import { Loader2, Send, Users, MessageSquare, MapPin, Contact } from "lucide-react"
+
 import { logger } from "@/lib/logger"
 import {
   Select,
@@ -33,6 +34,9 @@ interface MessageDialogProps {
     isBulk: boolean
     file?: File | null
     scheduledAt?: string
+    latitude?: number
+    longitude?: number
+    isLocation?: boolean
   }) => void
 }
 
@@ -45,6 +49,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | undefined>(deviceId ?? devices?.[0]?.id)
   const [file, setFile] = useState<File | null>(null)
   const [scheduledAt, setScheduledAt] = useState("")
+  const [latitude, setLatitude] = useState("")
+  const [longitude, setLongitude] = useState("")
   const [contacts, setContacts] = useState<ContactType[]>([])
   const [selectedContactId, setSelectedContactId] = useState<number | undefined>(undefined)
 
@@ -72,6 +78,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       return
     }
 
+    if (activeTab === "location" && (!recipient || !latitude || !longitude)) {
     if (activeTab === "contacts" && (!selectedContactId || !message)) {
       return
     }
@@ -93,6 +100,17 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           file,
           scheduledAt,
         })
+      } else if (activeTab === "location") {
+        await onSendMessage({
+          deviceId: targetDeviceId,
+          recipient,
+          message,
+          isBulk: false,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+          isLocation: true,
+        })
+      } else {
       } else if (activeTab === "bulk") {
         const recipients = bulkRecipients
           .split("\n")
@@ -125,6 +143,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setMessage("")
       setFile(null)
       setScheduledAt("")
+      setLatitude("")
+      setLongitude("")
       setSelectedContactId(undefined)
       onOpenChange(false)
     } catch (error) {
@@ -170,6 +190,11 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               <Users className="h-4 w-4" />
               رسائل متعددة
             </TabsTrigger>
+            <TabsTrigger value="location" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              إرسال موقع
+            </TabsTrigger>
+          </TabsList>
             <TabsTrigger value="contacts" className="flex items-center gap-2">
               <Contact className="h-4 w-4" />
               من جهات الاتصال
@@ -228,6 +253,37 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           </div>
         </TabsContent>
 
+          <TabsContent value="location" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="locRecipient">رقم المستلم</Label>
+              <Input
+                id="locRecipient"
+                placeholder="أدخل رقم الهاتف كاملاً (مثال: 966501234567)"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="latitude">خط العرض</Label>
+              <Input
+                id="latitude"
+                type="number"
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="longitude">خط الطول</Label>
+              <Input
+                id="longitude"
+                type="number"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+              />
+            </div>
+          </TabsContent>
+
           <div className="space-y-2 mt-4">
             <Label htmlFor="message">نص الرسالة</Label>
           <Textarea
@@ -265,6 +321,9 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             onClick={handleSendMessage}
             disabled={
               isSending ||
+              (activeTab === "single" && (!recipient || !message)) ||
+              (activeTab === "bulk" && (!bulkRecipients || !message)) ||
+              (activeTab === "location" && (!recipient || !latitude || !longitude))
               (!file && !message) ||
               (activeTab === "single"
                 ? !recipient
