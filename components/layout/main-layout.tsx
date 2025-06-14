@@ -11,42 +11,24 @@ import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X
 import { cn } from "@/lib/utils"
 import { Notifications } from "@/components/notifications"
 import { logger } from "@/lib/logger"
+import { useTranslation } from "@/lib/i18n"
 
 interface MainLayoutProps {
   children: React.ReactNode
 }
 
 const navigation = [
-  {
-    name: "لوحة التحكم",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "الأجهزة",
-    href: "/devices",
-    icon: Smartphone,
-  },
-  {
-    name: "الرسائل",
-    href: "/messages",
-    icon: MessageSquare,
-  },
-  {
-    name: "التشخيص",
-    href: "/diagnostics",
-    icon: Activity,
-  },
-  {
-    name: "الإعدادات",
-    href: "/settings",
-    icon: Settings,
-  },
+  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { key: "devices", href: "/devices", icon: Smartphone },
+  { key: "messages", href: "/messages", icon: MessageSquare },
+  { key: "diagnostics", href: "/diagnostics", icon: Activity },
+  { key: "settings", href: "/settings", icon: Settings },
 ]
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { t } = useTranslation()
 
   const handleLogout = async () => {
     try {
@@ -76,11 +58,11 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <User className="h-5 w-5 text-gray-500" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">المدير</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin')}</span>
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
-              تسجيل الخروج
+              {t('logout')}
             </Button>
           </div>
         </div>
@@ -100,7 +82,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 const isActive = pathname === item.href
                 return (
                   <Link
-                    key={item.name}
+                    key={item.key}
                     href={item.href}
                     className={cn(
                       "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
@@ -111,7 +93,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     onClick={() => setSidebarOpen(false)}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
-                    {item.name}
+                    {t(`navigation.${item.key}`)}
                   </Link>
                 )
               })}
@@ -121,8 +103,8 @@ export function MainLayout({ children }: MainLayoutProps) {
               <Card className="p-4">
                 <div className="text-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-2"></div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">النظام يعمل</p>
-                  <p className="text-xs text-gray-500">جميع الخدمات متاحة</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('system.status')}</p>
+                  <p className="text-xs text-gray-500">{t('system.all_services')}</p>
                 </div>
               </Card>
             </div>
