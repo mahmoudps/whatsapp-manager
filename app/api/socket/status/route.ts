@@ -27,15 +27,33 @@ export async function GET() {
       })
     }
 
-    // محاولة التحقق من حالة WebSocket server
+    // محاولة التحقق من حالة خادم WebSocket عبر طلب صحة HTTP
     try {
-      // هنا يمكن إضافة فحص فعلي للWebSocket server
-      // لكن الآن سنعتبره متاح إذا كان مُفعل
+      const healthResponse = await fetch(`http://localhost:${websocketPort}/health`)
+
+      if (!healthResponse.ok) {
+        const text = await healthResponse.text()
+        return NextResponse.json({
+          success: false,
+          status: "error",
+          message: `WebSocket server responded with ${healthResponse.status}: ${text}`,
+          clients: 0,
+          config: {
+            enabled: true,
+            url: websocketUrl,
+            port: websocketPort,
+          },
+        })
+      }
+
+      const data = await healthResponse.json().catch(() => ({}))
+      const clients = data.stats?.socketIOConnections || data.connections || 0
+
       return NextResponse.json({
         success: true,
         status: "running",
         message: "WebSocket server is running",
-        clients: 0, // يمكن تحديث هذا لاحقاً
+        clients,
         config: {
           enabled: true,
           url: websocketUrl,
