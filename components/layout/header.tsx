@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Button, Input, Badge } from "@/ui"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +9,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@/ui"
 import {
   Menu,
   Search,
