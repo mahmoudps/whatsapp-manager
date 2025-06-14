@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,8 +8,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Loader2, Send, Users, MessageSquare, MapPin, Contact } from "lucide-react"
-
-
 import { logger } from "@/lib/logger"
 import {
   Select,
@@ -43,7 +41,14 @@ interface MessageDialogProps {
   }) => void
 }
 
-export function MessageDialog({ open, onOpenChange, deviceId, deviceName, devices, onSendMessage }: MessageDialogProps) {
+export function MessageDialog({
+  open,
+  onOpenChange,
+  deviceId,
+  deviceName,
+  devices,
+  onSendMessage,
+}: MessageDialogProps) {
   const [recipient, setRecipient] = useState("")
   const [bulkRecipients, setBulkRecipients] = useState("")
   const [message, setMessage] = useState("")
@@ -54,10 +59,13 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
   const [scheduledAt, setScheduledAt] = useState("")
   const [vcard, setVcard] = useState("")
   const [contacts, setContacts] = useState<StoredContact[]>([])
-  const [selectedContactId, setSelectedContactId] = useState<string>()
+  const [selectedContactId, setSelectedContactId] = useState<number | undefined>()
+  const [latitude, setLatitude] = useState("")
+  const [longitude, setLongitude] = useState("")
 
   useEffect(() => {
-    const fetchContacts = async () => {
+    if (!open || (activeTab !== "contact" && activeTab !== "contacts")) return
+    ;(async () => {
       try {
         const res = await fetch("/api/contacts", { credentials: "include" })
         const data = await res.json()
@@ -67,42 +75,17 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       } catch (err) {
         logger.error("Error fetching contacts:", err as Error)
       }
-    }
-    if (open && activeTab === "contact" && contacts.length === 0) {
-      void fetchContacts()
-    }
-  const [latitude, setLatitude] = useState("")
-  const [longitude, setLongitude] = useState("")
-  const [contacts, setContacts] = useState<ContactType[]>([])
-  const [selectedContactId, setSelectedContactId] = useState<number | undefined>(undefined)
-
-  useEffect(() => {
-    if (!open || activeTab !== "contacts") return
-    ;(async () => {
-      try {
-        const res = await fetch("/api/contacts")
-        const data = await res.json()
-        if (data.success) {
-          setContacts(data.contacts || data.data || [])
-        }
-      } catch (err) {
-        logger.error("Error fetching contacts", err as Error)
-      }
     })()
   }, [open, activeTab])
 
   const handleSendMessage = async () => {
-    if (activeTab === "single" && (!recipient || !message)) {
-      return
-    }
-
-    if (activeTab === "bulk" && (!bulkRecipients || !message)) {
-      return
-    }
-
-    if (activeTab === "contact" && (!recipient || !vcard)) {
-    if (activeTab === "location" && (!recipient || !latitude || !longitude)) {
-    if (activeTab === "contacts" && (!selectedContactId || !message)) {
+    if (
+      (activeTab === "single" && (!recipient || (!message && !file))) ||
+      (activeTab === "bulk" && (!bulkRecipients || (!message && !file))) ||
+      (activeTab === "contact" && (!recipient || !vcard)) ||
+      (activeTab === "location" && (!recipient || !latitude || !longitude)) ||
+      (activeTab === "contacts" && (!selectedContactId || !message))
+    ) {
       return
     }
 
@@ -110,9 +93,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
 
     try {
       const targetDeviceId = selectedDeviceId ?? deviceId
-      if (!targetDeviceId) {
-        throw new Error("deviceId is required")
-      }
+      if (!targetDeviceId) throw new Error("deviceId is required")
 
       if (activeTab === "single") {
         await onSendMessage({
@@ -123,17 +104,6 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           file,
           scheduledAt,
         })
-      } else if (activeTab === "location") {
-        await onSendMessage({
-          deviceId: targetDeviceId,
-          recipient,
-          message,
-          isBulk: false,
-          latitude: Number(latitude),
-          longitude: Number(longitude),
-          isLocation: true,
-        })
-      } else {
       } else if (activeTab === "bulk") {
         const recipients = bulkRecipients
           .split("\n")
@@ -147,7 +117,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           file,
           scheduledAt,
         })
-      } else {
+      } else if (activeTab === "contact") {
         await onSendMessage({
           deviceId: targetDeviceId,
           recipient,
@@ -155,6 +125,18 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           isBulk: false,
           vcard,
           isContact: true,
+        })
+      } else if (activeTab === "location") {
+        await onSendMessage({
+          deviceId: targetDeviceId,
+          recipient,
+          message,
+          isBulk: false,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+          isLocation: true,
+        })
+      } else if (activeTab === "contacts") {
         const contact = contacts.find((c) => c.id === selectedContactId)
         if (!contact) throw new Error("contact not found")
         await onSendMessage({
@@ -167,7 +149,6 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
         })
       }
 
-      // إعادة تعيين النموذج
       setRecipient("")
       setBulkRecipients("")
       setMessage("")
@@ -177,7 +158,6 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setScheduledAt("")
       setLatitude("")
       setLongitude("")
-      setSelectedContactId(undefined)
       onOpenChange(false)
     } catch (error) {
       logger.error("Error sending message:", error as Error)
@@ -205,7 +185,9 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               </SelectTrigger>
               <SelectContent>
                 {devices.map((d) => (
-                  <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
+                  <SelectItem key={d.id} value={d.id.toString()}>
+                    {d.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -213,7 +195,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="single" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               رسالة فردية
@@ -225,18 +207,18 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             <TabsTrigger value="contact" className="flex items-center gap-2">
               <Contact className="h-4 w-4" />
               إرسال جهة اتصال
+            </TabsTrigger>
             <TabsTrigger value="location" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               إرسال موقع
             </TabsTrigger>
-          </TabsList>
             <TabsTrigger value="contacts" className="flex items-center gap-2">
               <Contact className="h-4 w-4" />
               من جهات الاتصال
-          </TabsTrigger>
-        </TabsList>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="single" className="space-y-4 mt-4">
+          <TabsContent value="single" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="recipient">رقم المستلم</Label>
               <Input
@@ -250,9 +232,9 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
                 أدخل رقم الهاتف بالصيغة الدولية بدون علامات أو مسافات (مثال: 966501234567)
               </p>
             </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="bulk" className="space-y-4 mt-4">
+          <TabsContent value="bulk" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="bulkRecipients">أرقام المستلمين</Label>
               <Textarea
@@ -263,30 +245,27 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
                 rows={5}
                 dir="ltr"
               />
-              <p className="text-xs text-gray-500">أدخل كل رقم في سطر منفصل بالصيغة الدولية (مثال: 966501234567)</p>
+              <p className="text-xs text-gray-500">أدخل كل رقم في سطر منفصل بالصغة الدولية (مثال: 966501234567)</p>
             </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="contacts" className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="contactSelect">اختر جهة الاتصال</Label>
-            <Select
-              value={selectedContactId?.toString()}
-              onValueChange={(val) => setSelectedContactId(Number(val))}
-            >
-              <SelectTrigger className="w-full mt-1">
-                <SelectValue placeholder="اختر جهة الاتصال" />
-              </SelectTrigger>
-              <SelectContent>
-                {contacts.map((c) => (
-                  <SelectItem key={c.id} value={c.id.toString()}>
-                    {c.name} - {c.phoneNumber}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </TabsContent>
+          <TabsContent value="contacts" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="contactSelect">اختر جهة الاتصال</Label>
+              <Select value={selectedContactId?.toString()} onValueChange={(val) => setSelectedContactId(Number(val))}>
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="اختر جهة الاتصال" />
+                </SelectTrigger>
+                <SelectContent>
+                  {contacts.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.name} - {c.phoneNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </TabsContent>
 
           <TabsContent value="location" className="space-y-4 mt-4">
             <div className="space-y-2">
@@ -332,20 +311,26 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             </div>
             <div className="space-y-2">
               <Label>اختر جهة الاتصال</Label>
-              <Select value={selectedContactId} onValueChange={(val) => {
-                setSelectedContactId(val)
-                const c = contacts.find((ct) => ct.id.toString() === val)
-                if (c) {
-                  const vc = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nTEL;type=CELL;type=VOICE;waid=${c.phoneNumber}:${c.phoneNumber}\nEND:VCARD`
-                  setVcard(vc)
-                }
-              }}>
+              <Select
+                value={selectedContactId?.toString()}
+                onValueChange={(val) => {
+                  const id = Number(val)
+                  setSelectedContactId(id)
+                  const c = contacts.find((ct) => ct.id === id)
+                  if (c) {
+                    const vc = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nTEL;type=CELL;type=VOICE;waid=${c.phoneNumber}:${c.phoneNumber}\nEND:VCARD`
+                    setVcard(vc)
+                  }
+                }}
+              >
                 <SelectTrigger className="w-full mt-1">
                   <SelectValue placeholder="اختر جهة الاتصال" />
                 </SelectTrigger>
                 <SelectContent>
                   {contacts.map((c) => (
-                    <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -390,7 +375,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               </div>
             </div>
           )}
-          </Tabs>
+        </Tabs>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSending}>
@@ -400,20 +385,11 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             onClick={handleSendMessage}
             disabled={
               isSending ||
-              (activeTab === "contact"
-                ? !recipient || !vcard
-                : activeTab === "single"
-                  ? !recipient || (!file && !message)
-                  : !bulkRecipients || (!file && !message))
-              (activeTab === "single" && (!recipient || !message)) ||
-              (activeTab === "bulk" && (!bulkRecipients || !message)) ||
-              (activeTab === "location" && (!recipient || !latitude || !longitude))
-              (!file && !message) ||
-              (activeTab === "single"
-                ? !recipient
-                : activeTab === "bulk"
-                ? !bulkRecipients
-                : !selectedContactId)
+              (activeTab === "single" && (!recipient || (!message && !file))) ||
+              (activeTab === "bulk" && (!bulkRecipients || (!message && !file))) ||
+              (activeTab === "contact" && (!recipient || !vcard)) ||
+              (activeTab === "location" && (!recipient || !latitude || !longitude)) ||
+              (activeTab === "contacts" && (!selectedContactId || !message))
             }
           >
             {isSending ? (
