@@ -1,180 +1,98 @@
 # WhatsApp Manager
 
-إدارة جلسات واتساب عبر واجهة ويب تعتمد على **Node.js** و **Next.js**.
-يُوفِّر المشروع لوحة تحكم، API REST، ودعم WebSocket للبث الفوري. يمكن تشغيله محليًا
-أو داخل حاويات Docker.
+إدارة متكاملة لجلسات واتساب عبر واجهة ويب مبنية على **Next.js** و **Node.js**. يهدف المشروع إلى تبسيط إدارة عدة أجهزة واتساب من خلال لوحة تحكم موحَّدة وواجهات برمجة REST، مع دعم اختياري للبث الفوري عبر WebSocket.
 
-## المزايا الرئيسية
-- إدارة عدة أجهزة واتساب من واجهة موحدة
-- واجهة مبنية بـ Next.js و React
-- قاعدة بيانات SQLite بسيطة مدمجة
-- خادم WebSocket اختياري للتنبيهات الفورية
-- سكربت CLI (`wa-manager.sh`) للتحكم السريع وتشغيل الحاويات
+## المزايا
+- تحكم في عدة جلسات واتساب من مكان واحد
+- واجهة تفاعلية مبنية بـ Next.js و React
+- API REST لإدارة الجلسات والأجهزة
+- قاعدة بيانات SQLite سهلة الإعداد
+- خادم WebSocket للبث الفوري (اختياري)
+- سكربت CLI لتبسيط تشغيل الحاويات وإدارة النظام
 
-## المتطلبات
- - Node.js **20** أو أحدث
-- Docker و Docker Compose (للتشغيل داخل الحاويات)
+## المتطلبات الأساسية
+- Node.js **20** أو أحدث
+- Docker وDocker Compose (للعمل داخل الحاويات)
 - Git
 
-## طريقة التثبيت السريع
-تأكد من استخدام **Node.js 20** أو أحدث. يحتوي المستودع على ملف
-`.nvmrc` يمكن استعماله مع `nvm` لاختيار الإصدار الصحيح.
+## التشغيل المحلي
 ```bash
 # استنساخ المستودع
 git clone <repository-url>
 cd whatsapp-manager
 
-# تأكد من استخدام Node.js إصدار 20 أو أحدث. يحدد الملف `.nvmrc` هذا الإصدار.
-
-# تثبيت الاعتماديات
+# تثبيت الاعتماديات (مع تخطي تنزيل المتصفح المدمج)
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 
 # تشغيل الخادم في وضع التطوير
 npm run dev
-# تشغيل خادم WebSocket
+# تشغيل خادم WebSocket (عند الحاجة)
 npm run ws
 ```
 
-**Note:** Install dependencies with `PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts` to skip Puppeteer downloads.
-The included `.npmrc` also sets `--legacy-peer-deps` to avoid peer-dependency conflicts with Jest packages.
-Make sure to copy the file when building Docker images so the flag is honored there.
-The `wa-manager install full` command now copies dotfiles (including `.npmrc`) to `/opt/whatsapp-manager` automatically.
-
-### Installing Chrome for Puppeteer
-
-If you skipped the bundled browser download using `PUPPETEER_SKIP_DOWNLOAD=1` you must install a compatible Chrome/Chromium before connecting devices:
-
+### تثبيت Chrome لـ Puppeteer
+عند استعمال `PUPPETEER_SKIP_DOWNLOAD=1` يجب تثبيت متصفح متوافق يدويًا:
 ```bash
 npx puppeteer browsers install chrome
 ```
+أو تحديد المسار عبر المتغير `PUPPETEER_EXECUTABLE_PATH`. في حال تركه فارغًا سيقوم السكربت بتنزيل نسخة متوافقة تلقائيًا عند التشغيل.
 
-Alternatively set `PUPPETEER_EXECUTABLE_PATH` to point to an existing Chrome binary.
-If left empty the start script will download a compatible browser automatically.
-
-If Chrome fails to start with a message about `chrome_crashpad_handler`,
-ensure the browser is up to date. If the problem persists you can pass extra
-flags via the `PUPPETEER_ARGS` variable, e.g. `PUPPETEER_ARGS=--disable-crashpad`
-alongside the `--disable-crash-reporter` flag already included by default.
-
-### Production
-
-For a production build you can use Docker:
-
+## Docker
+لإنشاء نسخة مهيأة للإنتاج:
 ```bash
 docker-compose up --build -d
 ```
-يُنشئ ملف `docker-compose.yml` حاوية للتطبيق وأخرى لـ Nginx. يتم تشغيل
-السكربت `start-production.sh` داخل الحاوية لتهيئة البيئة وتشغيل WebSocket
-بشكل افتراضي. يمكن تعطيله بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
+يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا. يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
 
-## إعداد ملف البيئة
-انسخ الملف المثال وعدّل القيم بما يناسبك:
+## إعداد متغيرات البيئة
+انسخ الملف الافتراضي ثم غيِّر القيم الحساسة قبل التشغيل:
 ```bash
 cp .env.example .env
 ```
-إذا لم تقم بإنشاء الملف يدويًا فسيقوم أمر `npm run build` تلقائيًا
-بإنشاء `.env` من المثال مع توليد قيمة عشوائية لـ `JWT_SECRET`.
-
-### تحذير أمني
-قبل تشغيل التطبيق في بيئة الإنتاج، تأكد من تغيير المتغيرات الافتراضية
-مثل `ADMIN_USERNAME`, `ADMIN_PASSWORD` و`JWT_SECRET` في ملف البيئة أو داخل
-`docker-compose.yml`. استخدام القيم الافتراضية قد يعرّض النظام للاختراق.
-يعتمد ملف `docker-compose.yml` على هذه المتغيرات بدون قيم افتراضية، لذلك
-يجب تعريفها في ملف `.env` أو في متغيرات النظام قبل تشغيل الحاويات.
-### شرح المتغيرات
-- `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم ويجب
-  تحديدهما قبل تشغيل الحاويات.
-- `JWT_SECRET`: مفتاح التوقيع للرموز ويعد متغيراً إلزامياً للإنتاج.
-- `JWT_EXPIRES_IN` و`REFRESH_TOKEN_EXPIRES_IN`: مدة صلاحية التوكنات.
-- `PORT` و`HOST`: إعدادات الخادم الرئيسي.
-- `DATABASE_PATH`: مسار قاعدة البيانات (الافتراضي `./data/whatsapp_manager.db`).
-  أثناء بناء صورة Docker يتم تعيين المتغير إلى مسار مؤقت داخل `/tmp`
-  لتجنب تعارضات SQLite، ويُعاد إلى المسار الافتراضي عند التشغيل.
+أهم المتغيرات:
+- `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم.
+- `JWT_SECRET`: مفتاح توقيع التوكنات.
+- `DATABASE_PATH`: مسار قاعدة البيانات.
 - `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
-- `NEXT_PUBLIC_WEBSOCKET_URL`: (اختياري) عنوان الاتصال من الواجهة. عند تركه فارغًا يقوم التطبيق بتوليد العنوان اعتمادًا على الدومين الحالي ويضيف المسار `/socket.io`.
-- `LOG_LEVEL`: مستوى السجلات (`debug`، `info`، إلخ).
-- `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
-- `WHATSAPP_SERVER_PORT`: المنفذ الداخلي لعميل WhatsApp (الافتراضي 3002).
-- `PUPPETEER_EXECUTABLE_PATH`: مسار ملف Chrome/Chromium المستخدم من Puppeteer.
-اتركه فارغاً ليتم تنزيل متصفح مدمج تلقائياً عند التشغيل.
-- `PUPPETEER_ARGS`: قائمة اختيارات إضافية لـ Chromium مفصولة بفواصل. يمكن
-استخدامها لحل مشاكل التشغيل على بعض الأنظمة كتعطيل Crashpad مثلاً.
+- بقية المتغيرات موثقة داخل `.env.example` ويمكن تعديلها حسب الحاجة.
 
-بقية المتغيرات موثقة داخل الملف `.env.example` ويمكن تعديلها حسب الحاجة.
-
-## الإعداد الأولي
-بعد ضبط ملف البيئة يمكن تشغيل الأمر التالي مرة واحدة لإنشاء ملف `.env`
-وقاعدة البيانات الافتراضية:
+بعد ضبط الملف يمكن تشغيل:
 ```bash
 npm run setup
 ```
-يولّد الأمر القيم اللازمة في `.env` عند الحاجة ثم يهيئ قاعدة البيانات مع
-الجداول الافتراضية ومستخدم الإدارة.
+لتهيئة قاعدة البيانات وإنشاء القيم المبدئية.
 
-## استخدام سكربت CLI
-يحتوي المستودع على سكربت `wa-manager.sh` الذي يسهل إدارة الخدمة.
-للجعل متاحًا على مستوى النظام:
+## سكربت CLI
+يوفر السكربت `wa-manager.sh` أوامر سريعة لإدارة الخدمة. بعد نسخه إلى المسار المناسب:
 ```bash
 sudo cp wa-manager.sh /usr/local/bin/wa-manager
 sudo chmod +x /usr/local/bin/wa-manager
 ```
-بعدها يمكن تشغيل الأوامر:
+أبرز الأوامر:
 ```bash
 wa-manager start    # تشغيل الحاويات
 wa-manager stop     # إيقافها
 wa-manager status   # حالة التشغيل
+wa-manager install full  # تثبيت النظام مع Nginx وSSL
 ```
-استخدم `wa-manager install full` لإعداد Nginx وشهادة SSL تلقائيًا.
-ينسخ هذا الأمر المشروع إلى المسار `/opt/whatsapp-manager` وينشئ ملف `.env`
-بإعدادات افتراضية تتضمن تفعيل خادم WebSocket. بعد انتهاء التثبيت يمكنك
-استخدام `wa-manager env` لعرض الملف والتحقق من الإعدادات، خصوصًا إذا رغبت
-في تعيين `NEXT_PUBLIC_WEBSOCKET_URL` يدويًا. في أغلب الحالات يفضل تركه
-فارغًا ليستخدم التطبيق الدومين الحالي تلقائيًا. بعد أي تعديل على الملف يفضل
-إعادة تشغيل الحاويات عبر `wa-manager restart` لتطبيق التغييرات.
-
-## أوامر Docker و PM2 الشائعة
-لإدارة الحاويات يمكن استخدام الأوامر التالية:
-```bash
-docker-compose up -d      # تشغيل الحاويات في الخلفية
-docker-compose stop       # إيقافها
-docker-compose logs -f    # متابعة السجلات
-```
-
-مع PM2:
-```bash
-pm2 start ecosystem.config.js       # تشغيل التطبيق
-pm2 status                          # عرض الحالة
-pm2 restart whatsapp-manager-app    # إعادة التشغيل
-pm2 logs whatsapp-manager-app       # متابعة السجلات
-```
-
-## نظرة على الواجهة الرسومية والـ CLI
-واجهة الويب توفِّر لوحة تحكم لإدارة الأجهزة والرسائل كما في الصورة التالية:
-
-![واجهة الويب](docs/images/web-ui.svg)
-
-يمكن تنفيذ معظم العمليات عبر سطر الأوامر أيضًا:
-
-![مثال CLI](docs/images/cli-example.svg)
 
 ## تشغيل الاختبارات
-تتطلب الاختبارات وجود جميع الاعتماديات ونسخة من ملف `.env.test`:
 ```bash
 cp .env.test .env
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
 npm test
 ```
-قد تفشل الاختبارات في البيئات غير المهيأة بالكامل لعدم توفر بعض التبعيات.
+قد تتطلب بعض الاختبارات توفر تبعيات إضافية حسب البيئة.
 
-## التحقق من التنسيق (Lint)
-لتشغيل فحص ESLint واستكشاف المشكلات المحتملة:
+## فحص الكود
+لتشغيل ESLint:
 ```bash
 npm run lint
 ```
-لإصلاح المشاكل تلقائياً:
+ولإصلاح المشاكل تلقائيًا:
 ```bash
 npm run lint:fix
 ```
 
-## رخصة الاستخدام
+## الرخصة
 [MIT](LICENSE)
