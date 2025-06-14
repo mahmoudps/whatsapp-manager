@@ -46,7 +46,13 @@ export interface Message {
 }
 
 export type MessageStatus = "pending" | "sent" | "delivered" | "failed" | "scheduled"
-export type MessageType = "text" | "image" | "video" | "audio" | "document"
+export type MessageType =
+  | "text"
+  | "image"
+  | "video"
+  | "audio"
+  | "document"
+  | "contact"
 
 export interface IncomingMessage {
   id: number

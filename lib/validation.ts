@@ -32,6 +32,9 @@ const scheduledMessageSchema = z.object({
   sendAt: z.string(),
 })
 
+const contactMessageSchema = z.object({
+  recipient: z.string().min(10, "رقم المستقبل مطلوب"),
+  vcard: z.string().min(1, "بيانات جهة الاتصال مطلوبة"),
 const locationMessageSchema = z.object({
   recipient: z.string().min(10, "رقم المستقبل مطلوب"),
   latitude: z.number(),
@@ -98,6 +101,11 @@ export const ValidationSchemas = {
     }
   },
 
+  contactMessage: (data: any) => {
+    try {
+      return contactMessageSchema.parse(data)
+    } catch (error) {
+      logger.error("Contact message validation error:", error as Error)
   locationMessage: (data: any) => {
     try {
       return locationMessageSchema.parse(data)
@@ -135,5 +143,6 @@ export {
   userSchema,
   mediaMessageSchema,
   scheduledMessageSchema,
+  contactMessageSchema,
   locationMessageSchema,
 }

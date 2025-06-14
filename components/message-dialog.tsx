@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Loader2, Send, Users, MessageSquare, MapPin, Contact } from "lucide-react"
 
+
 import { logger } from "@/lib/logger"
 import {
   Select,
@@ -18,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Device } from "@/lib/types"
-import type { Contact as ContactType } from "@/lib/database"
+import type { Contact as StoredContact } from "@/lib/database"
 
 interface MessageDialogProps {
   open: boolean
@@ -34,6 +35,8 @@ interface MessageDialogProps {
     isBulk: boolean
     file?: File | null
     scheduledAt?: string
+    vcard?: string
+    isContact?: boolean
     latitude?: number
     longitude?: number
     isLocation?: boolean
@@ -49,6 +52,25 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | undefined>(deviceId ?? devices?.[0]?.id)
   const [file, setFile] = useState<File | null>(null)
   const [scheduledAt, setScheduledAt] = useState("")
+  const [vcard, setVcard] = useState("")
+  const [contacts, setContacts] = useState<StoredContact[]>([])
+  const [selectedContactId, setSelectedContactId] = useState<string>()
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const res = await fetch("/api/contacts", { credentials: "include" })
+        const data = await res.json()
+        if (res.ok && data.success) {
+          setContacts(data.contacts)
+        }
+      } catch (err) {
+        logger.error("Error fetching contacts:", err as Error)
+      }
+    }
+    if (open && activeTab === "contact" && contacts.length === 0) {
+      void fetchContacts()
+    }
   const [latitude, setLatitude] = useState("")
   const [longitude, setLongitude] = useState("")
   const [contacts, setContacts] = useState<ContactType[]>([])
@@ -78,6 +100,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       return
     }
 
+    if (activeTab === "contact" && (!recipient || !vcard)) {
     if (activeTab === "location" && (!recipient || !latitude || !longitude)) {
     if (activeTab === "contacts" && (!selectedContactId || !message)) {
       return
@@ -125,6 +148,13 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           scheduledAt,
         })
       } else {
+        await onSendMessage({
+          deviceId: targetDeviceId,
+          recipient,
+          message: "",
+          isBulk: false,
+          vcard,
+          isContact: true,
         const contact = contacts.find((c) => c.id === selectedContactId)
         if (!contact) throw new Error("contact not found")
         await onSendMessage({
@@ -141,6 +171,8 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setRecipient("")
       setBulkRecipients("")
       setMessage("")
+      setVcard("")
+      setSelectedContactId(undefined)
       setFile(null)
       setScheduledAt("")
       setLatitude("")
@@ -190,6 +222,9 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               <Users className="h-4 w-4" />
               رسائل متعددة
             </TabsTrigger>
+            <TabsTrigger value="contact" className="flex items-center gap-2">
+              <Contact className="h-4 w-4" />
+              إرسال جهة اتصال
             <TabsTrigger value="location" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               إرسال موقع
@@ -284,34 +319,78 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             </div>
           </TabsContent>
 
-          <div className="space-y-2 mt-4">
-            <Label htmlFor="message">نص الرسالة</Label>
-          <Textarea
-            id="message"
-            placeholder="اكتب نص الرسالة هنا..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={5}
-          />
-          <div className="flex justify-between">
-            <p className="text-xs text-gray-500">يمكنك كتابة حتى 1000 حرف</p>
-            <p className="text-xs text-gray-500">{message.length} / 1000</p>
-          </div>
-          <div className="space-y-2 mt-2">
-            <Label htmlFor="file">مرفق (اختياري)</Label>
-            <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-          </div>
-          <div className="space-y-2 mt-2">
-            <Label htmlFor="schedule">موعد الإرسال</Label>
-            <Input
-              id="schedule"
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-            />
-          </div>
-        </div>
-      </Tabs>
+          <TabsContent value="contact" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="recipientContact">رقم المستلم</Label>
+              <Input
+                id="recipientContact"
+                placeholder="أدخل رقم الهاتف كاملاً"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>اختر جهة الاتصال</Label>
+              <Select value={selectedContactId} onValueChange={(val) => {
+                setSelectedContactId(val)
+                const c = contacts.find((ct) => ct.id.toString() === val)
+                if (c) {
+                  const vc = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nTEL;type=CELL;type=VOICE;waid=${c.phoneNumber}:${c.phoneNumber}\nEND:VCARD`
+                  setVcard(vc)
+                }
+              }}>
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="اختر جهة الاتصال" />
+                </SelectTrigger>
+                <SelectContent>
+                  {contacts.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vcard">بيانات vCard</Label>
+              <Textarea
+                id="vcard"
+                value={vcard}
+                onChange={(e) => setVcard(e.target.value)}
+                rows={5}
+              />
+            </div>
+          </TabsContent>
+
+          {activeTab !== "contact" && (
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="message">نص الرسالة</Label>
+              <Textarea
+                id="message"
+                placeholder="اكتب نص الرسالة هنا..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={5}
+              />
+              <div className="flex justify-between">
+                <p className="text-xs text-gray-500">يمكنك كتابة حتى 1000 حرف</p>
+                <p className="text-xs text-gray-500">{message.length} / 1000</p>
+              </div>
+              <div className="space-y-2 mt-2">
+                <Label htmlFor="file">مرفق (اختياري)</Label>
+                <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              </div>
+              <div className="space-y-2 mt-2">
+                <Label htmlFor="schedule">موعد الإرسال</Label>
+                <Input
+                  id="schedule"
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          </Tabs>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSending}>
@@ -321,6 +400,11 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             onClick={handleSendMessage}
             disabled={
               isSending ||
+              (activeTab === "contact"
+                ? !recipient || !vcard
+                : activeTab === "single"
+                  ? !recipient || (!file && !message)
+                  : !bulkRecipients || (!file && !message))
               (activeTab === "single" && (!recipient || !message)) ||
               (activeTab === "bulk" && (!bulkRecipients || !message)) ||
               (activeTab === "location" && (!recipient || !latitude || !longitude))

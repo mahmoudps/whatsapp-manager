@@ -844,6 +844,52 @@ class WhatsAppClientManager extends EventEmitter {
     }
   }
 
+  async sendContactMessage(
+    deviceId: number,
+    recipient: string,
+    vcard: string,
+  ): Promise<boolean> {
+    try {
+      const whatsappClient = this.clients.get(deviceId);
+      if (!whatsappClient || whatsappClient.status !== "connected") {
+        throw new Error(`Device ${deviceId} not connected`);
+      }
+      if (!this.isValidPhoneNumber(recipient)) {
+        throw new Error("Invalid phone number format");
+      }
+
+      const formattedNumber = this.formatPhoneNumber(recipient);
+      const sentMessage = await whatsappClient.client.sendMessage(
+        formattedNumber,
+        vcard,
+        { parseVCards: true },
+      );
+
+      whatsappClient.lastActivity = new Date();
+      db.createMessage({
+        deviceId,
+        recipient: formattedNumber,
+        message: vcard,
+        status: "sent",
+        sentAt: new Date().toISOString(),
+        messageType: "contact",
+        messageId: sentMessage.id.id,
+      });
+      return true;
+    } catch (error) {
+      logger.error(`Error sending contact message from device ${deviceId}:`, error);
+      db.createMessage({
+        deviceId,
+        recipient,
+        message: vcard,
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+        messageType: "contact",
+      });
+      return false;
+    }
+  }
+
   // معالج طوابير الرسائل
   private startMessageProcessor(): void {
     this.messageProcessingInterval = setInterval(async () => {
