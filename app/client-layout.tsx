@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { I18nProvider } from "@/lib/i18n";
 import { useCurrentLocale } from "@/lib/use-locale";
 
-import "./globals.css";
 import "../styles/globals.css";
 
 export default function ClientLayout({
