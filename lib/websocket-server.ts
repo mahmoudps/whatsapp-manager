@@ -6,6 +6,10 @@ import helmet from "helmet"
 import compression from "compression"
 import jwt from "jsonwebtoken"
 import { logger } from "./logger"
+import path from "path"
+import dotenv from "dotenv"
+
+dotenv.config({ path: path.join(__dirname, "../.env") })
 import { JWT_SECRET } from "./config"
 
 // إعدادات البيئة
