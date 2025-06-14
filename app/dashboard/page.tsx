@@ -162,7 +162,7 @@ export default function DashboardPage() {
         )}
 
         {/* إحصائيات سريعة */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">إجمالي الأجهزة</CardTitle>
@@ -215,7 +215,7 @@ export default function DashboardPage() {
             <CardDescription>حالة النظام والخدمات</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <h3 className="font-medium mb-2">مدة التشغيل</h3>
                 <p className="text-2xl font-bold text-green-600">{stats.system.uptime}</p>
