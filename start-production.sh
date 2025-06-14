@@ -66,12 +66,13 @@ if [ "$ENABLE_WEBSOCKET" = "true" ]; then
     fi
   fi
   echo "📡 تشغيل WebSocket Server..."
-  node ./dist/websocket-server.js &
+  node ./dist/websocket-server.js >logs/websocket.log 2>&1 &
   WS_PID=$!
   echo "WebSocket Server PID: $WS_PID"
   sleep 1
   if ! kill -0 "$WS_PID" 2>/dev/null; then
-    echo "❌ تعذر تشغيل WebSocket Server" >&2
+    echo "❌ تعذر تشغيل WebSocket Server"
+    tail -n 20 logs/websocket.log
     exit 1
   fi
   trap 'echo "📡 إيقاف WebSocket Server..."; kill $WS_PID' EXIT
