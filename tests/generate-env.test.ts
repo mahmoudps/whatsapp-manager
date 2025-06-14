@@ -1,33 +1,39 @@
 import { expect, test } from '@jest/globals';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import { execFileSync } from 'child_process';
+import { mkdtempSync, copyFileSync, readFileSync, existsSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import * as path from 'path';
+import { spawnSync } from 'child_process';
 
 const repoRoot = path.resolve(__dirname, '..');
+const script = path.join(repoRoot, 'scripts', 'generate-env.js');
+const exampleSrc = path.join(repoRoot, '.env.example');
 
-function runGenerateEnv(cwd: string) {
-  const scriptPath = path.join(repoRoot, 'scripts', 'generate-env.js');
-  execFileSync('node', [scriptPath], { cwd });
+function runScript(cwd: string) {
+  const result = spawnSync('node', [script], { cwd, encoding: 'utf8' });
+  if (result.error) throw result.error;
+  expect(result.status).toBe(0);
 }
 
 test('generate-env creates .env with new JWT_SECRET', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'env-test-'));
-  const exampleSource = path.join(repoRoot, '.env.example');
-  const exampleDest = path.join(tmpDir, '.env.example');
+  const dir = mkdtempSync(path.join(tmpdir(), 'envtest-'));
+  try {
+    const exampleDest = path.join(dir, '.env.example');
+    copyFileSync(exampleSrc, exampleDest);
 
-  fs.copyFileSync(exampleSource, exampleDest);
+    runScript(dir);
 
-  runGenerateEnv(tmpDir);
+    const envPath = path.join(dir, '.env');
+    expect(existsSync(envPath)).toBe(true);
 
-  const envPath = path.join(tmpDir, '.env');
-  expect(fs.existsSync(envPath)).toBe(true);
+    const envContent = readFileSync(envPath, 'utf8');
+    const exampleContent = readFileSync(exampleDest, 'utf8');
 
-  const exampleContent = fs.readFileSync(exampleSource, 'utf8');
-  const exampleSecret = /^JWT_SECRET=(.*)$/m.exec(exampleContent)?.[1];
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  const secret = /^JWT_SECRET=(.*)$/m.exec(envContent)?.[1];
+    const envSecret = envContent.match(/^JWT_SECRET=(.*)$/m)?.[1];
+    const exampleSecret = exampleContent.match(/^JWT_SECRET=(.*)$/m)?.[1];
 
-  expect(secret).toBeDefined();
-  expect(secret).not.toBe(exampleSecret);
+    expect(envSecret).toBeDefined();
+    expect(envSecret).not.toBe(exampleSecret);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
