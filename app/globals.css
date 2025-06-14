@@ -182,8 +182,8 @@ body {
   }
 
   .status-connecting {
-    background-color: rgb(59 130 246); /* tailwind blue-500 */
-    color: white;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
     animation: pulse 2s infinite;
   }
 
