@@ -49,6 +49,7 @@ npx puppeteer browsers install chrome
 ```
 
 Alternatively set `PUPPETEER_EXECUTABLE_PATH` to point to an existing Chrome binary.
+If left empty the start script will download a compatible browser automatically.
 
 If Chrome fails to start with a message about `chrome_crashpad_handler`,
 ensure the browser is up to date and try launching with the `--disable-crash-reporter`
@@ -94,6 +95,7 @@ cp .env.example .env
 - `RESTART_POLICY`: سياسة إعادة تشغيل الحاويات عند استخدام Docker.
 - `WHATSAPP_SERVER_PORT`: المنفذ الداخلي لعميل WhatsApp (الافتراضي 3002).
 - `PUPPETEER_EXECUTABLE_PATH`: مسار ملف Chrome/Chromium المستخدم من Puppeteer.
+اتركه فارغاً ليتم تنزيل متصفح مدمج تلقائياً عند التشغيل.
 
 بقية المتغيرات موثقة داخل الملف `.env.example` ويمكن تعديلها حسب الحاجة.
 

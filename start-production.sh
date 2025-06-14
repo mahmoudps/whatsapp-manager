@@ -31,6 +31,12 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 # تأكد من توفر متصفح Chrome أو Chromium لـ Puppeteer
+if [ -n "$PUPPETEER_EXECUTABLE_PATH" ] && [ ! -x "$PUPPETEER_EXECUTABLE_PATH" ]; then
+  echo "⚠️  Browser not found at $PUPPETEER_EXECUTABLE_PATH"
+  echo "⬇️  Falling back to bundled Chromium"
+  unset PUPPETEER_EXECUTABLE_PATH
+fi
+
 if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
   PUPPETEER_CACHE_DIR=${PUPPETEER_CACHE_DIR:-/app/.cache/puppeteer}
   export PUPPETEER_CACHE_DIR
