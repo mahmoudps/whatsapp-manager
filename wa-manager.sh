@@ -386,7 +386,7 @@ services:
     build: .
     image: whatsapp-manager:latest
     container_name: whatsapp-manager
-    restart: unless-stopped
+    restart: \${RESTART_POLICY:-unless-stopped}
     ports:
       - "127.0.0.1:3000:3000"
       - "127.0.0.1:3001:3001"
@@ -420,7 +420,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: whatsapp-manager-nginx
-    restart: unless-stopped
+    restart: \${RESTART_POLICY:-unless-stopped}
     ports:
       - "80:80"
       - "443:443"
@@ -904,7 +904,11 @@ update_system() {
 
     # إعادة إنشاء المفاتيح المفقودة في .env
     echo -e "${YELLOW}⏳ التحقق من ملف .env وإنشاء المفاتيح الناقصة...${NC}"
-    node scripts/generate-env.js
+    if npm run --silent setup >/dev/null 2>&1; then
+        npm run setup
+    else
+        node scripts/generate-env.js
+    fi
 
     # إعادة بناء الصور
     echo -e "${YELLOW}⏳ إعادة بناء الصور...${NC}"
