@@ -8,6 +8,7 @@ import fs from "fs";
 import { EventEmitter } from "events";
 import {
   PUPPETEER_EXECUTABLE_PATH,
+  PUPPETEER_ARGS,
   ENABLE_WEBSOCKET,
   AUTO_CONNECT_DEVICES,
 } from "./config";
@@ -237,6 +238,11 @@ class WhatsAppClientManager extends EventEmitter {
         ],
         timeout: 60000,
       };
+
+      if (PUPPETEER_ARGS) {
+        const extraArgs = PUPPETEER_ARGS.split(',').map((a) => a.trim()).filter(Boolean);
+        puppeteerOptions.args.push(...extraArgs);
+      }
 
       if (PUPPETEER_EXECUTABLE_PATH) {
         puppeteerOptions.executablePath = PUPPETEER_EXECUTABLE_PATH;
