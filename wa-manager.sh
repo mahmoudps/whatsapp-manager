@@ -370,7 +370,7 @@ services:
     build: .
     image: whatsapp-manager:latest
     container_name: whatsapp-manager
-    restart: unless-stopped
+    restart: \${RESTART_POLICY:-unless-stopped}
     ports:
       - "127.0.0.1:3000:3000"
       - "127.0.0.1:3001:3001"
@@ -404,7 +404,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: whatsapp-manager-nginx
-    restart: unless-stopped
+    restart: \${RESTART_POLICY:-unless-stopped}
     ports:
       - "80:80"
       - "443:443"
