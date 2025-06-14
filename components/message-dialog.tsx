@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
-import { Loader2, Send, Users, MessageSquare } from "lucide-react"
+import { Loader2, Send, Users, MessageSquare, Contact } from "lucide-react"
 import { logger } from "@/lib/logger"
 import {
   Select,
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Device } from "@/lib/types"
+import type { Contact as ContactType } from "@/lib/database"
 
 interface MessageDialogProps {
   open: boolean
@@ -44,6 +45,23 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | undefined>(deviceId ?? devices?.[0]?.id)
   const [file, setFile] = useState<File | null>(null)
   const [scheduledAt, setScheduledAt] = useState("")
+  const [contacts, setContacts] = useState<ContactType[]>([])
+  const [selectedContactId, setSelectedContactId] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    if (!open || activeTab !== "contacts") return
+    ;(async () => {
+      try {
+        const res = await fetch("/api/contacts")
+        const data = await res.json()
+        if (data.success) {
+          setContacts(data.contacts || data.data || [])
+        }
+      } catch (err) {
+        logger.error("Error fetching contacts", err as Error)
+      }
+    })()
+  }, [open, activeTab])
 
   const handleSendMessage = async () => {
     if (activeTab === "single" && (!recipient || !message)) {
@@ -51,6 +69,10 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
     }
 
     if (activeTab === "bulk" && (!bulkRecipients || !message)) {
+      return
+    }
+
+    if (activeTab === "contacts" && (!selectedContactId || !message)) {
       return
     }
 
@@ -71,7 +93,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           file,
           scheduledAt,
         })
-      } else {
+      } else if (activeTab === "bulk") {
         const recipients = bulkRecipients
           .split("\n")
           .map((r) => r.trim())
@@ -84,6 +106,17 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
           file,
           scheduledAt,
         })
+      } else {
+        const contact = contacts.find((c) => c.id === selectedContactId)
+        if (!contact) throw new Error("contact not found")
+        await onSendMessage({
+          deviceId: targetDeviceId,
+          recipient: contact.phoneNumber,
+          message,
+          isBulk: false,
+          file,
+          scheduledAt,
+        })
       }
 
       // إعادة تعيين النموذج
@@ -92,6 +125,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
       setMessage("")
       setFile(null)
       setScheduledAt("")
+      setSelectedContactId(undefined)
       onOpenChange(false)
     } catch (error) {
       logger.error("Error sending message:", error as Error)
@@ -127,7 +161,7 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="single" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               رسالة فردية
@@ -136,9 +170,13 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               <Users className="h-4 w-4" />
               رسائل متعددة
             </TabsTrigger>
-          </TabsList>
+            <TabsTrigger value="contacts" className="flex items-center gap-2">
+              <Contact className="h-4 w-4" />
+              من جهات الاتصال
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="single" className="space-y-4 mt-4">
+        <TabsContent value="single" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="recipient">رقم المستلم</Label>
               <Input
@@ -152,9 +190,9 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
                 أدخل رقم الهاتف بالصيغة الدولية بدون علامات أو مسافات (مثال: 966501234567)
               </p>
             </div>
-          </TabsContent>
+        </TabsContent>
 
-          <TabsContent value="bulk" className="space-y-4 mt-4">
+        <TabsContent value="bulk" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="bulkRecipients">أرقام المستلمين</Label>
               <Textarea
@@ -167,7 +205,28 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
               />
               <p className="text-xs text-gray-500">أدخل كل رقم في سطر منفصل بالصيغة الدولية (مثال: 966501234567)</p>
             </div>
-          </TabsContent>
+        </TabsContent>
+
+        <TabsContent value="contacts" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="contactSelect">اختر جهة الاتصال</Label>
+            <Select
+              value={selectedContactId?.toString()}
+              onValueChange={(val) => setSelectedContactId(Number(val))}
+            >
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="اختر جهة الاتصال" />
+              </SelectTrigger>
+              <SelectContent>
+                {contacts.map((c) => (
+                  <SelectItem key={c.id} value={c.id.toString()}>
+                    {c.name} - {c.phoneNumber}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </TabsContent>
 
           <div className="space-y-2 mt-4">
             <Label htmlFor="message">نص الرسالة</Label>
@@ -207,7 +266,11 @@ export function MessageDialog({ open, onOpenChange, deviceId, deviceName, device
             disabled={
               isSending ||
               (!file && !message) ||
-              (activeTab === "single" ? !recipient : !bulkRecipients)
+              (activeTab === "single"
+                ? !recipient
+                : activeTab === "bulk"
+                ? !bulkRecipients
+                : !selectedContactId)
             }
           >
             {isSending ? (

@@ -6,7 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button, Card } from "@/ui"
-import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X, LogOut, User } from "lucide-react"
+import { LayoutDashboard, Smartphone, MessageSquare, Settings, Activity, Menu, X, LogOut, User, Contact } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Notifications } from "@/components/notifications"
 import { logger } from "@/lib/logger"
@@ -20,6 +20,7 @@ const navigation = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "devices", href: "/devices", icon: Smartphone },
   { key: "messages", href: "/messages", icon: MessageSquare },
+  { key: "contacts", href: "/contacts", icon: Contact },
   { key: "diagnostics", href: "/diagnostics", icon: Activity },
   { key: "settings", href: "/settings", icon: Settings },
 ]
