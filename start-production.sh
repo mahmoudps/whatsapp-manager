@@ -4,9 +4,18 @@ echo "🚀 بدء تشغيل WhatsApp Manager في وضع الإنتاج..."
 
 # تحميل المتغيرات من الملف .env إن وجد
 if [ -f .env ]; then
-  set -o allexport
-  . ./.env
-  set +o allexport
+  while IFS='=' read -r key value; do
+    # تخطي الأسطر الفارغة أو المسبوقة بملاحظات
+    if [[ -z "$key" || "$key" =~ ^# ]]; then
+      continue
+    fi
+    # قم بتصدير المتغير فقط إذا لم يكن محددًا مسبقًا
+    # إزالة أي محارف CR قد تتسبب بعدم تطابق القيم
+    value="${value//$'\r'/}"
+    if [ -z "${!key+x}" ]; then
+      export "$key"="${value}"
+    fi
+  done < .env
 fi
 
 if [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
