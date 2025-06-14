@@ -72,9 +72,21 @@ sudo chmod +x /usr/local/bin/wa-manager
 ```bash
 wa-manager start    # تشغيل الحاويات
 wa-manager stop     # إيقافها
+wa-manager restart  # إعادة تشغيل النظام
 wa-manager status   # حالة التشغيل
 wa-manager install full  # تثبيت النظام مع Nginx وSSL
 ```
+
+يُستعمل الأمر `wa-manager restart` لإعادة تشغيل جميع الحاويات وخادم WebSocket عند الحاجة.
+
+### التحقق من خادم WebSocket
+بعد التشغيل يمكن التأكد من أن الخادم يعمل عبر تنفيذ:
+```bash
+curl http://localhost:3000/api/socket/status
+# أو
+curl http://localhost:3001/health
+```
+ستحصل على استجابة JSON تحتوي على المعرف `whatsapp-manager-ws` مما يدل على أن الخادم قيد التشغيل.
 
 ## تشغيل الاختبارات
 ```bash
