@@ -40,6 +40,7 @@ let createContactPost: any;
 let whatsappManagerMock: any;
 let statsGet: any;
 let devicesGet: any;
+let socketStatusGet: any;
 
 beforeAll(async () => {
   process.env.DATABASE_PATH = ':memory:';
@@ -56,6 +57,7 @@ beforeAll(async () => {
   analyticsGet = (await import('../app/api/analytics/route')).GET;
   statsGet = (await import('../app/api/stats/route')).GET;
   devicesGet = (await import('../app/api/devices/route')).GET;
+  socketStatusGet = (await import('../app/api/socket/status/route')).GET;
 
   createContactPost = (await import('../app/api/contacts/route')).POST;
 });
@@ -139,4 +141,34 @@ test('GET /api/devices returns devices array', async () => {
   expect(res.status).toBe(200);
   expect(data.success).toBe(true);
   expect(Array.isArray(data.devices)).toBe(true);
+});
+
+test('GET /api/socket/status reports running when health check succeeds', async () => {
+  process.env.ENABLE_WEBSOCKET = 'true';
+  process.env.WEBSOCKET_PORT = '1234';
+  const mockFetch = global.fetch as jest.Mock;
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    json: async () => ({ stats: { socketIOConnections: 5 } }),
+  });
+
+  const res = await socketStatusGet();
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.status).toBe('running');
+  expect(data.clients).toBe(5);
+});
+
+test('GET /api/socket/status reports error when health check fails', async () => {
+  process.env.ENABLE_WEBSOCKET = 'true';
+  process.env.WEBSOCKET_PORT = '1234';
+  const mockFetch = global.fetch as jest.Mock;
+  mockFetch.mockRejectedValueOnce(new Error('connection refused'));
+
+  const res = await socketStatusGet();
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.status).toBe('error');
+  expect(data.message).toMatch(/connection refused/i);
 });
