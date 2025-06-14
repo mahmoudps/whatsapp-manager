@@ -37,6 +37,7 @@ export const AUTO_CONNECT_DEVICES = process.env.AUTO_CONNECT_DEVICES === "true"
 // إعدادات WhatsApp
 export const WHATSAPP_SERVER_PORT = Number.parseInt(process.env.WHATSAPP_SERVER_PORT || "3002")
 export const PUPPETEER_EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH
+export const PUPPETEER_ARGS = process.env.PUPPETEER_ARGS
 
 // إعدادات السجلات
 export const LOG_LEVEL = process.env.LOG_LEVEL || "debug"

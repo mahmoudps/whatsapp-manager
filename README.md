@@ -52,8 +52,9 @@ Alternatively set `PUPPETEER_EXECUTABLE_PATH` to point to an existing Chrome bin
 If left empty the start script will download a compatible browser automatically.
 
 If Chrome fails to start with a message about `chrome_crashpad_handler`,
-ensure the browser is up to date and try launching with the `--disable-crash-reporter`
-flag (already included by default in the application configuration).
+ensure the browser is up to date. If the problem persists you can pass extra
+flags via the `PUPPETEER_ARGS` variable, e.g. `PUPPETEER_ARGS=--disable-crashpad`
+alongside the `--disable-crash-reporter` flag already included by default.
 
 ### Production
 
@@ -96,6 +97,8 @@ cp .env.example .env
 - `WHATSAPP_SERVER_PORT`: المنفذ الداخلي لعميل WhatsApp (الافتراضي 3002).
 - `PUPPETEER_EXECUTABLE_PATH`: مسار ملف Chrome/Chromium المستخدم من Puppeteer.
 اتركه فارغاً ليتم تنزيل متصفح مدمج تلقائياً عند التشغيل.
+- `PUPPETEER_ARGS`: قائمة اختيارات إضافية لـ Chromium مفصولة بفواصل. يمكن
+استخدامها لحل مشاكل التشغيل على بعض الأنظمة كتعطيل Crashpad مثلاً.
 
 بقية المتغيرات موثقة داخل الملف `.env.example` ويمكن تعديلها حسب الحاجة.
 
