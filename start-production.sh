@@ -67,8 +67,14 @@ fi
 # تشغيل WebSocket Server
 if [ "$ENABLE_WEBSOCKET" = "true" ]; then
   if [ ! -f ./dist/websocket-server.js ]; then
-    echo "❌ dist/websocket-server.js غير موجود. تأكد من تشغيل 'npm run build:ws' أثناء بناء الصورة" >&2
-    exit 1
+    echo "⚠️  dist/websocket-server.js غير موجود. سيتم محاولة إنشائه..." >&2
+    npm run build:ws >/tmp/build_ws.log 2>&1
+    status=$?
+    if [ $status -ne 0 ] || [ ! -f ./dist/websocket-server.js ]; then
+      echo "❌ فشل إنشاء dist/websocket-server.js" >&2
+      cat /tmp/build_ws.log >&2
+      exit 1
+    fi
   fi
   echo "📡 تشغيل WebSocket Server..."
   node ./dist/websocket-server.js &
