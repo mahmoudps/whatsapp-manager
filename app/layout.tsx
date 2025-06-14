@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Tajawal, Inter } from "next/font/google"
 import ClientLayout from "./client-layout"
+import { cookies } from "next/headers"
 
 export const metadata: Metadata = {
   title: "WhatsApp Manager",
@@ -34,9 +35,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = cookies().get("NEXT_LOCALE")?.value || "ar"
+  const dir = locale === "ar" ? "rtl" : "ltr"
   return (
-    <html lang="ar" dir="rtl">
-      <body className={`${tajawal.className} ${inter.className}`}> 
+    <html lang={locale} dir={dir}>
+      <body className={`${tajawal.className} ${inter.className}`}>
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

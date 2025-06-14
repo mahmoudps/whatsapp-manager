@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { useTranslation } from "@/lib/i18n"
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -14,6 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,21 +52,21 @@ export default function Login() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-md w-full bg-white rounded-lg shadow-lg p-8"
       >
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">تسجيل الدخول</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">{t('login.title')}</h1>
 
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              اسم المستخدم
+              {t('login.username')}
             </label>
             <input
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="اسم المستخدم"
+              placeholder={t('login.username')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -72,7 +74,7 @@ export default function Login() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              كلمة المرور
+              {t('login.password')}
             </label>
             <div className="relative">
               <input
@@ -80,7 +82,7 @@ export default function Login() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="كلمة المرور"
+                placeholder={t('login.password')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                 required
               />
@@ -100,7 +102,7 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+            {loading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
       </motion.div>

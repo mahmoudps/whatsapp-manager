@@ -1,0 +1,42 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "devices": "Devices",
+    "messages": "Messages",
+    "diagnostics": "Diagnostics",
+    "settings": "Settings"
+  },
+  "system": {
+    "status": "System Operational",
+    "all_services": "All services available"
+  },
+  "admin": "Admin",
+  "logout": "Log out",
+  "login": {
+    "title": "Sign in",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in..."
+  },
+  "home": {
+    "heading": "WhatsApp Manager",
+    "subheading": "Comprehensive platform to manage devices and messages with bulk send and scheduling support",
+    "login": "Log in",
+    "dashboard": "Dashboard"
+  },
+  "features": {
+    "devices_title": "Device Management",
+    "devices_desc": "Add multiple devices and monitor their status easily",
+    "bulk_title": "Bulk Sending",
+    "bulk_desc": "Send messages to many contacts at once",
+    "schedule_title": "Schedule Messages",
+    "schedule_desc": "Set automatic send times for messages",
+    "messages_title": "Message Management",
+    "messages_desc": "Track sent messages and replies",
+    "diagnostics_title": "Instant Diagnostics",
+    "diagnostics_desc": "Monitor system status and alerts",
+    "stats_title": "Statistics & Reports",
+    "stats_desc": "Detailed analytics on performance and usage"
+  }
+}
