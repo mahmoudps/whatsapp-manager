@@ -72,7 +72,8 @@ if [ "$ENABLE_WEBSOCKET" = "true" ]; then
   node ./dist/websocket-server.js &
   WS_PID=$!
   echo "WebSocket Server PID: $WS_PID"
-  sleep 1
+  # انتظر قليلاً لإعطاء الخادم فرصة للبدء
+  sleep 0.5
   if ! kill -0 "$WS_PID" 2>/dev/null; then
     echo "❌ WebSocket Server لم يبدأ" >&2
     exit 1
