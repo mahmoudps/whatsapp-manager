@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, type ReactNode, useCallback } from "react"
 import { useWebSocket } from "@/lib/use-websocket"
 
 export interface IWebSocketContext {
@@ -30,8 +30,15 @@ const WebSocketContext = createContext<IWebSocketContext>({
 export function WebSocketProvider({ children }: { children: ReactNode }) {
   const ws = useWebSocket({})
 
+  const handleOn = useCallback(
+    (event: string, handler: (...args: any[]) => void) => ws.on(event, handler),
+    [ws],
+  )
+
   return (
-    <WebSocketContext.Provider value={ws}>{children}</WebSocketContext.Provider>
+    <WebSocketContext.Provider value={{ ...ws, on: handleOn }}>
+      {children}
+    </WebSocketContext.Provider>
   )
 }
 

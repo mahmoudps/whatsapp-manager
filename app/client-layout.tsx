@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { AppProvider } from "@/lib/app-context";
-import { WebSocketProvider } from "@/lib/websocket-context";
+import { WebSocketProvider } from "@/lib/websocket-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { I18nProvider } from "@/lib/i18n";
 import { useCurrentLocale } from "@/lib/use-locale";

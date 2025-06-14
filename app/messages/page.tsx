@@ -16,7 +16,7 @@ import {
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
-import { useWebSocketContext } from "@/lib/websocket-context"
+import { useWebSocketContext } from "@/lib/websocket-provider"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
