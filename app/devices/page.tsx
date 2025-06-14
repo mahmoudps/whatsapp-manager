@@ -257,7 +257,8 @@ export default function DevicesPage() {
       | { deviceId: number; formData: FormData; isMedia: true },
   ) => {
     try {
-      let url = data.isBulk
+      const isBulk = "isBulk" in data && data.isBulk
+      let url = isBulk
         ? `/api/devices/${data.deviceId}/send-bulk`
         : `/api/devices/${data.deviceId}/send`
 
@@ -303,7 +304,7 @@ export default function DevicesPage() {
           }
         } else if (data.scheduledAt) {
           payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
-        } else if (data.isBulk) {
+        } else if (isBulk) {
           payload = { recipients: data.recipients, message: data.message }
         } else {
           payload = { recipient: data.recipient, message: data.message }
