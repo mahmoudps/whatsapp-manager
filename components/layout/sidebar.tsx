@@ -129,7 +129,13 @@ export function Sidebar({ onClose }: SidebarProps) {
           </div>
         </div>
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose} className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="lg:hidden"
+            aria-label="إغلاق القائمة"
+          >
             <X className="h-4 w-4" />
           </Button>
         )}

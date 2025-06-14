@@ -237,6 +237,7 @@ export default function SettingsPage() {
                 size="sm"
                 className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowApiToken(!showApiToken)}
+                aria-label={showApiToken ? "إخفاء الرمز" : "إظهار الرمز"}
               >
                 {showApiToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
@@ -275,6 +276,7 @@ export default function SettingsPage() {
                     size="sm"
                     className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    aria-label={showCurrentPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                   >
                     {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -297,6 +299,7 @@ export default function SettingsPage() {
                     size="sm"
                     className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowNewPassword(!showNewPassword)}
+                    aria-label={showNewPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                   >
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -329,6 +332,7 @@ export default function SettingsPage() {
                     size="sm"
                     className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
