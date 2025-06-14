@@ -14,6 +14,8 @@ const fs = require("fs")
 const cors = require("cors")
 const compression = require("compression")
 const helmet = require("helmet")
+const cookieParser = require("cookie-parser")
+const csurf = require("csurf")
 const { CORS_ORIGIN } = require("./lib/config")
 const { logger } = require("./lib/logger")
 
@@ -58,6 +60,24 @@ app.prepare().then(() => {
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
   )
+
+  // معالجة ملفات الكوكيز وتوليد رمز CSRF
+  server.use(cookieParser())
+  const csrfProtection = csurf({ cookie: true })
+  server.use(csrfProtection)
+
+  // مسار لإرجاع رمز CSRF للواجهة
+  server.get("/api/csrf-token", (req, res) => {
+    res.json({ csrfToken: req.csrfToken() })
+  })
+
+  // معالجة أخطاء CSRF
+  server.use((err, req, res, next) => {
+    if (err.code === "EBADCSRFTOKEN") {
+      return res.status(403).json({ error: "Invalid CSRF token" })
+    }
+    next(err)
+  })
 
   // معالجة الطلبات الثابتة
   server.use("/media", express.static(mediaDir))
