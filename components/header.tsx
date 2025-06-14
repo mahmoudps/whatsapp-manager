@@ -40,7 +40,12 @@ export function Header() {
         {/* Right side - User menu and theme toggle */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="relative"
+            aria-label="عرض الإشعارات"
+          >
             <Bell className="h-5 w-5" />
             <Badge
               variant="destructive"
@@ -55,8 +60,12 @@ export function Header() {
 
           {/* User Menu */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full"
+                aria-label="قائمة المستخدم"
+              >
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                     {user.username.charAt(0).toUpperCase()}

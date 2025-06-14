@@ -253,7 +253,13 @@ export function DeviceCard({
               </motion.div>
             )}
 
-            <Button onClick={() => onDelete(device.id)} disabled={isLoading} variant="destructive" size="sm">
+            <Button
+              onClick={() => onDelete(device.id)}
+              disabled={isLoading}
+              variant="destructive"
+              size="sm"
+              aria-label="حذف الجهاز"
+            >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             </Button>
           </div>

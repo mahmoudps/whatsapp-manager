@@ -91,6 +91,7 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 focus:outline-none"
                 tabIndex={0}
+                aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>

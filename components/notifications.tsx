@@ -54,6 +54,7 @@ export function Notifications() {
               size="sm"
               className="h-6 w-6 p-0"
               onClick={() => removeNotification(notification.id)}
+              aria-label="إغلاق الإشعار"
             >
               <X className="h-4 w-4" />
             </Button>
