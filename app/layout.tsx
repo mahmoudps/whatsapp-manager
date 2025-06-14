@@ -30,12 +30,13 @@ const inter = Inter({
   weight: ["400", "500", "700"],
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const locale = cookies().get("NEXT_LOCALE")?.value || "ar"
+  const cookieStore = await cookies()
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "ar"
   const dir = locale === "ar" ? "rtl" : "ltr"
   return (
     <html lang={locale} dir={dir}>
