@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "npm ci && npm test",
-    "ws": "ts-node lib/websocket-server.ts",
+    "ws": "ts-node -P tsconfig.ws.json lib/websocket-server.ts",
     "build:ws": "tsc -p tsconfig.ws.json",
     "ws:prod": "node dist/websocket-server.js"
   },
