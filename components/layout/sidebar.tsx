@@ -19,6 +19,8 @@ import {
   Zap,
   Shield,
   HelpCircle,
+  CalendarClock,
+  Send,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -47,6 +49,22 @@ const navigation = [
     icon: MessageSquare,
     badge: null,
     description: "عرض وإدارة الرسائل",
+  },
+  {
+    name: "الإرسال الجماعي",
+    href: "#",
+    icon: Send,
+    badge: "قريباً",
+    description: "هذه الميزة غير مفعلة حالياً",
+    disabled: true,
+  },
+  {
+    name: "جدولة الرسائل",
+    href: "#",
+    icon: CalendarClock,
+    badge: "قريباً",
+    description: "هذه الميزة غير مفعلة حالياً",
+    disabled: true,
   },
   {
     name: "التشخيص",
@@ -123,6 +141,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           {navigation.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
+            const isDisabled = item.disabled
 
             return (
               <motion.div
@@ -132,17 +151,52 @@ export function Sidebar({ onClose }: SidebarProps) {
                 onHoverStart={() => setHoveredItem(item.name)}
                 onHoverEnd={() => setHoveredItem(null)}
               >
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                    "hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20",
-                    isActive
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
-                      : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white",
-                  )}
-                  onClick={onClose}
-                >
+                {isDisabled ? (
+                  <div
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 cursor-not-allowed opacity-60",
+                      "bg-gray-100 dark:bg-gray-800",
+                    )}
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span>{item.name}</span>
+                        {item.badge && (
+                          <Badge variant="secondary" className="text-xs">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </div>
+                      <AnimatePresence>
+                        {hoveredItem === item.name && (
+                          <motion.p
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                          >
+                            {item.description}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                      "hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20",
+                      isActive
+                        ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                        : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white",
+                    )}
+                    onClick={onClose}
+                  >
                   <div
                     className={cn(
                       "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
@@ -178,7 +232,8 @@ export function Sidebar({ onClose }: SidebarProps) {
                   <ChevronRight
                     className={cn("h-4 w-4 transition-transform", isActive ? "rotate-90" : "group-hover:translate-x-1")}
                   />
-                </Link>
+                  </Link>
+                )}
               </motion.div>
             )
           })}
