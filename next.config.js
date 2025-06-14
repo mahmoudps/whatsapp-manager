@@ -6,6 +6,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  i18n: {
+    locales: ["ar", "en"],
+    defaultLocale: "ar",
+  },
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       // إضافة externals للمكتبات التي تعمل فقط على الخادم

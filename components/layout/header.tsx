@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Button, Input, Badge } from "@/ui"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +9,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@/ui"
 import {
   Menu,
   Search,
@@ -72,7 +70,13 @@ export function Header({ onMenuClick }: HeaderProps) {
     >
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-8">
         {/* Mobile Menu Button */}
-        <Button variant="ghost" size="sm" className="lg:hidden" onClick={onMenuClick}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="lg:hidden"
+          onClick={onMenuClick}
+          aria-label="فتح القائمة الجانبية"
+        >
           <Menu className="h-5 w-5" />
         </Button>
 
@@ -155,6 +159,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             size="sm"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="h-9 w-9"
+            aria-label="تبديل الثيم"
           >
             <motion.div initial={false} animate={{ rotate: theme === "dark" ? 180 : 0 }} transition={{ duration: 0.3 }}>
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -164,7 +169,12 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative h-9 w-9">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative h-9 w-9"
+                aria-label="عرض الإشعارات"
+              >
                 <Bell className="h-4 w-4" />
                 {notifications.length > 0 && (
                   <motion.div
@@ -208,7 +218,11 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Button
+                variant="ghost"
+                className="relative h-9 w-9 rounded-full"
+                aria-label="قائمة المستخدم"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" alt="User" />
                   <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">

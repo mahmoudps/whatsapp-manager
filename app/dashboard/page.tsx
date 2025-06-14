@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@/ui"
 import { Activity, MessageSquare, Smartphone, Users, RefreshCw, AlertCircle } from "lucide-react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { logger } from "@/lib/logger"
