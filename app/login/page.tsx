@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
@@ -14,8 +14,22 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [csrfToken, setCsrfToken] = useState("")
   const router = useRouter()
   const { t } = useTranslation()
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const res = await fetch("/api/csrf-token")
+        const data = await res.json()
+        setCsrfToken(data.csrfToken)
+      } catch (err) {
+        console.error("Failed to fetch CSRF token", err)
+      }
+    }
+    fetchToken()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +41,7 @@ export default function Login() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({ username, password }),
       })
