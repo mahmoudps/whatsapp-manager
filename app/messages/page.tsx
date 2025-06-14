@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,7 @@ import { useWebSocketContext } from "@/lib/websocket-context"
 import { MainLayout } from "@/components/layout/main-layout"
 import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn, getDefaultWebSocketUrl } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { logger } from "@/lib/logger"
 
 export default function MessagesPage() {
@@ -26,8 +26,6 @@ export default function MessagesPage() {
   const { actions } = useApp()
   const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
-  const ws = useRef<WebSocket | null>(null)
-  const reconnectAttempts = useRef(0)
 
 
   const fetchMessages = useCallback(async () => {
@@ -83,109 +81,49 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchMessages()
     fetchDevices()
-    return () => {
-      if (ws.current) {
-        ws.current.close()
-      }
-    }
   }, [deviceFilter, fetchMessages, fetchDevices])
 
   useEffect(() => {
-    const connectWebSocket = () => {
-      const wsUrl =
-        process.env.NEXT_PUBLIC_WEBSOCKET_URL || getDefaultWebSocketUrl()
-      logger.info("Attempting to connect to WebSocket", { url: wsUrl, attempt: reconnectAttempts.current + 1 })
-
-      ws.current = new WebSocket(wsUrl)
-
-      ws.current.onopen = () => {
-        logger.info("WebSocket connected successfully")
-        reconnectAttempts.current = 0 // Reset attempts on successful connection
+    const offStatus = on("device_status_changed", (data: any) => {
+      const { deviceId, status } = data || {}
+      if (deviceId && status) {
+        setDevices((prev) => prev.map((d) => (d.id === deviceId ? { ...d, status } : d)))
+        actions.addNotification({
+          type: "success",
+          title: "تحديث الأجهزة",
+          message: `تم تحديث حالة الجهاز ${deviceId}`,
+        })
       }
+    })
 
-      ws.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          const eventType = data.event || data.type
-          logger.debug("WebSocket message received", { event: eventType })
-
-          switch (eventType) {
-            case "device_status_changed": {
-              const { deviceId, status } = data.data || data
-              if (deviceId && status) {
-                setDevices((prev) =>
-                  prev.map((d) =>
-                    d.id === deviceId ? { ...d, status } : d,
-                  ),
-                )
-                actions.addNotification({
-                  type: "success",
-                  title: "تحديث الأجهزة",
-                  message: `تم تحديث حالة الجهاز ${deviceId}`,
-                })
-              }
-              break
-            }
-            case "message_sent": {
-              const payload = data.data || {}
-              const deviceId = data.deviceId || payload.deviceId
-              if (deviceId) {
-                const newMessage: Message = {
-                  id: Date.now(),
-                  deviceId,
-                  recipient: payload.recipient,
-                  message: payload.message,
-                  status: "sent",
-                  sentAt: payload.timestamp || new Date().toISOString(),
-                  messageType: payload.messageType || "text",
-                }
-                setMessages((prev) => [newMessage, ...prev])
-              }
-              break
-            }
-            case "message_received": {
-              const payload = data.data || {}
-              actions.addNotification({
-                type: "info",
-                title: `رسالة واردة من ${payload.sender}`,
-                message: payload.message,
-              })
-              break
-            }
-            default:
-              break
-          }
-        } catch (error) {
-          logger.error("Error parsing WebSocket message", error)
+    const offSent = on("message_sent", (payload: any) => {
+      const deviceId = payload.deviceId
+      if (deviceId) {
+        const newMessage: Message = {
+          id: Date.now(),
+          deviceId,
+          recipient: payload.recipient,
+          message: payload.message,
+          status: "sent",
+          sentAt: payload.timestamp || new Date().toISOString(),
+          messageType: payload.messageType || "text",
         }
+        setMessages((prev) => [newMessage, ...prev])
       }
+    })
 
-      ws.current.onclose = (event) => {
-        logger.warn("WebSocket disconnected", { code: event.code, reason: event.reason })
-        if (reconnectAttempts.current < 5) {
-          // Limit reconnection attempts
-          const delay = Math.pow(2, reconnectAttempts.current) * 1000 // Exponential backoff
-          logger.info(`Attempting to reconnect in ${delay / 1000}s`)
-          setTimeout(connectWebSocket, delay)
-          reconnectAttempts.current++
-        } else {
-          logger.error("Max reconnection attempts reached. Please check server and network.")
-        }
-      }
+    const offReceived = on("message_received", (payload: any) => {
+      actions.addNotification({
+        type: "info",
+        title: `رسالة واردة من ${payload.sender}`,
+        message: payload.message,
+      })
+    })
 
-      ws.current.onerror = (error) => {
-        logger.error("WebSocket error", error)
-        // onclose will be called, triggering reconnection logic
-        // ws.current?.close() // No need to close here, onclose handles it
-      }
-    }
-
-    connectWebSocket()
-    
     return () => {
-      if (ws.current) {
-        ws.current.close()
-      }
+      offStatus && offStatus()
+      offSent && offSent()
+      offReceived && offReceived()
     }
   }, [on, actions])
 
