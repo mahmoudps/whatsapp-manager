@@ -11,7 +11,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "production": "npm run build && npm start",
+    "production": "npm run build && npm run build:ws && npm start",
     "lint": "next lint --dir .",
     "lint:fix": "next lint --dir . --fix",
     "test": "jest",
