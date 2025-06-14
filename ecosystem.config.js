@@ -43,7 +43,8 @@ module.exports = {
     },
     {
       name: "whatsapp-manager-websocket",
-      script: "dist/websocket-server.js",
+      script: "npm",
+      args: "run ws:prod",
       cwd: process.cwd(),
       instances: 1,
       exec_mode: "fork",
