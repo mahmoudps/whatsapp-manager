@@ -883,7 +883,11 @@ update_system() {
     # سحب التحديثات
     echo -e "${YELLOW}⏳ سحب التحديثات...${NC}"
     git pull
-    
+
+    # إعادة إنشاء المفاتيح المفقودة في .env
+    echo -e "${YELLOW}⏳ التحقق من ملف .env وإنشاء المفاتيح الناقصة...${NC}"
+    node scripts/generate-env.js
+
     # إعادة بناء الصور
     echo -e "${YELLOW}⏳ إعادة بناء الصور...${NC}"
     $DOCKER_COMPOSE_CMD build --no-cache
