@@ -22,6 +22,7 @@ import type { Message, Device } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { logger } from "@/lib/logger"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -31,6 +32,7 @@ export default function MessagesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [deviceFilter, setDeviceFilter] = useState<number | "all">("all")
   const { actions } = useApp()
+  const { toast } = useToast()
   const { on } = useWebSocketContext()
   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
 
@@ -214,6 +216,9 @@ export default function MessagesPage() {
     scheduledAt?: string
     vcard?: string
     isContact?: boolean
+    latitude?: number
+    longitude?: number
+    isLocation?: boolean
   }) => {
     try {
       let url = data.isBulk
@@ -224,6 +229,8 @@ export default function MessagesPage() {
         url = `/api/devices/${data.deviceId}/send-contact`
       } else if (data.file) {
         url = `/api/devices/${data.deviceId}/send-media`
+      } else if (data.isLocation) {
+        url = `/api/devices/${data.deviceId}/send-location`
       } else if (data.scheduledAt) {
         url = `/api/devices/${data.deviceId}/schedule`
       }
@@ -237,6 +244,13 @@ export default function MessagesPage() {
           data: await fileToBase64(data.file),
           mimeType: data.file.type,
           caption: data.message,
+        }
+      } else if (data.isLocation) {
+        payload = {
+          recipient: data.recipient,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          description: data.message,
         }
       } else if (data.scheduledAt) {
         payload = { recipient: data.recipient, message: data.message, sendAt: data.scheduledAt }
@@ -258,17 +272,16 @@ export default function MessagesPage() {
         throw new Error(resp.error || "فشل إرسال الرسالة")
       }
 
-      actions.addNotification({
-        type: "success",
+      toast({
         title: "نجح",
-        message: resp.message || "تم إرسال الرسالة",
+        description: resp.message || "تم إرسال الرسالة",
       })
     } catch (err) {
       logger.error("Error sending message:", err as Error)
-      actions.addNotification({
-        type: "error",
+      toast({
+        variant: "destructive",
         title: "خطأ",
-        message: "فشل في إرسال الرسالة",
+        description: "فشل في إرسال الرسالة",
       })
     }
   }
