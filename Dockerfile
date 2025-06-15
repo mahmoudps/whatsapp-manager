@@ -47,7 +47,7 @@ COPY package.json package-lock.json .npmrc tsconfig.ws.json tsconfig.json ./
 ENV NODE_ENV=development
 # Use a temporary database during build to avoid SQLite locking errors
 ENV DATABASE_PATH=/tmp/whatsapp_manager_build.db
-RUN npm ci && npm cache clean --force
+RUN npm ci --ignore-scripts && npm cache clean --force
 
 # Copy the rest of the application source
 COPY . .
