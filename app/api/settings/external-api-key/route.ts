@@ -2,13 +2,13 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { db } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAuth(request)
   if (!auth.success) {
-    return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 })
+    return buildUnauthorizedResponse(auth)
   }
   await db.ensureInitialized()
   const value = db.getSetting("external_api_key")
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await verifyAuth(request)
   if (!auth.success) {
-    return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 })
+    return buildUnauthorizedResponse(auth)
   }
   const { value } = await request.json()
   if (!value || typeof value !== "string") {

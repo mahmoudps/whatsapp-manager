@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 import { type NextRequest, NextResponse } from "next/server"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
 import fs from "fs/promises"
 import path from "path"
@@ -17,7 +17,7 @@ export async function POST(
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     const deviceId = Number.parseInt(id)
