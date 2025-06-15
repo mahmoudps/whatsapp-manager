@@ -76,7 +76,7 @@
     "input-otp": "^1.4.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.513.0",
-    "metro4": "^5.0.0-rc0",
+    "metro4": "4.5.0",
     "next": "^15.3.3",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.4",
