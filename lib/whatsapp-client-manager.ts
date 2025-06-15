@@ -82,18 +82,37 @@ class WhatsAppClientManager extends EventEmitter {
       // إيقاف العمليات المرتبطة بهذا الجهاز
       const { exec } = require("child_process");
       await new Promise<void>((resolve) => {
-        exec(`pkill -f "device_${deviceId}"`, (error: any) => {
-          if (
-            error &&
-            error.message &&
-            !error.message.includes("No such process")
-          ) {
-            logger.warn(
-              `Warning killing processes for device ${deviceId}:`,
-              error.message,
-            );
+        exec(`pkill --signal 0 -f "device_${deviceId}"`, (checkErr: any) => {
+          if (checkErr) {
+            if (checkErr.code === 1) {
+              return resolve(); // no matching process
+            }
+            if (
+              checkErr.message &&
+              !checkErr.message.includes("No such process")
+            ) {
+              logger.warn(
+                `Warning checking processes for device ${deviceId}:`,
+                checkErr.message,
+              );
+            }
+            return resolve();
           }
-          resolve();
+
+          exec(`pkill -f "device_${deviceId}"`, (killErr: any) => {
+            if (
+              killErr &&
+              killErr.code !== 1 &&
+              killErr.message &&
+              !killErr.message.includes("No such process")
+            ) {
+              logger.warn(
+                `Warning killing processes for device ${deviceId}:`,
+                killErr.message,
+              );
+            }
+            resolve();
+          });
         });
       });
 
