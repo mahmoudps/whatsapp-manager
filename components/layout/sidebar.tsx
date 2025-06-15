@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button, Badge, Separator } from "@/components/ui"
 import {
@@ -50,19 +50,17 @@ const navigation = [
   },
   {
     name: "الإرسال الجماعي",
-    href: "#",
+    href: "/messages?tab=bulk",
     icon: Send,
-    badge: "قريباً",
-    description: "هذه الميزة غير مفعلة حالياً",
-    disabled: true,
+    badge: "جديد",
+    description: "أرسل رسائل لعدة جهات في وقت واحد",
   },
   {
     name: "جدولة الرسائل",
-    href: "#",
+    href: "/messages?tab=schedule",
     icon: CalendarClock,
-    badge: "قريباً",
-    description: "هذه الميزة غير مفعلة حالياً",
-    disabled: true,
+    badge: "جديد",
+    description: "حدد موعد الإرسال التلقائي للرسائل",
   },
   {
     name: "التشخيص",
@@ -103,6 +101,8 @@ const quickActions = [
 
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentTab = searchParams.get("tab")
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   return (
@@ -143,7 +143,15 @@ export function Sidebar({ onClose }: SidebarProps) {
       <nav className="flex-1 space-y-2 p-4 sm:p-6">
         <div className="space-y-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.href
+            const hrefTab = item.href.startsWith("/messages?tab=")
+              ? item.href.split("tab=")[1]
+              : null
+            let isActive = pathname === item.href
+            if (hrefTab) {
+              isActive = pathname === "/messages" && currentTab === hrefTab
+            } else if (item.href === "/messages") {
+              isActive = pathname === "/messages" && !currentTab
+            }
             const Icon = item.icon
             const isDisabled = item.disabled
 
