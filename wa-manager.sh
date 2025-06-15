@@ -77,6 +77,21 @@ ensure_openssl() {
     fi
 }
 
+# التأكد من وجود ملف .env عند الحاجة
+ensure_env_file() {
+    if [ ! -f ".env" ]; then
+        if [ -f "scripts/generate-env.js" ]; then
+            node scripts/generate-env.js >/dev/null 2>&1
+        elif [ -f ".env.example" ]; then
+            cp .env.example .env
+        elif npm run --silent setup >/dev/null 2>&1; then
+            true
+        else
+            touch .env
+        fi
+    fi
+}
+
 # عرض المساعدة
 show_help() {
     echo -e "${BLUE}=== WhatsApp Manager CLI ===${NC}"
@@ -677,7 +692,10 @@ clean_system() {
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
     fi
-    
+
+    # ضمان وجود ملف .env لتفادي رسائل الخطأ
+    ensure_env_file
+
     # تحديد ملف البيئة لاستخدامه مع Docker Compose لتفادي التحذيرات
     if [ -f ".env" ]; then
         $DOCKER_COMPOSE_CMD --env-file .env down
@@ -768,8 +786,12 @@ uninstall_system() {
     # التحقق من المسار
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
+    fi
 
-        # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
+    # ضمان وجود ملف .env لتفادي رسائل الخطأ
+    ensure_env_file
+
+    # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
         if [ -f ".env" ]; then
             $DOCKER_COMPOSE_CMD --env-file .env down -v
         elif [ -f ".env.example" ]; then
@@ -789,7 +811,6 @@ uninstall_system() {
         # حذف المجلد
         cd /
         rm -rf "$DEFAULT_PATH"
-    fi
     
     # إزالة الأمر من النظام
     if [ -f "/usr/local/bin/wa-manager" ]; then
