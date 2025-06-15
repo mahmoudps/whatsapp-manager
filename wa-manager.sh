@@ -404,7 +404,8 @@ http {
         }
         
         # WebSocket endpoint (preferred path)
-        location /ws/socket.io/ {
+        # Accept `/ws/socket.io` with or without a trailing slash
+        location ^~ /ws/socket.io {
             proxy_pass http://whatsapp-manager:3001/socket.io/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
