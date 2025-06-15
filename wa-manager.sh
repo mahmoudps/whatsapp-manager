@@ -445,6 +445,11 @@ EOL
     # الحصول على شهادة SSL
     echo -e "${YELLOW}⏳ الحصول على شهادة SSL...${NC}"
     certbot certonly --webroot -w $DEFAULT_PATH/certbot-webroot -d $DOMAIN_NAME --email $EMAIL --agree-tos --no-eff-email
+    certbot_status=$?
+    if [ $certbot_status -ne 0 ]; then
+        echo -e "${RED}❌ فشل إنشاء شهادة SSL. تأكد من صحة إعدادات الدومين وفتح المنافذ 80 و443.${NC}"
+        exit 1
+    fi
     
     # نسخ شهادات SSL
     mkdir -p $DEFAULT_PATH/ssl/live/$DOMAIN_NAME
