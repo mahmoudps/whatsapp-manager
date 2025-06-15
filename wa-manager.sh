@@ -80,17 +80,18 @@ ensure_openssl() {
 # التأكد من وجود ملف .env عند الحاجة
 ensure_env_file() {
     if [ ! -f ".env" ]; then
-        if npm run --silent setup >/dev/null 2>&1; then
-            npm run --silent setup >/dev/null 2>&1
-        elif [ -f "scripts/generate-env.js" ]; then
+        if [ -f "scripts/generate-env.js" ]; then
             node scripts/generate-env.js >/dev/null 2>&1
         elif [ -f ".env.example" ]; then
             cp .env.example .env
+        elif npm run --silent setup >/dev/null 2>&1; then
+            true
         else
             touch .env
         fi
     fi
 }
+
 
 # عرض المساعدة
 show_help() {
@@ -786,31 +787,32 @@ uninstall_system() {
     # التحقق من المسار
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
-
-        # ضمان وجود ملف .env لتفادي رسائل الخطأ
-        ensure_env_file
-
-        # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
-        if [ -f ".env" ]; then
-            $DOCKER_COMPOSE_CMD --env-file .env down -v
-        elif [ -f ".env.example" ]; then
-            $DOCKER_COMPOSE_CMD --env-file .env.example down -v
-        else
-            $DOCKER_COMPOSE_CMD down -v
-        fi
-
-        # تنظيف الموارد المتبقية
-        docker container prune -f
-        docker image prune -af
-        docker network prune -f
-
-        # حذف الصور المخصصة إن وجدت
-        docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
-
-        # حذف المجلد
-        cd /
-        rm -rf "$DEFAULT_PATH"
     fi
+
+    # ضمان وجود ملف .env لتفادي رسائل الخطأ
+    ensure_env_file
+
+
+    # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
+    if [ -f ".env" ]; then
+        $DOCKER_COMPOSE_CMD --env-file .env down -v
+    elif [ -f ".env.example" ]; then
+        $DOCKER_COMPOSE_CMD --env-file .env.example down -v
+    else
+        $DOCKER_COMPOSE_CMD down -v
+    fi
+
+    # تنظيف الموارد المتبقية
+    docker container prune -f
+    docker image prune -af
+    docker network prune -f
+
+    # حذف الصور المخصصة إن وجدت
+    docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
+
+    # حذف المجلد
+    cd /
+    rm -rf "$DEFAULT_PATH"
     
     # إزالة الأمر من النظام
     if [ -f "/usr/local/bin/wa-manager" ]; then
