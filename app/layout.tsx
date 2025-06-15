@@ -1,10 +1,9 @@
 import type React from "react"
-import type { Metadata } from "next"
 import { Tajawal, Inter } from "next/font/google"
 import ClientLayout from "./client-layout"
 import { cookies } from "next/headers"
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "WhatsApp Manager",
   description: "Professional WhatsApp Management System",
   generator: "Next.js",
