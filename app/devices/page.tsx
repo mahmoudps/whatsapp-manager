@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,7 +32,8 @@ export default function DevicesPage() {
   const [activeDevice, setActiveDevice] = useState<{ id: number; name: string } | null>(null)
   const { actions } = useApp()
   const { toast } = useToast()
-  const { on } = useWebSocketContext()
+  const { on, emit, connected } = useWebSocketContext()
+  const joinedDevicesRef = useRef<Set<number>>(new Set())
   const fetchDevices = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -91,6 +92,25 @@ export default function DevicesPage() {
       offQR && offQR()
     }
   }, [on])
+
+  useEffect(() => {
+    if (!connected) return
+    devices.forEach((device) => {
+      if (!joinedDevicesRef.current.has(device.id)) {
+        emit("join_device", device.id)
+        joinedDevicesRef.current.add(device.id)
+      }
+    })
+  }, [connected, devices, emit])
+
+  useEffect(() => {
+    return () => {
+      joinedDevicesRef.current.forEach((id) => {
+        emit("leave_device", id)
+      })
+      joinedDevicesRef.current.clear()
+    }
+  }, [emit])
   const handleAddDevice = async () => {
     if (!newDeviceName.trim()) {
       actions.addNotification({
@@ -165,6 +185,10 @@ export default function DevicesPage() {
           d.id === deviceId ? { ...d, status: "connecting" } : d,
         ),
       )
+      if (connected) {
+        emit("join_device", deviceId)
+        joinedDevicesRef.current.add(deviceId)
+      }
     } catch (err) {
       logger.error("Error connecting device:", err as Error)
       const errorMsg =
@@ -198,6 +222,10 @@ export default function DevicesPage() {
           d.id === deviceId ? { ...d, status: "disconnected" } : d,
         ),
       )
+      if (connected) {
+        emit("leave_device", deviceId)
+        joinedDevicesRef.current.delete(deviceId)
+      }
     } catch (err) {
       logger.error("Error disconnecting device:", err as Error)
       toast({
