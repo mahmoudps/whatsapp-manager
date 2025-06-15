@@ -163,7 +163,10 @@ class WhatsAppClientManager extends EventEmitter {
   }
 
   // إنشاء عميل WhatsApp
-  async createClient(deviceId: number, deviceName: string): Promise<boolean> {
+  async createClient(
+    deviceId: number,
+    deviceName: string,
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       logger.info(
         `Creating WhatsApp client for device ${deviceId}: ${deviceName}`,
@@ -552,7 +555,7 @@ class WhatsAppClientManager extends EventEmitter {
       logger.info(`Initializing WhatsApp client for device ${deviceId}`);
       await client.initialize();
 
-      return true;
+      return { success: true };
     } catch (error) {
       logger.error(
         `Error creating WhatsApp client for device ${deviceId}:`,
@@ -576,7 +579,10 @@ class WhatsAppClientManager extends EventEmitter {
       this.clients.delete(deviceId);
 
       await this.cleanupSessions(deviceId);
-      return false;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
