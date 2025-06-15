@@ -138,6 +138,33 @@ install_docker() {
             echo -e "${RED}❌ فشل تحميل برنامج تثبيت Docker${NC}"
             return 1
         fi
+
+        # التحقق من سلامة السكريبت قبل التنفيذ
+        SCRIPT_COMMIT=$(grep -oE 'SCRIPT_COMMIT_SHA="[a-f0-9]{40}"' get-docker.sh | cut -d'"' -f2)
+        if [ -n "$SCRIPT_COMMIT" ]; then
+            if curl -fsSL "https://raw.githubusercontent.com/docker/docker-install/${SCRIPT_COMMIT}/install.sh" -o verify-docker.sh; then
+                LOCAL_SUM=$(sha256sum get-docker.sh | awk '{print $1}')
+                REMOTE_SUM=$(sha256sum verify-docker.sh | awk '{print $1}')
+                rm -f verify-docker.sh
+                if [ "$LOCAL_SUM" != "$REMOTE_SUM" ]; then
+                    echo -e "${RED}❌ فشل التحقق من سلامة برنامج التثبيت${NC}"
+                    echo -e "${YELLOW}للتثبيت اليدوي، راجع الوثائق الرسمية:${NC} https://docs.docker.com/engine/install/"
+                    rm -f get-docker.sh
+                    return 1
+                fi
+            else
+                echo -e "${RED}❌ فشل تحميل ملف التحقق من Docker${NC}"
+                echo -e "${YELLOW}للتثبيت اليدوي، راجع الوثائق الرسمية:${NC} https://docs.docker.com/engine/install/"
+                rm -f get-docker.sh
+                return 1
+            fi
+        else
+            echo -e "${RED}❌ تعذر العثور على بصمة التحقق داخل السكريبت${NC}"
+            echo -e "${YELLOW}للتثبيت اليدوي، راجع الوثائق الرسمية:${NC} https://docs.docker.com/engine/install/"
+            rm -f get-docker.sh
+            return 1
+        fi
+
         if ! sh get-docker.sh; then
             echo -e "${RED}❌ فشل تثبيت Docker${NC}"
             rm -f get-docker.sh
@@ -162,11 +189,29 @@ install_docker() {
         echo -e "${YELLOW}⏳ تثبيت Docker Compose...${NC}"
         
         # تثبيت Docker Compose
-        if ! curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose; then
+        COMPOSE_VERSION="v2.20.3"
+        COMPOSE_BIN="/usr/local/bin/docker-compose"
+        if ! curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o "$COMPOSE_BIN"; then
             echo -e "${RED}❌ فشل تحميل Docker Compose${NC}"
             return 1
         fi
-        if ! chmod +x /usr/local/bin/docker-compose; then
+        if curl -fsSL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m).sha256" -o compose.sha256; then
+            EXPECTED_SUM=$(cut -d' ' -f1 compose.sha256)
+            LOCAL_SUM=$(sha256sum "$COMPOSE_BIN" | awk '{print $1}')
+            rm -f compose.sha256
+            if [ "$EXPECTED_SUM" != "$LOCAL_SUM" ]; then
+                echo -e "${RED}❌ فشل التحقق من سلامة Docker Compose${NC}"
+                echo -e "${YELLOW}للتثبيت اليدوي، راجع الوثائق الرسمية:${NC} https://docs.docker.com/compose/install/"
+                rm -f "$COMPOSE_BIN"
+                return 1
+            fi
+        else
+            echo -e "${RED}❌ فشل تحميل ملف التحقق لـ Docker Compose${NC}"
+            echo -e "${YELLOW}للتثبيت اليدوي، راجع الوثائق الرسمية:${NC} https://docs.docker.com/compose/install/"
+            rm -f "$COMPOSE_BIN"
+            return 1
+        fi
+        if ! chmod +x "$COMPOSE_BIN"; then
             echo -e "${RED}❌ فشل إعداد صلاحيات Docker Compose${NC}"
             return 1
         fi
