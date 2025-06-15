@@ -21,8 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@/ui": ["./ui/index.ts"],
-      "@/ui/*": ["./ui/*"]
+      "@/components/ui": ["./components/ui/index.ts"],
+      "@/components/ui/*": ["./components/ui/*"]
     }
   },
   "include": [

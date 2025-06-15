@@ -12,7 +12,7 @@ import {
   SelectContent,
   SelectItem,
   Badge,
-} from "@/ui"
+} from "@/components/ui"
 import { MessageSquare, RefreshCw, Search, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
 import { MessageDialog } from "@/components/message-dialog"
 import { useApp } from "@/lib/app-context"
