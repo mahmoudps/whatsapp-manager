@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import colorTokens from "./lib/theme";
+import themePlugin from "./lib/theme-plugin";
 
 const config: Config = {
     darkMode: "class",
@@ -11,6 +13,7 @@ const config: Config = {
         "./hooks/**/*.{js,ts,jsx,tsx,mdx}"
     ],
   theme: {
+        tokens: colorTokens,
         extend: {
                 ringColor: {
                         ring: 'hsl(var(--ring))',
@@ -109,6 +112,6 @@ const config: Config = {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), themePlugin],
 };
 export default config;
