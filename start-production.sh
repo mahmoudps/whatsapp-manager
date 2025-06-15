@@ -68,6 +68,10 @@ if [ "$ENABLE_WEBSOCKET" = "true" ]; then
     fi
   fi
   echo "📡 تشغيل WebSocket Server..."
+  if lsof -i:"$WEBSOCKET_PORT" >/dev/null 2>&1 || ss -ltn | grep -q ":$WEBSOCKET_PORT\\b"; then
+    echo "❌ Port $WEBSOCKET_PORT already in use" >&2
+    exit 1
+  fi
   node ./dist/websocket-server.js >logs/websocket.log 2>&1 &
   WS_PID=$!
   echo "WebSocket Server PID: $WS_PID"
