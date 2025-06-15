@@ -23,6 +23,8 @@ cd whatsapp-manager
 
 # تثبيت الاعتماديات (مع تخطي تنزيل المتصفح المدمج)
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
+# في حال فشل تثبيت الحزم المدمجة، شغّل
+npm run rebuild:native
 
 # تشغيل الخادم في وضع التطوير
 npm run dev

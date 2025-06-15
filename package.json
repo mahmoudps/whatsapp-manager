@@ -24,7 +24,9 @@
     "build:ws": "tsc -p tsconfig.ws.json",
     "prews:prod": "npm run build:ws",
     "ws:prod": "node dist/websocket-server.js",
-    "prepare": "npm run build:ws"
+    "prepare": "npm run build:ws",
+    "rebuild:native": "npm rebuild bcrypt better-sqlite3 --build-from-source",
+    "postinstall": "npm run rebuild:native"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
