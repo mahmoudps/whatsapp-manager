@@ -218,7 +218,7 @@ install_pm2() {
     fi
 
     echo -e "${YELLOW}⏳ بناء التطبيق...${NC}"
-    if ! npm run build && npm run build:ws; then
+    if ! npm run build || ! npm run build:ws; then
         echo -e "${RED}❌ فشل عملية البناء${NC}"
         return 1
     fi
