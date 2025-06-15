@@ -41,6 +41,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     sqlite3 \
     curl \
+    iproute2 \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
