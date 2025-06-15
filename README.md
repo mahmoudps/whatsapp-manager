@@ -166,9 +166,11 @@ npm run setup
 ```bash
 cp .env.test .env
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
+npm run rebuild:native
 npm test
 ```
-قد تتطلب بعض الاختبارات توفر تبعيات إضافية حسب البيئة.
+قد تتطلب بعض الاختبارات توفر تبعيات إضافية حسب البيئة. ويجب إعادة بناء حزم
+`bcrypt` و`better-sqlite3` المستعملة في الاختبارات قبل تشغيلها.
 
 ## فحص الكود
 لتشغيل ESLint:
