@@ -127,6 +127,18 @@ curl http://localhost:3000/api/socket/status
 curl http://localhost:3001/health
 ```
 ستحصل على استجابة JSON تحتوي على المعرف `whatsapp-manager-ws` مما يدل على أن الخادم قيد التشغيل.
+> **ملاحظة:** عند استخدام Nginx أو أي reverse proxy، يجب تمرير المسار `/health` إلى خادم WebSocket لضمان عمل فحوصات الصحة.
+
+```nginx
+location /health {
+    proxy_pass http://localhost:3001/health;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
 
 ## تخصيص الألوان
 قيم الألوان الأساسية للوضعين الفاتح والداكن محفوظة في الملف `lib/theme.ts`.
