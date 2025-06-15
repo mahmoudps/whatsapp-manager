@@ -97,13 +97,11 @@ ENV PUPPETEER_ARGS=--disable-crashpad
 # Remove development dependencies after the build to keep the image slim
 RUN npm prune --production && npm cache clean --force
 
-RUN addgroup --gid 1001 nodejs && \
-    adduser --system --uid 1001 --gid 1001 whatsapp
-
-RUN mkdir -p data logs && \
-    chown -R whatsapp:nodejs /app
-
+RUN useradd -m -u 1001 -d /opt/whatsapp-manager/home -s /bin/bash whatsapp \
+    && mkdir -p /opt/whatsapp-manager/home \
+    && chown -R whatsapp:whatsapp /opt/whatsapp-manager/home /app
 USER whatsapp
+ENV HOME=/opt/whatsapp-manager/home
 
 EXPOSE 3000
 EXPOSE 3001
