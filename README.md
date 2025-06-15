@@ -110,6 +110,8 @@ wa-manager install pm2   # تثبيت Node.js وPM2 وتشغيل التطبيق 
 ```bash
 source /etc/bash_completion.d/wa-manager
 ```
+> **ملاحظة:** يترك سكربت التثبيت القيم `PUPPETEER_EXECUTABLE_PATH` و`PUPPETEER_ARGS` فارغة ضمن ملف `.env`، ليتولى Puppeteer تنزيل متصفح Chromium تلقائيًا واستخدام الإعدادات الافتراضية.
+
 ### تشغيل التطبيق عبر PM2
 بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:
 ```bash
