@@ -5,6 +5,9 @@
   "engines": {
     "node": ">=20"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prebuild": "node scripts/generate-env.js && node scripts/init-database.js",
     "setup": "node scripts/generate-env.js && node scripts/init-database.js",
@@ -20,7 +23,8 @@
     "ws": "ts-node -P tsconfig.ws.json lib/websocket-server.ts",
     "build:ws": "tsc -p tsconfig.ws.json",
     "prews:prod": "npm run build:ws",
-    "ws:prod": "node dist/websocket-server.js"
+    "ws:prod": "node dist/websocket-server.js",
+    "prepare": "npm run build:ws"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
