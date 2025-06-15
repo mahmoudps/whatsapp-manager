@@ -304,6 +304,7 @@ ENABLE_WEBSOCKET=true
 WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
+# Leave blank to auto-download Chromium and use default flags
 PUPPETEER_EXECUTABLE_PATH=
 PUPPETEER_ARGS=
 
@@ -961,6 +962,7 @@ ENABLE_WEBSOCKET=true
 WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
+# Leave blank to auto-download Chromium and use default flags
 PUPPETEER_EXECUTABLE_PATH=
 PUPPETEER_ARGS=
 
