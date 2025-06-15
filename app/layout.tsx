@@ -40,7 +40,7 @@ export default async function RootLayout({
   const dir = locale === "ar" ? "rtl" : "ltr"
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${tajawal.className} ${inter.className} metro`}> 
+      <body className={`${tajawal.className} ${inter.className}`}> 
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
