@@ -162,8 +162,8 @@ install_docker() {
 # تثبيت PM2
 install_pm2() {
     require_root
-    echo -e "${BLUE}📦 تثبيت PM2...${NC}"
-    
+    echo -e "${BLUE}📦 إعداد Node.js و PM2 وتشغيل التطبيق...${NC}"
+
     # التحقق من وجود Node.js و npm
     if ! command -v node &> /dev/null; then
         echo -e "${YELLOW}⏳ تثبيت Node.js...${NC}"
@@ -176,22 +176,48 @@ install_pm2() {
             return 1
         fi
     fi
-    
+
     # التحقق من وجود PM2
-    if command -v pm2 &> /dev/null; then
-        echo -e "${GREEN}✅ PM2 مثبت بالفعل${NC}"
-    else
+    if ! command -v pm2 &> /dev/null; then
         echo -e "${YELLOW}⏳ تثبيت PM2...${NC}"
         if ! npm install -g pm2; then
             echo -e "${RED}❌ فشل تثبيت PM2${NC}"
             return 1
         fi
-        
-        # تكوين PM2 للتشغيل عند بدء النظام
-        pm2 startup
-        
-        echo -e "${GREEN}✅ تم تثبيت PM2 بنجاح${NC}"
+        pm2 startup systemd -u $(whoami) --hp $(eval echo "~$(whoami)")
+    else
+        echo -e "${GREEN}✅ PM2 مثبت بالفعل${NC}"
     fi
+
+    echo -e "${YELLOW}⏳ نسخ الملفات إلى $DEFAULT_PATH...${NC}"
+    mkdir -p "$DEFAULT_PATH" "$DEFAULT_PATH/logs" "$DEFAULT_PATH/data"
+    cp -a "$SCRIPT_DIR"/. "$DEFAULT_PATH/"
+    cd "$DEFAULT_PATH"
+    fix_permissions
+
+    echo -e "${YELLOW}⏳ تثبيت الاعتماديات...${NC}"
+    if ! npm ci --omit=dev; then
+        echo -e "${RED}❌ فشل تثبيت الاعتماديات${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}⏳ بناء التطبيق...${NC}"
+    if ! npm run build && npm run build:ws; then
+        echo -e "${RED}❌ فشل عملية البناء${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}⏳ إنشاء ملف .env وقاعدة البيانات...${NC}"
+    if ! npm run --silent setup; then
+        echo -e "${RED}❌ فشل إعداد البيئة${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}⏳ تشغيل الخدمات عبر PM2...${NC}"
+    pm2 start ecosystem.config.js
+    pm2 save
+
+    echo -e "${GREEN}✅ تم تثبيت التطبيق وتشغيله عبر PM2${NC}"
 }
 
 # تثبيت كامل مع SSL
