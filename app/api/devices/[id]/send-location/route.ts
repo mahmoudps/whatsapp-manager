@@ -2,6 +2,7 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { type NextRequest, NextResponse } from "next/server"
+import type { RouteHandlerContext } from "next"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
@@ -10,7 +11,7 @@ import { logger } from "@/lib/logger"
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: RouteHandlerContext<{ id: string }>,
 ) {
   const { id } = params
   try {
