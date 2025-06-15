@@ -77,7 +77,18 @@ npx puppeteer browsers install chrome
 sudo chown -R 1001:1001 data logs
 docker-compose up --build -d
 ```
-يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا. يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
+يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا.
+يمكن تمرير المتغيرات العامة مثل `NEXT_PUBLIC_WEBSOCKET_URL` أثناء البناء:
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_WEBSOCKET_URL=wss://example.com/ws/socket.io \
+  -t whatsapp-manager .
+```
+ويمكن توفير القيم الحساسة عند التشغيل دون الحاجة لملف `.env` داخل الصورة:
+```bash
+docker run -e ADMIN_USERNAME=admin -e ADMIN_PASSWORD=secret -e JWT_SECRET=mysecret whatsapp-manager
+```
+يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
 يجب التأكد من أن المنفذ المحدد في `WEBSOCKET_PORT` غير مشغول قبل التشغيل وإلا سيتوقف السكربت عن العمل.
 
 يجب التأكد من أن المنفذ المحدد في `WEBSOCKET_PORT` غير مشغول قبل التشغيل وإلا سيتوقف السكربت عن العمل برسالة "Port $WEBSOCKET_PORT already in use".

@@ -48,6 +48,14 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Build-time variables
+ARG NEXT_PUBLIC_WEBSOCKET_URL
+ARG NEXT_PUBLIC_DOMAIN_NAME
+ARG NEXT_PUBLIC_WHATSAPP_API_URL
+ENV NEXT_PUBLIC_WEBSOCKET_URL=${NEXT_PUBLIC_WEBSOCKET_URL}
+ENV NEXT_PUBLIC_DOMAIN_NAME=${NEXT_PUBLIC_DOMAIN_NAME}
+ENV NEXT_PUBLIC_WHATSAPP_API_URL=${NEXT_PUBLIC_WHATSAPP_API_URL}
+
 # Copy package manifests first for better Docker layer caching
 COPY package.json package-lock.json .npmrc tsconfig.ws.json tsconfig.json ./
 
@@ -63,9 +71,6 @@ COPY . .
 
 # Ensure helper scripts are executable
 RUN chmod +x start-production.sh scripts/generate-env.js
-
-# توليد ملف البيئة تلقائياً عند البناء
-RUN node scripts/generate-env.js
 
 # Use production mode when building the Next.js application
 ENV NODE_ENV=production
