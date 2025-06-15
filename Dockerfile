@@ -2,6 +2,9 @@ FROM node:20-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-browser \
+    libnss3-dev \
     wget \
     ca-certificates \
     fonts-liberation \

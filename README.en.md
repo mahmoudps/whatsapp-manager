@@ -59,7 +59,7 @@ npx puppeteer browsers install chrome
 ```
 Or specify `PUPPETEER_EXECUTABLE_PATH`. Leaving it empty will download a compatible version at runtime.
 #### Puppeteer troubleshooting
-If the browser fails to start with `chrome_crashpad_handler: --database is required` set `PUPPETEER_ARGS=--disable-crashpad` in `.env`.
+The Docker image installs Chromium and sets `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` with `PUPPETEER_ARGS=--disable-crashpad` by default. If you run outside Docker and see `chrome_crashpad_handler: --database is required`, set the same flag manually in your `.env` file.
 
 If you see `recvmsg: Connection reset by peer (104)` when launching the browser it usually means a missing Chromium library. Ensure all dependencies listed in the Dockerfile are installed and rebuild the container. See the dependency section in the Dockerfile for reference.
 ## Docker
@@ -113,7 +113,7 @@ During `wa-manager install full` you will be asked to set the admin username and
 ```bash
 source /etc/bash_completion.d/wa-manager
 ```
-> **Note:** the installer leaves `PUPPETEER_EXECUTABLE_PATH` and `PUPPETEER_ARGS` empty in `.env` so Puppeteer downloads Chromium automatically with default settings.
+> **Note:** the installer now sets `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` and `PUPPETEER_ARGS=--disable-crashpad` in `.env` so the preinstalled Chromium is used by default.
 
 ### Running via PM2
 After installation manage the service with PM2. Again ensure `data/` and `logs/` are writable by UID `1001`:
