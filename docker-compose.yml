@@ -17,7 +17,7 @@ services:
 #      Replace default credentials before using in production
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/whatsapp_manager.db
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
       - PUPPETEER_ARGS=--disable-crashpad
     volumes:
       - ./data:/app/data
