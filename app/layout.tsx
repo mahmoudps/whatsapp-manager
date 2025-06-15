@@ -1,4 +1,5 @@
 import type React from "react"
+// Next.js 15 moved Metadata to an internal path
 import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
 import { Tajawal, Inter } from "next/font/google"
 import ClientLayout from "./client-layout"
