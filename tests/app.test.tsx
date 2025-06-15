@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '../app/page';
+import { I18nProvider } from '../lib/i18n';
 
 const mockFetch = global.fetch as jest.Mock;
 
@@ -9,12 +10,20 @@ beforeEach(() => {
 });
 describe('Home Page', () => {
   it('renders without crashing', () => {
-    render(<Home />);
+    render(
+      <I18nProvider locale="ar">
+        <Home />
+      </I18nProvider>
+    );
     expect(screen.getByRole('main')).toBeInTheDocument();
   });
 
   it('displays welcome message', () => {
-    render(<Home />);
+    render(
+      <I18nProvider locale="ar">
+        <Home />
+      </I18nProvider>
+    );
     expect(
       screen.getByText(/منصة متكاملة لإدارة الأجهزة والرسائل/i)
     ).toBeInTheDocument();
