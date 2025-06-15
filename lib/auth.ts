@@ -373,11 +373,26 @@ export async function validateLogin(credentials: { username: string; password: s
   return { id: user.id, username: user.username }
 }
 
-export function generateAuthToken(user: { id: number; username: string }) {
-  return jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  })
+export function createAuthToken(payload: {
+  id: number
+  username: string
+  role?: string
+}) {
+  return jwt.sign(
+    {
+      userId: payload.id,
+      username: payload.username,
+      role: payload.role || "user",
+    },
+    JWT_SECRET,
+    {
+      expiresIn: JWT_EXPIRES_IN,
+    },
+  )
 }
+
+// Legacy name kept for backward compatibility
+export const generateAuthToken = createAuthToken
 
 export async function authenticateUser(username: string, password: string) {
   const user = await validateUserCredentials(username, password)
