@@ -146,12 +146,13 @@ export default function DevicesPage() {
   }
 
   const handleConnect = async (deviceId: number) => {
+    let data: any
     try {
       const res = await fetch(`/api/devices/${deviceId}/connect`, {
         method: "POST",
         credentials: "include",
       })
-      const data = await res.json()
+      data = await res.json()
       if (!res.ok || !data.success) {
         throw new Error(data.error || "فشل الاتصال بالجهاز")
       }
@@ -166,10 +167,14 @@ export default function DevicesPage() {
       )
     } catch (err) {
       logger.error("Error connecting device:", err as Error)
+      const errorMsg =
+        (err instanceof Error && err.message) ||
+        (data && data.error) ||
+        "فشل الاتصال بالجهاز"
       toast({
         variant: "destructive",
         title: "خطأ",
-        description: "فشل الاتصال بالجهاز",
+        description: errorMsg,
       })
     }
   }
