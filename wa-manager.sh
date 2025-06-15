@@ -768,16 +768,27 @@ uninstall_system() {
     # التحقق من المسار
     if [ -d "$DEFAULT_PATH" ]; then
         cd $DEFAULT_PATH
-        
-        # إيقاف النظام
-        $DOCKER_COMPOSE_CMD down -v
-        
-        # حذف الصور
+
+        # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
+        if [ -f ".env" ]; then
+            $DOCKER_COMPOSE_CMD --env-file .env down -v
+        elif [ -f ".env.example" ]; then
+            $DOCKER_COMPOSE_CMD --env-file .env.example down -v
+        else
+            $DOCKER_COMPOSE_CMD down -v
+        fi
+
+        # تنظيف الموارد المتبقية
+        docker container prune -f
+        docker image prune -af
+        docker network prune -f
+
+        # حذف الصور المخصصة إن وجدت
         docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
-        
+
         # حذف المجلد
         cd /
-        rm -rf $DEFAULT_PATH
+        rm -rf "$DEFAULT_PATH"
     fi
     
     # إزالة الأمر من النظام
