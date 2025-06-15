@@ -91,6 +91,14 @@ wa-manager stop     # إيقافها
 wa-manager restart  # إعادة تشغيل النظام
 wa-manager status   # حالة التشغيل
 wa-manager install full  # تثبيت النظام مع Nginx وSSL
+wa-manager install pm2   # تثبيت Node.js وPM2 وتشغيل التطبيق مباشرة على المضيف
+```
+
+### تشغيل التطبيق عبر PM2
+بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:
+```bash
+pm2 status
+pm2 logs
 ```
 
 يُستعمل الأمر `wa-manager restart` لإعادة تشغيل جميع الحاويات وخادم WebSocket عند الحاجة.
