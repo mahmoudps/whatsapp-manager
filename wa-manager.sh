@@ -212,7 +212,7 @@ install_pm2() {
     fix_permissions
 
     echo -e "${YELLOW}⏳ تثبيت الاعتماديات...${NC}"
-    if ! npm ci --omit=dev; then
+    if ! npm ci; then
         echo -e "${RED}❌ فشل تثبيت الاعتماديات${NC}"
         return 1
     fi
@@ -222,6 +222,7 @@ install_pm2() {
         echo -e "${RED}❌ فشل عملية البناء${NC}"
         return 1
     fi
+    npm prune --omit=dev
 
     echo -e "${YELLOW}⏳ إنشاء ملف .env وقاعدة البيانات...${NC}"
     if ! npm run --silent setup; then
