@@ -789,6 +789,7 @@ uninstall_system() {
         cd $DEFAULT_PATH
     fi
 
+
     # ضمان وجود ملف .env لتفادي رسائل الخطأ
     ensure_env_file
 
