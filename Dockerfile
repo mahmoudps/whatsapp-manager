@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy package manifests first for better Docker layer caching
-COPY package.json package-lock.json .npmrc ./
+COPY package.json package-lock.json .npmrc tsconfig.ws.json ./
 
 # Install dependencies with development packages enabled
 ENV NODE_ENV=development
