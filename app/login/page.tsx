@@ -69,7 +69,7 @@ export default function Login() {
       >
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">{t('login.title')}</h1>
 
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+        {error && <div className="alert alert-danger" role="alert">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -82,7 +82,7 @@ export default function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder={t('login.username')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input w-full input-large"
               required
             />
           </div>
@@ -98,7 +98,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t('login.password')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="input w-full input-large pr-10"
                 required
               />
               <button
@@ -116,7 +116,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="button primary w-full"
           >
             {loading ? t('login.submitting') : t('login.submit')}
           </button>
