@@ -509,6 +509,7 @@ EOL
     
     # تثبيت wa-manager في النظام
     install_system_command
+    install_autocomplete
 
     # تشغيل النظام
     cd $DEFAULT_PATH
@@ -542,9 +543,30 @@ install_system_command() {
     echo -e "${YELLOW}يمكنك الآن استخدام الأمر 'wa-manager' من أي مكان${NC}"
 }
 
+# تثبيت إكمال أوامر bash
+install_autocomplete() {
+    require_root
+    echo -e "${BLUE}⚙️ إعداد إكمال تلقائي للأوامر...${NC}"
+
+    cat >/etc/bash_completion.d/wa-manager <<'EOF'
+_wa_manager_completion() {
+    local cmds="help start stop restart status logs install uninstall clean monitor env update backup restore rebuild"
+    COMPREPLY=( $(compgen -W "${cmds}" -- "${COMP_WORDS[1]}") )
+}
+complete -F _wa_manager_completion wa-manager
+EOF
+
+    echo -e "${GREEN}✅ تم تثبيت الإكمال التلقائي${NC}"
+    # تفعيل الإكمال التلقائي مباشرة دون الحاجة لتسجيل خروج المستخدم
+    if [ -f /etc/bash_completion.d/wa-manager ]; then
+        source /etc/bash_completion.d/wa-manager
+    fi
+}
+
 # تثبيت CLI فقط
 install_cli() {
     install_system_command
+    install_autocomplete
 }
 
 # تشغيل النظام
