@@ -75,6 +75,7 @@ if [ "$ENABLE_WEBSOCKET" = "true" ]; then
     fi
   fi
   echo "📡 تشغيل WebSocket Server..."
+
   if ! is_port_free "$WEBSOCKET_PORT"; then
     echo "❌ Port $WEBSOCKET_PORT already in use" >&2
     exit 1
