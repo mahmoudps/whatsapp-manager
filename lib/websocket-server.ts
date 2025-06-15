@@ -457,3 +457,8 @@ const websocketServerApi = {
 }
 
 export default websocketServerApi
+
+if (require.main === module) {
+  initializeWebSocketServer();
+}
+

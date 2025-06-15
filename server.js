@@ -55,7 +55,7 @@ app.prepare().then(() => {
   server.use(compression())
   server.use(
     cors({
-      origin: CORS_ORIGIN ? CORS_ORIGIN.split(',') : false,
+      origin: CORS_ORIGIN ? CORS_ORIGIN.split(',').map((o) => o.trim()) : false,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
