@@ -38,6 +38,9 @@ export const AUTO_CONNECT_DEVICES = process.env.AUTO_CONNECT_DEVICES === "true"
 export const WHATSAPP_SERVER_PORT = Number.parseInt(process.env.WHATSAPP_SERVER_PORT || "3002")
 export const PUPPETEER_EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH
 export const PUPPETEER_ARGS = process.env.PUPPETEER_ARGS
+export const WHATSAPP_WEB_VERSION_URL =
+  process.env.WHATSAPP_WEB_VERSION_URL ||
+  "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html"
 
 // إعدادات السجلات
 export const LOG_LEVEL = process.env.LOG_LEVEL || "debug"
