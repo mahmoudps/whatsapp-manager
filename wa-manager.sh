@@ -593,6 +593,12 @@ start_system() {
         systemctl start docker
     fi
 
+    # التأكد من وجود ملف .env وإنشاءه عند الحاجة
+    ensure_env_file
+    if [ -f "scripts/generate-env.js" ]; then
+        node scripts/generate-env.js >/dev/null 2>&1
+    fi
+
     # التحقق من وجود الملفات
     check_files || return 1
 
