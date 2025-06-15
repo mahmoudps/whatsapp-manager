@@ -1,4 +1,5 @@
 import { createServer } from "http"
+import type { Server as HttpServer } from "http"
 import { Server } from "socket.io"
 import express from "express"
 import cors from "cors"
@@ -18,7 +19,7 @@ const NODE_ENV = process.env.NODE_ENV || "development"
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"
 
 interface WebSocketServerInstance {
-  server: any
+  server: HttpServer
   io: Server
   isRunning: boolean
   port: number
@@ -109,25 +110,12 @@ export function initializeWebSocketServer(port: number = Number(PORT)): WebSocke
       }
     }
 
-    function broadcastToAll(event: string, data: any) {
-      const message = {
-        event,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-
+    function broadcastToAll<T>(event: string, data: T) {
       io.emit(event, data)
       stats.messagesProcessed++
     }
 
-    function broadcastToDevice(deviceId: number, event: string, data: any) {
-      const message = {
-        event,
-        data,
-        deviceId,
-        timestamp: new Date().toISOString(),
-      }
-
+    function broadcastToDevice<T>(deviceId: number, event: string, data: T) {
       io.to(`device_${deviceId}`).emit(event, data)
       stats.messagesProcessed++
     }
