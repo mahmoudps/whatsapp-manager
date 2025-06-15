@@ -24,6 +24,15 @@ if [ "$(id -u)" -eq 0 ]; then
     chown -R 1001:1001 data logs
 fi
 
+# دالة للتحقق من أن المنفذ متاح قبل التشغيل
+is_port_free() {
+  if lsof -i:"$1" >/dev/null 2>&1 || ss -ltn | grep -q ":$1\\b"; then
+    return 1
+  else
+    return 0
+  fi
+}
+
 # تأكد من توفر متصفح Chrome أو Chromium لـ Puppeteer
 if [ -n "$PUPPETEER_EXECUTABLE_PATH" ] && [ ! -x "$PUPPETEER_EXECUTABLE_PATH" ]; then
   echo "⚠️  Browser not found at $PUPPETEER_EXECUTABLE_PATH"
@@ -68,7 +77,7 @@ if [ "$ENABLE_WEBSOCKET" = "true" ]; then
     fi
   fi
   echo "📡 تشغيل WebSocket Server..."
-  if lsof -i:"$WEBSOCKET_PORT" >/dev/null 2>&1 || ss -ltn | grep -q ":$WEBSOCKET_PORT\\b"; then
+  if ! is_port_free "$WEBSOCKET_PORT"; then
     echo "❌ Port $WEBSOCKET_PORT already in use" >&2
     exit 1
   fi
