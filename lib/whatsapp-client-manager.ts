@@ -268,6 +268,8 @@ class WhatsAppClientManager extends EventEmitter {
 
       if (PUPPETEER_EXECUTABLE_PATH) {
         puppeteerOptions.executablePath = PUPPETEER_EXECUTABLE_PATH;
+      } else {
+        puppeteerOptions.executablePath = "/usr/bin/google-chrome-stable";
       }
 
       const client = new Client({
