@@ -67,7 +67,9 @@ npx puppeteer browsers install chrome
 
 ## Docker
 لإنشاء نسخة مهيأة للإنتاج:
+تأكد من أن دليلي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001` قبل التشغيل:
 ```bash
+sudo chown -R 1001:1001 data logs
 docker-compose up --build -d
 ```
 يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا. يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
@@ -101,6 +103,10 @@ npm run setup
 sudo cp wa-manager.sh /usr/local/bin/wa-manager
 sudo chmod +x /usr/local/bin/wa-manager
 ```
+قبل تشغيل الأوامر تأكد من أن دليلي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001`:
+```bash
+sudo chown -R 1001:1001 data logs
+```
 أبرز الأوامر:
 ```bash
 wa-manager start    # تشغيل الحاويات
@@ -120,6 +126,10 @@ source /etc/bash_completion.d/wa-manager
 
 ### تشغيل التطبيق عبر PM2
 بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:
+تأكد كذلك من أن مجلدي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001`:
+```bash
+sudo chown -R 1001:1001 data logs
+```
 ```bash
 pm2 status
 pm2 logs
