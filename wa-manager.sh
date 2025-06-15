@@ -350,9 +350,10 @@ ENABLE_WEBSOCKET=true
 WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
-# Leave blank to auto-download Chromium and use default flags
-PUPPETEER_EXECUTABLE_PATH=
-PUPPETEER_ARGS=
+# Use the system Chromium installed in the Docker image
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Disable crashpad to avoid browser launch errors
+PUPPETEER_ARGS=--disable-crashpad
 
 # إعدادات CORS
 CORS_ORIGIN=https://${DOMAIN_NAME}
@@ -1015,9 +1016,10 @@ ENABLE_WEBSOCKET=true
 WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
-# Leave blank to auto-download Chromium and use default flags
-PUPPETEER_EXECUTABLE_PATH=
-PUPPETEER_ARGS=
+# Use the system Chromium installed in the Docker image
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Disable crashpad to avoid browser launch errors
+PUPPETEER_ARGS=--disable-crashpad
 
 # إعدادات CORS
 CORS_ORIGIN=https://${DOMAIN_NAME}
