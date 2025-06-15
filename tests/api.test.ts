@@ -27,6 +27,7 @@ jest.mock('@/lib/whatsapp-client-manager', () => {
     whatsappManager: {
       sendMessage: jest.fn().mockResolvedValue(true),
       isClientReady: jest.fn().mockReturnValue(true),
+      createClient: jest.fn().mockResolvedValue({ success: true }),
     },
   };
 });
@@ -34,6 +35,7 @@ jest.mock('@/lib/whatsapp-client-manager', () => {
 let db: any;
 let createDevicePost: any;
 let sendMessagePost: any;
+let connectPost: any;
 let analyticsGet: any;
 
 let createContactPost: any;
@@ -54,6 +56,7 @@ beforeAll(async () => {
 
   createDevicePost = (await import('../app/api/devices/route')).POST;
   sendMessagePost = (await import('../app/api/devices/[id]/send/route')).POST;
+  connectPost = (await import('../app/api/devices/[id]/connect/route')).POST;
   analyticsGet = (await import('../app/api/analytics/route')).GET;
   statsGet = (await import('../app/api/stats/route')).GET;
   devicesGet = (await import('../app/api/devices/route')).GET;
@@ -94,6 +97,19 @@ test('POST /api/devices/[id]/send sends a message', async () => {
   expect(res.status).toBe(200);
   expect(data.success).toBe(true);
   expect(whatsappManagerMock.sendMessage).toHaveBeenCalled();
+});
+
+test('POST /api/devices/[id]/connect returns error detail on failure', async () => {
+  const device = await db.createDevice({ name: 'Connect Device' });
+  whatsappManagerMock.createClient.mockResolvedValueOnce({ success: false, error: 'init failed' });
+
+  const req: any = { headers: new Headers(), cookies: { get: () => undefined } };
+  const res = await connectPost(req, { params: { id: String(device.id) } });
+  const data = await res.json();
+
+  expect(res.status).toBe(500);
+  expect(data.success).toBe(false);
+  expect(data.error).toBe('init failed');
 });
 
 test('GET /api/analytics returns summary', async () => {

@@ -76,9 +76,9 @@ export async function POST(
     })
 
     // بدء عملية الاتصال
-    const success = await whatsappManager.createClient(deviceId, device.name)
+    const result = await whatsappManager.createClient(deviceId, device.name)
 
-    if (success) {
+    if (result.success) {
       logger.info("✅ WhatsApp client creation initiated successfully")
       return NextResponse.json({
         success: true,
@@ -91,7 +91,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: "فشل في بدء عملية الاتصال",
+          error: result.error || "فشل في بدء عملية الاتصال",
           timestamp: new Date().toISOString(),
         },
         { status: 500 },
