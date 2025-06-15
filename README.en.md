@@ -144,6 +144,18 @@ location /health {
 }
 ```
 
+### Checking through Nginx
+After starting the containers with `docker compose up -d` verify they are running using:
+```bash
+docker compose ps
+```
+Both `nginx` and `whatsapp-manager` should display `Up` in the status column.
+Then confirm WebSocket access through the proxy with:
+```bash
+curl http://localhost/health
+```
+The output should contain `whatsapp-manager-ws`, indicating the service is reachable via Nginx.
+
 ## Color customization
 Base colors for light and dark mode live in `lib/theme.ts`. Modify them then run `npm run dev` or build the project to update `styles/themes/colors.css` via the Tailwind plugin.
 
