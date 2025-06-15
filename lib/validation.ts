@@ -32,6 +32,12 @@ const scheduledMessageSchema = z.object({
   sendAt: z.string(),
 })
 
+const scheduledBulkMessageSchema = z.object({
+  recipients: z.array(z.string()).min(1, "قائمة المستقبلين مطلوبة"),
+  message: z.string().min(1, "الرسالة مطلوبة"),
+  sendAt: z.string(),
+})
+
 const contactMessageSchema = z.object({
   recipient: z.string().min(10, "رقم المستقبل مطلوب"),
   vcard: z.string().min(1, "بيانات جهة الاتصال مطلوبة"),
@@ -103,6 +109,15 @@ export const ValidationSchemas = {
     }
   },
 
+  scheduledBulkMessage: (data: any) => {
+    try {
+      return scheduledBulkMessageSchema.parse(data)
+    } catch (error) {
+      logger.error("Scheduled bulk message validation error:", error as Error)
+      return null
+    }
+  },
+
   contactMessage: (data: any) => {
     try {
       return contactMessageSchema.parse(data)
@@ -149,6 +164,7 @@ export {
   userSchema,
   mediaMessageSchema,
   scheduledMessageSchema,
+  scheduledBulkMessageSchema,
   contactMessageSchema,
   locationMessageSchema,
 }

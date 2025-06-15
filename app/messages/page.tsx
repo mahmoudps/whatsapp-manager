@@ -230,7 +230,9 @@ export default function MessagesPage() {
       } else if ("isLocation" in data && data.isLocation) {
         url = `/api/devices/${data.deviceId}/send-location`
       } else if ("scheduledAt" in data && data.scheduledAt) {
-        url = `/api/devices/${data.deviceId}/schedule`
+        url = isBulk
+          ? `/api/devices/${data.deviceId}/schedule-bulk`
+          : `/api/devices/${data.deviceId}/schedule`
       }
 
       let res: Response
@@ -262,7 +264,19 @@ export default function MessagesPage() {
             description: data.message,
           }
         } else if ("scheduledAt" in data && data.scheduledAt) {
-          payload = { recipient: 'recipient' in data ? data.recipient : '', message: 'message' in data ? data.message : '', sendAt: data.scheduledAt }
+          if (isBulk) {
+            payload = {
+              recipients: 'recipients' in data ? data.recipients : [],
+              message: 'message' in data ? data.message : '',
+              sendAt: data.scheduledAt,
+            }
+          } else {
+            payload = {
+              recipient: 'recipient' in data ? data.recipient : '',
+              message: 'message' in data ? data.message : '',
+              sendAt: data.scheduledAt,
+            }
+          }
         } else if (isBulk) {
           payload = { recipients: 'recipients' in data ? data.recipients : [], message: 'message' in data ? data.message : '' }
         } else {
