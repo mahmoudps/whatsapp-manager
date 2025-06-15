@@ -69,6 +69,7 @@ npx puppeteer browsers install chrome
 #### استكشاف أخطاء Puppeteer
 إذا فشل المتصفح في الإقلاع وظهرت الرسالة `chrome_crashpad_handler: --database is required` فيكفي ضبط `PUPPETEER_ARGS=--disable-crashpad` داخل ملف `.env` لحل المشكلة.
 
+إذا ظهرت الرسالة `recvmsg: Connection reset by peer (104)` عند بدء المتصفح فقد يكون السبب نقص إحدى مكتبات Chromium. تأكد من تثبيت جميع تبعيات Chromium كما هي مذكورة في قسم الاعتماديات داخل `Dockerfile` ثم أعد بناء الحاوية.
 
 ## Docker
 لإنشاء نسخة مهيأة للإنتاج:
