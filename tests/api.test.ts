@@ -172,7 +172,7 @@ test('GET /api/socket/status reports running when health check succeeds', async 
 
   const res = await socketStatusGet();
   const data = await res.json();
-  expect(mockFetch).toHaveBeenCalledWith('https://ws.example.com:1234/health');
+  expect(mockFetch).toHaveBeenCalledWith('https://ws.example.com:1234/ws/health');
   expect(res.status).toBe(200);
   expect(data.status).toBe('running');
   expect(data.clients).toBe(5);
@@ -187,7 +187,7 @@ test('GET /api/socket/status reports error when health check fails', async () =>
 
   const res = await socketStatusGet();
   const data = await res.json();
-  expect(mockFetch).toHaveBeenCalledWith('http://ws.example.com:1234/health');
+  expect(mockFetch).toHaveBeenCalledWith('http://ws.example.com:1234/ws/health');
   expect(res.status).toBe(200);
   expect(data.status).toBe('error');
   expect(data.message).toMatch(/connection refused/i);

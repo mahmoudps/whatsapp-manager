@@ -17,7 +17,8 @@ export async function GET() {
       try {
         const parsed = new URL(process.env.NEXT_PUBLIC_WEBSOCKET_URL)
         const protocol = parsed.protocol.startsWith("wss") ? "https" : "http"
-        healthUrl = `${protocol}://${parsed.host}/health`
+        const basePath = parsed.pathname.replace(/\/socket\.io\/?$/, "")
+        healthUrl = `${protocol}://${parsed.host}${basePath}/health`
       } catch {
         healthUrl = `http://localhost:${websocketPort}/health`
       }
