@@ -351,7 +351,7 @@ WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
 # Use the system Chromium installed in the Docker image
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 # Disable crashpad to avoid browser launch errors
 PUPPETEER_ARGS=--disable-crashpad
 
@@ -1017,7 +1017,7 @@ WEBSOCKET_PORT=3001
 NEXT_PUBLIC_WEBSOCKET_URL=wss://${DOMAIN_NAME}/ws/socket.io
 
 # Use the system Chromium installed in the Docker image
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 # Disable crashpad to avoid browser launch errors
 PUPPETEER_ARGS=--disable-crashpad
 

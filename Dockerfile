@@ -91,7 +91,7 @@ RUN npm run build:ws
 # Use the real database location at runtime
 ENV DATABASE_PATH=/app/data/whatsapp_manager.db
 # Use the Chromium binary installed in the image with crashpad disabled
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ENV PUPPETEER_ARGS=--disable-crashpad
 
 # Remove development dependencies after the build to keep the image slim
