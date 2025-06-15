@@ -457,3 +457,8 @@ const websocketServerApi = {
 }
 
 export default websocketServerApi
+
+// إذا تم تشغيل الملف مباشرةً، قم ببدء خادم WebSocket
+if (require.main === module) {
+  initializeWebSocketServer()
+}
