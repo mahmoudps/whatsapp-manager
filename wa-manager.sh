@@ -92,6 +92,7 @@ ensure_env_file() {
     fi
 }
 
+
 # عرض المساعدة
 show_help() {
     echo -e "${BLUE}=== WhatsApp Manager CLI ===${NC}"
@@ -788,29 +789,31 @@ uninstall_system() {
         cd $DEFAULT_PATH
     fi
 
+
     # ضمان وجود ملف .env لتفادي رسائل الخطأ
     ensure_env_file
 
+
     # إيقاف النظام مع مراعاة ملف البيئة في حال وجوده
-        if [ -f ".env" ]; then
-            $DOCKER_COMPOSE_CMD --env-file .env down -v
-        elif [ -f ".env.example" ]; then
-            $DOCKER_COMPOSE_CMD --env-file .env.example down -v
-        else
-            $DOCKER_COMPOSE_CMD down -v
-        fi
+    if [ -f ".env" ]; then
+        $DOCKER_COMPOSE_CMD --env-file .env down -v
+    elif [ -f ".env.example" ]; then
+        $DOCKER_COMPOSE_CMD --env-file .env.example down -v
+    else
+        $DOCKER_COMPOSE_CMD down -v
+    fi
 
-        # تنظيف الموارد المتبقية
-        docker container prune -f
-        docker image prune -af
-        docker network prune -f
+    # تنظيف الموارد المتبقية
+    docker container prune -f
+    docker image prune -af
+    docker network prune -f
 
-        # حذف الصور المخصصة إن وجدت
-        docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
+    # حذف الصور المخصصة إن وجدت
+    docker rmi $(docker images -q whatsapp-manager_whatsapp-manager) 2>/dev/null || true
 
-        # حذف المجلد
-        cd /
-        rm -rf "$DEFAULT_PATH"
+    # حذف المجلد
+    cd /
+    rm -rf "$DEFAULT_PATH"
     
     # إزالة الأمر من النظام
     if [ -f "/usr/local/bin/wa-manager" ]; then
