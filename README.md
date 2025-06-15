@@ -64,6 +64,9 @@ node dist/websocket-server.js
 npx puppeteer browsers install chrome
 ```
 أو تحديد المسار عبر المتغير `PUPPETEER_EXECUTABLE_PATH`. في حال تركه فارغًا سيقوم السكربت بتنزيل نسخة متوافقة تلقائيًا عند التشغيل.
+#### استكشاف أخطاء Puppeteer
+إذا فشل المتصفح في الإقلاع وظهرت الرسالة `chrome_crashpad_handler: --database is required` فيكفي ضبط `PUPPETEER_ARGS=--disable-crashpad` داخل ملف `.env` لحل المشكلة.
+
 
 ## Docker
 لإنشاء نسخة مهيأة للإنتاج:
