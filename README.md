@@ -106,7 +106,10 @@ wa-manager install pm2   # تثبيت Node.js وPM2 وتشغيل التطبيق 
 ```
 
 أثناء تشغيل `wa-manager install full` سيُطلب منك تحديد اسم المستخدم وكلمة المرور للمشرف، مع قيم افتراضية يمكن قبولها بالضغط على Enter.
-
+بعد تثبيت الأمر عبر `install cli` أو `install full` يتم إنشاء ملف إكمال تلقائي في `/etc/bash_completion.d/wa-manager`. يمكن تفعيله مباشرةً بدون إعادة تسجيل الخروج عبر الأمر:
+```bash
+source /etc/bash_completion.d/wa-manager
+```
 ### تشغيل التطبيق عبر PM2
 بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:
 ```bash
