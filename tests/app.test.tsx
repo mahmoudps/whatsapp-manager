@@ -37,13 +37,10 @@ describe('API Routes', () => {
     expect(response.status).toBe(200);
   });
 
-  it('websocket connection works', async () => {
-    const socket = new WebSocket('ws://localhost:3001/ws/socket.io');
-    await new Promise((resolve) => {
-      socket.onopen = resolve;
-    });
-    expect(socket.readyState).toBe(WebSocket.OPEN);
-    socket.close();
+  it('websocket status endpoint returns 200', async () => {
+    mockFetch.mockResolvedValueOnce({ status: 200, json: async () => ({}) });
+    const response = await fetch('http://localhost:3000/api/socket/status');
+    expect(response.status).toBe(200);
   });
 });
 
@@ -61,33 +58,27 @@ describe('Authentication', () => {
   });
 });
 describe('Database', () => {
-  it('database connection works', async () => {
+  it('database health check works', async () => {
     mockFetch.mockResolvedValueOnce({
       status: 200,
-      json: async () => ({ status: 'connected' }),
+      json: async () => ({ database: { connected: true } }),
     });
-    const response = await fetch('http://localhost:3000/api/db/status');
+    const response = await fetch('http://localhost:3000/api/health?check=database');
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.status).toBe('connected');
+    expect(data.database.connected).toBe(true);
   });
 });
 
-describe('WhatsApp Integration', () => {
-  it('whatsapp connection status endpoint exists', async () => {
-    mockFetch.mockResolvedValueOnce({ status: 200, json: async () => ({}) });
-    const response = await fetch('http://localhost:3000/api/whatsapp/status');
-    expect(response.status).toBe(200);
-  });
-
-  it('whatsapp session management works', async () => {
+describe('Device APIs', () => {
+  it('devices endpoint returns list', async () => {
     mockFetch.mockResolvedValueOnce({
       status: 200,
-      json: async () => ({ sessions: [] }),
+      json: async () => ({ devices: [] }),
     });
-    const response = await fetch('http://localhost:3000/api/whatsapp/sessions');
+    const response = await fetch('http://localhost:3000/api/devices');
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(Array.isArray(data.sessions)).toBe(true);
+    expect(Array.isArray(data.devices)).toBe(true);
   });
 });

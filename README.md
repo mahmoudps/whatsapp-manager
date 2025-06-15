@@ -1,5 +1,7 @@
 # WhatsApp Manager
 
+**Languages:** [English](README.en.md) | [العربية](README.md)
+
 إدارة متكاملة لجلسات واتساب عبر واجهة ويب مبنية على **Next.js** و **Node.js**. يهدف المشروع إلى تبسيط إدارة عدة أجهزة واتساب من خلال لوحة تحكم موحَّدة وواجهات برمجة REST، مع دعم اختياري للبث الفوري عبر WebSocket.
 
 ## المزايا
@@ -27,7 +29,7 @@ cd whatsapp-manager
 
 # تثبيت الاعتماديات (مع تخطي تنزيل المتصفح المدمج)
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
-# في حال فشل تثبيت الحزم المدمجة، شغّل
+# بعد الانتهاء **يجب** تشغيل الأمر التالي لتجميع `bcrypt` و`better-sqlite3`
 npm run rebuild:native
 
 # تشغيل الخادم في وضع التطوير
@@ -64,10 +66,15 @@ node dist/websocket-server.js
 npx puppeteer browsers install chrome
 ```
 أو تحديد المسار عبر المتغير `PUPPETEER_EXECUTABLE_PATH`. في حال تركه فارغًا سيقوم السكربت بتنزيل نسخة متوافقة تلقائيًا عند التشغيل.
+#### استكشاف أخطاء Puppeteer
+إذا فشل المتصفح في الإقلاع وظهرت الرسالة `chrome_crashpad_handler: --database is required` فيكفي ضبط `PUPPETEER_ARGS=--disable-crashpad` داخل ملف `.env` لحل المشكلة.
+
 
 ## Docker
 لإنشاء نسخة مهيأة للإنتاج:
+تأكد من أن دليلي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001` قبل التشغيل:
 ```bash
+sudo chown -R 1001:1001 data logs
 docker-compose up --build -d
 ```
 يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا. يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
@@ -101,6 +108,10 @@ npm run setup
 sudo cp wa-manager.sh /usr/local/bin/wa-manager
 sudo chmod +x /usr/local/bin/wa-manager
 ```
+قبل تشغيل الأوامر تأكد من أن دليلي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001`:
+```bash
+sudo chown -R 1001:1001 data logs
+```
 أبرز الأوامر:
 ```bash
 wa-manager start    # تشغيل الحاويات
@@ -120,6 +131,10 @@ source /etc/bash_completion.d/wa-manager
 
 ### تشغيل التطبيق عبر PM2
 بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:
+تأكد كذلك من أن مجلدي `data/` و`logs/` قابلان للكتابة بواسطة UID `1001`:
+```bash
+sudo chown -R 1001:1001 data logs
+```
 ```bash
 pm2 status
 pm2 logs
