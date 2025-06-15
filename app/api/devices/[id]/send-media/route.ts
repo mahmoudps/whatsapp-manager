@@ -2,7 +2,6 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { type NextRequest, NextResponse } from "next/server"
-import type { RouteHandlerContext } from "next"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
@@ -12,9 +11,9 @@ import path from "path"
 
 export async function POST(
   request: NextRequest,
-  { params }: RouteHandlerContext<{ id: string }>,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params
+  const { id } = await params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {

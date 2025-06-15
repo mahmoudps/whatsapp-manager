@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import type { RouteHandlerContext } from "next"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
@@ -10,9 +9,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteHandlerContext<{ id: string }>,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params
+  const { id } = await params
   try {
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
@@ -83,9 +82,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: RouteHandlerContext<{ id: string }>,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params
+  const { id } = await params
   try {
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
@@ -159,9 +158,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteHandlerContext<{ id: string }>,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params
+  const { id } = await params
   try {
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
