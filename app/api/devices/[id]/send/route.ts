@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import type { RouteHandlerContext } from "next"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
 import { verifyAuth } from "@/lib/auth"
@@ -11,9 +10,9 @@ export const dynamic = "force-dynamic"
 
 export async function POST(
   request: NextRequest,
-  { params }: RouteHandlerContext<{ id: string }>,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params
+  const { id } = await params
   try {
     logger.info(`🔍 POST /api/devices/${id}/send - Starting request`)
 
