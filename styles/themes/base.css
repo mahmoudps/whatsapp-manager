@@ -1,5 +1,5 @@
-/* Updated theme colors for a cleaner modern design */
-/* Refreshed global styles for better UX */
+/* Complete theme refresh with modern fonts and colors */
+/* Global style tweaks for a smoother user experience */
 
 /* إعادة تعيين عامة محسنة */
 * {
@@ -15,6 +15,7 @@ html {
 
 body {
   font-family:
+    "Poppins",
     "Inter",
     -apple-system,
     BlinkMacSystemFont,
