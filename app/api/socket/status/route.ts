@@ -12,6 +12,18 @@ export async function GET() {
         .toLowerCase() === "true"
     const websocketPort = process.env.WEBSOCKET_PORT || "3001"
     const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || getDefaultWebSocketUrl()
+    let healthUrl: string
+    if (process.env.NEXT_PUBLIC_WEBSOCKET_URL) {
+      try {
+        const parsed = new URL(process.env.NEXT_PUBLIC_WEBSOCKET_URL)
+        const protocol = parsed.protocol.startsWith("wss") ? "https" : "http"
+        healthUrl = `${protocol}://${parsed.host}/health`
+      } catch {
+        healthUrl = `http://localhost:${websocketPort}/health`
+      }
+    } else {
+      healthUrl = `http://localhost:${websocketPort}/health`
+    }
 
     if (!isWebSocketEnabled) {
       return NextResponse.json({
@@ -29,7 +41,7 @@ export async function GET() {
 
     // محاولة التحقق من حالة خادم WebSocket عبر طلب صحة HTTP
     try {
-      const healthResponse = await fetch(`http://localhost:${websocketPort}/health`)
+      const healthResponse = await fetch(healthUrl)
 
       if (!healthResponse.ok) {
         const text = await healthResponse.text()
