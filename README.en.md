@@ -61,6 +61,7 @@ Or specify `PUPPETEER_EXECUTABLE_PATH`. Leaving it empty will download a compati
 #### Puppeteer troubleshooting
 If the browser fails to start with `chrome_crashpad_handler: --database is required` set `PUPPETEER_ARGS=--disable-crashpad` in `.env`.
 
+If you see `recvmsg: Connection reset by peer (104)` when launching the browser it usually means a missing Chromium library. Ensure all dependencies listed in the Dockerfile are installed and rebuild the container. See the dependency section in the Dockerfile for reference.
 ## Docker
 To build a production ready image make sure the `data/` and `logs/` directories are writable by UID `1001` then run:
 ```bash
