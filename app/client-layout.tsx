@@ -8,6 +8,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { useCurrentLocale } from "@/lib/use-locale";
 
 import "../styles/globals.css";
+import "../styles/themes/colors.css";
 
 export default function ClientLayout({
   children,
