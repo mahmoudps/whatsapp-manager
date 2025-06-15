@@ -43,11 +43,19 @@ if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
   export PUPPETEER_CACHE_DIR
   if [ ! -d "$PUPPETEER_CACHE_DIR" ] || [ -z "$(ls -A "$PUPPETEER_CACHE_DIR" 2>/dev/null)" ]; then
     echo "🔍 Installing Chromium for Puppeteer..."
-    npx puppeteer browsers install chrome >/dev/null 2>&1
+    if ! npx puppeteer browsers install chrome >/tmp/install_chrome.log 2>&1; then
+      status=$?
+      echo "❌ Failed to download Chrome for Puppeteer" >&2
+      cat /tmp/install_chrome.log >&2
+      exit $status
+    fi
   fi
   if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
-    PUPPETEER_EXECUTABLE_PATH=$(npx puppeteer browsers path chrome 2>/dev/null)
-    export PUPPETEER_EXECUTABLE_PATH
+    tmp_path=$(npx puppeteer browsers path chrome 2>/dev/null)
+    if [ -x "$tmp_path" ]; then
+      PUPPETEER_EXECUTABLE_PATH="$tmp_path"
+      export PUPPETEER_EXECUTABLE_PATH
+    fi
   fi
 fi
 
