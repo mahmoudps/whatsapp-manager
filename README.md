@@ -67,9 +67,9 @@ npx puppeteer browsers install chrome
 ```
 أو تحديد المسار عبر المتغير `PUPPETEER_EXECUTABLE_PATH`. في حال تركه فارغًا سيقوم السكربت بتنزيل نسخة متوافقة تلقائيًا عند التشغيل.
 #### استكشاف أخطاء Puppeteer
-تتضمن صورة Docker المتصفح Chromium وتضبط افتراضيًا `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` مع `PUPPETEER_ARGS=--disable-crashpad`. عند تشغيل التطبيق خارج Docker وظهور الخطأ `chrome_crashpad_handler: --database is required` يكفي إضافة نفس العلم يدويًا في ملف `.env`.
+تتضمن صورة Docker المتصفح Google Chrome وتضبط افتراضيًا `PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable` مع `PUPPETEER_ARGS=--disable-crashpad`. عند تشغيل التطبيق خارج Docker وظهور الخطأ `chrome_crashpad_handler: --database is required` يكفي إضافة نفس العلم يدويًا في ملف `.env`.
 
-إذا ظهرت الرسالة `recvmsg: Connection reset by peer (104)` عند بدء المتصفح فقد يكون السبب نقص إحدى مكتبات Chromium. تأكد من تثبيت جميع تبعيات Chromium كما هي مذكورة في قسم الاعتماديات داخل `Dockerfile` ثم أعد بناء الحاوية.
+إذا ظهرت الرسالة `recvmsg: Connection reset by peer (104)` عند بدء المتصفح فقد يكون السبب نقص إحدى مكتبات Chrome. تأكد من تثبيت جميع تبعيات Chrome كما هي مذكورة في قسم الاعتماديات داخل `Dockerfile` ثم أعد بناء الحاوية.
 
 ## Docker
 لإنشاء نسخة مهيأة للإنتاج:
@@ -139,7 +139,7 @@ wa-manager install pm2   # تثبيت Node.js وPM2 وتشغيل التطبيق 
 ```bash
 source /etc/bash_completion.d/wa-manager
 ```
-> **ملاحظة:** يقوم سكربت التثبيت الآن بضبط `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` و`PUPPETEER_ARGS=--disable-crashpad` داخل ملف `.env` لاستخدام Chromium المثبت مسبقًا بشكل افتراضي.
+> **ملاحظة:** يقوم سكربت التثبيت الآن بضبط `PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable` و`PUPPETEER_ARGS=--disable-crashpad` داخل ملف `.env` لاستخدام Chrome المثبت مسبقًا بشكل افتراضي.
 
 ### تشغيل التطبيق عبر PM2
 بعد تنفيذ أمر التثبيت يمكن إدارة الخدمة باستخدام PM2:

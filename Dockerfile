@@ -2,10 +2,14 @@ FROM node:20-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    chromium \
-    libnss3-dev \
     wget \
-    ca-certificates \
+    curl \
+    gnupg \
+    ca-certificates && \
+    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list' && \
+    apt-get update && apt-get install -y \
+    google-chrome-stable \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -42,10 +46,12 @@ RUN apt-get update && apt-get install -y \
     make \
     g++ \
     sqlite3 \
-    curl \
     iproute2 \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
+
+# Prevent Puppeteer from downloading Chromium during install
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 
 WORKDIR /app
