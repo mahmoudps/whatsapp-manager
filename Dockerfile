@@ -25,6 +25,13 @@ RUN apt-get update && apt-get install -y \
     libpangoft2-1.0-0 \
     libfreetype6 \
     libharfbuzz0b \
+    libxss1 \
+    libxkbcommon0 \
+    libxtst6 \
+    libxext6 \
+    libxfixes3 \
+    libu2f-udev \
+    libvulkan1 \
     fonts-freefont-ttf \
     fonts-noto-color-emoji \
     xdg-utils \
