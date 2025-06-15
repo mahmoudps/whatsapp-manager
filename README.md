@@ -48,6 +48,7 @@ npx puppeteer browsers install chrome
 docker-compose up --build -d
 ```
 يُشغِّل هذا الأمر حاوية التطبيق مع Nginx ويتولى السكربت `start-production.sh` ضبط البيئة وبدء خادم WebSocket افتراضيًا. يمكن إيقاف البث الفوري بوضع `ENABLE_WEBSOCKET=false` في ملف البيئة.
+يجب التأكد من أن المنفذ المحدد في `WEBSOCKET_PORT` غير مشغول قبل التشغيل وإلا سيتوقف السكربت عن العمل.
 
 ## إعداد متغيرات البيئة
 انسخ الملف الافتراضي ثم غيِّر القيم الحساسة قبل التشغيل:
@@ -58,7 +59,7 @@ cp .env.example .env
 - `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم.
 - `JWT_SECRET`: مفتاح توقيع التوكنات.
 - `DATABASE_PATH`: مسار قاعدة البيانات.
-- `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ.
+- `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ. يجب أن يكون هذا المنفذ متاحًا وغير مستخدم قبل التشغيل.
 - بقية المتغيرات موثقة داخل `.env.example` ويمكن تعديلها حسب الحاجة.
 
 بعد ضبط الملف يمكن تشغيل:
