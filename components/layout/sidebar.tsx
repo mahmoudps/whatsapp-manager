@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button, Badge, Separator } from "@/components/ui"
+import type { LucideIcon } from "lucide-react"
 import {
   LayoutDashboard,
   Smartphone,
@@ -26,7 +27,16 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-const navigation = [
+interface NavigationItem {
+  name: string
+  href: string
+  icon: LucideIcon
+  badge: string | null
+  description: string
+  disabled?: boolean
+}
+
+const navigation: NavigationItem[] = [
   {
     name: "لوحة التحكم",
     href: "/dashboard",
