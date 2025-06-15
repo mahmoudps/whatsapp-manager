@@ -8,9 +8,9 @@ import { ValidationSchemas } from "@/lib/validation"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
@@ -52,9 +52,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
@@ -99,9 +99,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {

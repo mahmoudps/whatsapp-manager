@@ -11,9 +11,9 @@ import path from "path"
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
