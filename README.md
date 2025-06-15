@@ -72,8 +72,7 @@ cp .env.example .env
 - `ADMIN_USERNAME` و`ADMIN_PASSWORD`: بيانات الدخول للوحة التحكم.
 - `JWT_SECRET`: مفتاح توقيع التوكنات.
 - `DATABASE_PATH`: مسار قاعدة البيانات.
-
-
+- `WHATSAPP_WEB_VERSION_URL`: مسار HTML لإصدار WhatsApp Web.
 - `CORS_ORIGIN`: قائمة بالمصادر المسموح بها مفصولة بفواصل **دون مسافات**.
 - `ENABLE_WEBSOCKET` و`WEBSOCKET_PORT`: تشغيل خادم WebSocket وتحديد المنفذ. يجب أن يكون هذا المنفذ متاحًا وغير مستخدم قبل التشغيل.
 - بقية المتغيرات موثقة داخل `.env.example` ويمكن تعديلها حسب الحاجة.
