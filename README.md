@@ -27,7 +27,7 @@ cd whatsapp-manager
 
 # تثبيت الاعتماديات (مع تخطي تنزيل المتصفح المدمج)
 PUPPETEER_SKIP_DOWNLOAD=1 npm install --ignore-scripts
-# في حال فشل تثبيت الحزم المدمجة، شغّل
+# بعد الانتهاء **يجب** تشغيل الأمر التالي لتجميع `bcrypt` و`better-sqlite3`
 npm run rebuild:native
 
 # تشغيل الخادم في وضع التطوير
