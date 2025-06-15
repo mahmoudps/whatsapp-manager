@@ -532,7 +532,7 @@ install_system_command() {
     echo -e "${BLUE}📦 تثبيت الأمر في النظام...${NC}"
 
     # نسخ السكريبت إلى /usr/local/bin
-    cp $0 /usr/local/bin/wa-manager
+    cp "$SCRIPT_DIR/wa-manager.sh" /usr/local/bin/wa-manager
     chmod +x /usr/local/bin/wa-manager
 
     echo -e "${GREEN}✅ تم تثبيت الأمر بنجاح${NC}"
