@@ -231,6 +231,12 @@ install_full() {
     DOMAIN_NAME=${DOMAIN_NAME:-wa-api.developments.world}
     read -p "أدخل البريد الإلكتروني (لشهادة SSL) [info@wa-api.developments.world]: " EMAIL
     EMAIL=${EMAIL:-info@wa-api.developments.world}
+
+    # طلب بيانات الدخول الافتراضية
+    read -p "أدخل اسم المستخدم للوحة التحكم [admin]: " ADMIN_USERNAME
+    ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+    read -p "أدخل كلمة المرور للوحة التحكم [admin123]: " ADMIN_PASSWORD
+    ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
     
     # تثبيت Docker
     install_docker
@@ -270,8 +276,8 @@ JWT_EXPIRES_IN=24h
 REFRESH_TOKEN_EXPIRES_IN=7d
 
 # بيانات الإدارة الافتراضية
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
+ADMIN_USERNAME=${ADMIN_USERNAME}
+ADMIN_PASSWORD=${ADMIN_PASSWORD}
 
 # إعدادات الأمان
 MAX_AUTH_ATTEMPTS=5
@@ -496,8 +502,8 @@ EOL
     if $DOCKER_COMPOSE_CMD up -d; then
         echo -e "${GREEN}✅ تم تثبيت WhatsApp Manager بنجاح!${NC}"
         echo -e "${BLUE}🌐 يمكنك الوصول للنظام عبر: https://${DOMAIN_NAME}${NC}"
-        echo -e "${YELLOW}👤 المستخدم: admin${NC}"
-        echo -e "${YELLOW}🔑 كلمة المرور: admin123${NC}"
+        echo -e "${YELLOW}👤 المستخدم: ${ADMIN_USERNAME}${NC}"
+        echo -e "${YELLOW}🔑 كلمة المرور: ${ADMIN_PASSWORD}${NC}"
     else
         echo -e "${RED}❌ فشل تشغيل الحاويات عبر Docker Compose${NC}"
         exit 1
