@@ -1,5 +1,7 @@
 @import "./themes/colors.css";
 @import "./themes/base.css";
+@import "metro4/build/css/metro.min.css";
+@import "metro4/build/css/metro-colors.min.css";
 
 @tailwind base;
 @tailwind components;
