@@ -48,6 +48,7 @@ ENV NODE_ENV=development
 # Use a temporary database during build to avoid SQLite locking errors
 ENV DATABASE_PATH=/tmp/whatsapp_manager_build.db
 RUN npm ci --ignore-scripts && npm cache clean --force
+RUN npm run rebuild:native
 
 # Copy the rest of the application source
 COPY . .
