@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
 import { Tajawal, Inter } from "next/font/google"
 import ClientLayout from "./client-layout"
 import { cookies } from "next/headers"
