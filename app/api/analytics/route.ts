@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -9,14 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: authResult.message || "غير مصرح",
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 },
-      )
+      return buildUnauthorizedResponse(authResult)
     }
 
     // Ensure the database is initialized before querying

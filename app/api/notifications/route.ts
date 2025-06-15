@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
@@ -41,14 +41,7 @@ export async function GET(request: NextRequest) {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       logger.info("❌ Authentication failed:", authResult.message)
-      return NextResponse.json(
-        {
-          success: false,
-          error: authResult.message || "غير مصرح",
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 },
-      )
+      return buildUnauthorizedResponse(authResult)
     }
 
     logger.info("✅ Authentication successful")
@@ -89,14 +82,7 @@ export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
       logger.info("❌ Authentication failed:", authResult.message)
-      return NextResponse.json(
-        {
-          success: false,
-          error: authResult.message || "غير مصرح",
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 },
-      )
+      return buildUnauthorizedResponse(authResult)
     }
 
     logger.info("✅ Authentication successful")

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { logger } from "./logger"
@@ -39,7 +40,14 @@ export interface AuthUser {
   role: string
 }
 
-export async function verifyAuth(request: NextRequest) {
+export interface AuthResult {
+  success: boolean
+  message?: string
+  user?: AuthUser
+  clearCookie?: boolean
+}
+
+export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
   try {
     // محاولة قراءة التوكن من الكوكيز أولاً
     let token = request.cookies.get("auth-token")?.value
@@ -54,7 +62,7 @@ export async function verifyAuth(request: NextRequest) {
 
     if (!token) {
       logger.warn("No token found in cookies or headers")
-      return { success: false, message: "No token provided" }
+      return { success: false, message: "No token provided", clearCookie: false }
     }
 
     // التحقق من صحة التوكن
@@ -62,19 +70,30 @@ export async function verifyAuth(request: NextRequest) {
 
     if (!decoded || !decoded.userId) {
       logger.warn("Invalid token structure:", decoded)
-      return { success: false, message: "Invalid token" }
+      return { success: false, message: "Invalid token", clearCookie: true }
     }
 
     logger.info("Token verified successfully for user:", decoded.userId)
     const { userId, username, role } = decoded
-    return { success: true, user: { userId, username, role } }
+    return { success: true, user: { userId, username, role }, clearCookie: false }
   } catch (error: any) {
     logger.error("Auth verification failed:", error)
     if (error.name === "JsonWebTokenError") {
-      return { success: false, message: "Invalid token" }
+      return { success: false, message: "Invalid token", clearCookie: true }
     }
-    return { success: false, message: "Authentication failed" }
+    return { success: false, message: "Authentication failed", clearCookie: true }
   }
+}
+
+export function buildUnauthorizedResponse(result: AuthResult) {
+  const response = NextResponse.json(
+    { success: false, error: result.message || "غير مصرح" },
+    { status: 401 },
+  )
+  if (result.clearCookie) {
+    response.cookies.set("auth-token", "", { maxAge: 0 })
+  }
+  return response
 }
 
 export async function generateTokens(user: { id: number; username: string; role?: string }) {

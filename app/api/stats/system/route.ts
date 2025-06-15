@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import os from "os"
 import fs from "fs"
 import { logger } from "@/lib/logger"
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     // جمع معلومات النظام

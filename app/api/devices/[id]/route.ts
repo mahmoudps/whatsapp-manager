@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { logger } from "@/lib/logger"
 
@@ -16,7 +16,7 @@ export async function GET(
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     const deviceId = Number.parseInt(id)
@@ -89,7 +89,7 @@ export async function PUT(
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     const deviceId = Number.parseInt(id)
@@ -165,7 +165,7 @@ export async function DELETE(
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     const deviceId = Number.parseInt(id)

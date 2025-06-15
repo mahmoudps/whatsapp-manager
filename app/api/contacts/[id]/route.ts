@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { ValidationSchemas } from "@/lib/validation"
 
 export async function GET(
@@ -14,7 +14,7 @@ export async function GET(
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     // Ensure database is initialized
@@ -58,7 +58,7 @@ export async function PUT(
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     // Ensure database is initialized
@@ -105,7 +105,7 @@ export async function DELETE(
   try {
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     // Ensure database is initialized

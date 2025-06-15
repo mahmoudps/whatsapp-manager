@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { whatsappManager } from "@/lib/whatsapp-client-manager"
 import { db } from "@/lib/database"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 
 export const runtime = "nodejs"
@@ -16,7 +16,7 @@ export async function POST(
     // التحقق من المصادقة
     const authResult = await verifyAuth(request)
     if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     const deviceId = Number.parseInt(id)

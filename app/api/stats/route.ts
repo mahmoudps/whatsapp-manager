@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/database"
 import { logger } from "@/lib/logger"
-import { verifyAuth } from "@/lib/auth"
+import { verifyAuth, buildUnauthorizedResponse } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const authResult = await verifyAuth(request)
     if (!authResult.success || !authResult.user) {
       logger.warn("❌ Authentication failed:", authResult.message)
-      return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 })
+      return buildUnauthorizedResponse(authResult)
     }
 
     logger.info("✅ Authentication successful")
