@@ -14,6 +14,7 @@ jest.mock('@/lib/validation', () => ({
     createDevice: jest.fn().mockReturnValue({ name: 'API Device' }),
     message: jest.fn().mockReturnValue({ to: '123456789', message: 'hi' }),
     contact: jest.fn().mockReturnValue({ name: 'Test Contact', phoneNumber: '12345' }),
+    scheduledBulkMessage: jest.fn().mockImplementation((d: any) => d),
   },
 }));
 
@@ -38,6 +39,8 @@ let sendMessagePost: any;
 let connectPost: any;
 let analyticsGet: any;
 
+let scheduleBulkPost: any;
+
 let createContactPost: any;
 let whatsappManagerMock: any;
 let statsGet: any;
@@ -61,6 +64,8 @@ beforeAll(async () => {
   statsGet = (await import('../app/api/stats/route')).GET;
   devicesGet = (await import('../app/api/devices/route')).GET;
   socketStatusGet = (await import('../app/api/socket/status/route')).GET;
+
+  scheduleBulkPost = (await import('../app/api/devices/[id]/schedule-bulk/route')).POST;
 
   createContactPost = (await import('../app/api/contacts/route')).POST;
 });
@@ -157,6 +162,23 @@ test('GET /api/devices returns devices array', async () => {
   expect(res.status).toBe(200);
   expect(data.success).toBe(true);
   expect(Array.isArray(data.devices)).toBe(true);
+});
+
+test('POST /api/devices/[id]/schedule-bulk schedules messages', async () => {
+  const device = await db.createDevice({ name: 'Sched Bulk Device' });
+  const req: any = {
+    json: async () => ({ recipients: ['1', '2'], message: 'hi', sendAt: '2099-01-01T00:00:00Z' }),
+    headers: new Headers({ 'Content-Type': 'application/json' }),
+    cookies: { get: () => undefined },
+  };
+
+  const res = await scheduleBulkPost(req, { params: { id: String(device.id) } });
+  const data = await res.json();
+  expect(res.status).toBe(200);
+  expect(data.success).toBe(true);
+  const msgs = db.getAllMessages();
+  const scheduled = msgs.filter((m: any) => m.deviceId === device.id && m.status === 'scheduled');
+  expect(scheduled.length).toBe(2);
 });
 
 test('GET /api/socket/status reports running when health check succeeds', async () => {
