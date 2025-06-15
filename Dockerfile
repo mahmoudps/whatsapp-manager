@@ -74,6 +74,9 @@ COPY . .
 # Ensure helper scripts are executable
 RUN chmod +x start-production.sh scripts/generate-env.js
 
+# Ensure required environment variables exist before building
+RUN node scripts/generate-env.js
+
 # Use production mode when building the Next.js application
 ENV NODE_ENV=production
 RUN npm run build
